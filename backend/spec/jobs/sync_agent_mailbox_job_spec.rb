@@ -13,5 +13,11 @@ RSpec.describe SyncAgentMailboxJob, type: :job do
     it "uses the webhooks queue" do
       expect(described_class.queue_name).to eq("webhooks")
     end
+
+    it "discards the job when the account no longer exists" do
+      expect {
+        described_class.perform_now(0)
+      }.not_to raise_error
+    end
   end
 end
