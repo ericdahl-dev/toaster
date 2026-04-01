@@ -30,6 +30,8 @@ Rails.application.routes.draw do
     get "/webhook_events", to: "ops#webhook_events"
     get "/failed_jobs",    to: "ops#failed_jobs"
     get "/ai_runs",        to: "ops#ai_runs"
+    get "/inbox_messages", to: "ops/inbox_messages#index"
+    get "/inbox_messages/:id", to: "ops/inbox_messages#show"
 
     post "/retry_failed_job/:id",    to: "ops#retry_failed_job"
     post "/retry_webhook_event/:id", to: "ops#retry_webhook_event"
