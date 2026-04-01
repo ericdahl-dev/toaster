@@ -3,6 +3,19 @@ Rails.application.routes.draw do
 
   get "/up", to: "up#show"
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  namespace :gmail do
+    get "oauth/start", to: "oauth#start"
+    get "oauth/callback", to: "oauth#callback"
+  end
+
+  resources :accounts, only: [] do
+    namespace :gmail do
+      resources :connections, only: [ :index, :show ] do
+        member do
+          post :reconnect
+          post :resync
+        end
+      end
+    end
+  end
 end
