@@ -3,6 +3,7 @@ class BookingRequest < ApplicationRecord
   belongs_to :conversation_thread
   belongs_to :contact
   belongs_to :venue, optional: true
+  belongs_to :source_inbox_message, class_name: "InboxMessage", optional: true
 
   has_many :messages, dependent: :nullify
   has_many :drafts, dependent: :destroy
@@ -24,6 +25,7 @@ class BookingRequest < ApplicationRecord
   validate :contact_belongs_to_account
   validate :conversation_thread_belongs_to_account
   validate :venue_belongs_to_account
+  validate :source_inbox_message_belongs_to_account
 
   private
 
@@ -52,6 +54,13 @@ class BookingRequest < ApplicationRecord
     return unless venue && account
     if venue.account_id != account_id
       errors.add(:venue, "must belong to the same account")
+    end
+  end
+
+  def source_inbox_message_belongs_to_account
+    return unless source_inbox_message && account
+    if source_inbox_message.account_id != account_id
+      errors.add(:source_inbox_message, "must belong to the same account")
     end
   end
 end

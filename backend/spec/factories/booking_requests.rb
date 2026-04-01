@@ -3,6 +3,9 @@ FactoryBot.define do
     association :account
     status { "pending" }
     event_date { Date.today + 30 }
+    extraction_snapshot { {} }
+    missing_fields { [] }
+    review_reasons { [] }
 
     after(:build) do |br|
       br.contact ||= build(:contact, account: br.account)
