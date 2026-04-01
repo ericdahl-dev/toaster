@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.env.*
+
+# Rails runtime/build artifacts
+backend/log/
+backend/tmp/
+backend/.bundle/
+backend/config/master.key
+backend/config/credentials.yml.enc
+
+# Next.js runtime artifacts
+frontend/.next/
+frontend/node_modules/
+frontend/.yarn/unplugged/
+frontend/.yarn/install-state.gz
