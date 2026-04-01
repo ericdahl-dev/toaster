@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_01_154000) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_01_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -67,7 +67,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_154000) do
     t.string "phone"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["account_id", "email"], name: "index_contacts_on_account_id_and_email"
+    t.index ["account_id", "email"], name: "index_contacts_on_account_id_and_email", unique: true, where: "email IS NOT NULL"
     t.index ["account_id"], name: "index_contacts_on_account_id"
   end
 
@@ -170,6 +170,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_154000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_messages_on_account_id"
+    t.index ["account_id", "gmail_message_id"], name: "index_messages_on_account_id_and_gmail_message_id", unique: true, where: "gmail_message_id IS NOT NULL"
     t.index ["booking_request_id"], name: "index_messages_on_booking_request_id"
     t.index ["conversation_thread_id"], name: "index_messages_on_conversation_thread_id"
     t.index ["direction"], name: "index_messages_on_direction"
