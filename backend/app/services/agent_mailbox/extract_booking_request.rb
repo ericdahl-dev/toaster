@@ -2,7 +2,25 @@ module AgentMailbox
   class ExtractBookingRequest
     Result = Struct.new(:booking_request, :contact, :conversation_thread, :message, keyword_init: true)
 
-    MONTH_NAME_DATE = /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:,\s*\d{4})?\b/i
+    MONTH_NAME_DATE = /
+      \b
+      (?:jan(?:uary)?|
+         feb(?:ruary)?|
+         mar(?:ch)?|
+         apr(?:il)?|
+         may|
+         jun(?:e)?|
+         jul(?:y)?|
+         aug(?:ust)?|
+         sep(?:tember)?|
+         oct(?:ober)?|
+         nov(?:ember)?|
+         dec(?:ember)?)
+      \s+
+      \d{1,2}
+      ,\s*\d{4}
+      \b
+    /ix
     HEADCOUNT = /\b(\d{1,4})\s+(?:guests?|people|attendees?)\b/i
     BUDGET = /\$\s?(\d[\d,]*(?:\.\d{2})?)/
 
@@ -127,9 +145,11 @@ module AgentMailbox
     end
 
     def extract_event_dates
-      source_text.scan(MONTH_NAME_DATE).map { |match| Date.parse(match).to_date }.uniq.sort
-    rescue Date::Error
-      []
+      source_text.scan(MONTH_NAME_DATE).filter_map do |match|
+        Date.parse(match)
+      rescue Date::Error
+        nil
+      end.uniq.sort
     end
 
     def extract_headcounts
