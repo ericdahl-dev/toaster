@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_01_01_000014) do
+ActiveRecord::Schema[7.2].define(version: 2024_01_01_000015) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -113,6 +113,9 @@ ActiveRecord::Schema[7.2].define(version: 2024_01_01_000014) do
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "watch_resource_id"
+    t.string "watch_history_id"
+    t.datetime "watch_expiration"
     t.index ["account_id", "email"], name: "index_gmail_connections_on_account_id_and_email", unique: true
     t.index ["account_id"], name: "index_gmail_connections_on_account_id"
     t.index ["user_id"], name: "index_gmail_connections_on_user_id"
