@@ -3,7 +3,7 @@ class CreateAiRuns < ActiveRecord::Migration[7.2]
     create_table :ai_runs do |t|
       t.references :account, null: false, foreign_key: true
       t.references :booking_request, foreign_key: true
-      t.string :model_name, null: false
+      t.string :llm_model, null: false
       t.text :prompt, null: false
       t.text :response
       t.integer :input_tokens

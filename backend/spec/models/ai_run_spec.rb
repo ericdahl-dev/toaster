@@ -6,8 +6,8 @@ RSpec.describe AiRun, type: :model do
       expect(build(:ai_run)).to be_valid
     end
 
-    it "is invalid without a model_name" do
-      expect(build(:ai_run, model_name: nil)).not_to be_valid
+    it "is invalid without a llm_model" do
+      expect(build(:ai_run, llm_model: nil)).not_to be_valid
     end
 
     it "is invalid without a prompt" do

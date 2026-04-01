@@ -5,15 +5,6 @@ class AiRun < ApplicationRecord
   validates :llm_model, presence: true
   validates :prompt, presence: true
 
-  # model_name conflicts with ActiveRecord::Base.model_name; use llm_model column via explicit accessors
-  def model_name
-    llm_model
-  end
-
-  def model_name=(value)
-    self.llm_model = value
-  end
-
   validate :booking_request_belongs_to_account
 
   private
