@@ -18,20 +18,39 @@ module AgentMailbox
 
       fetcher.fetch_messages.each do |payload|
         attrs = normalize(payload)
-        inbox_message = InboxMessage.find_or_initialize_by(
-          account: account,
-          provider: attrs[:provider],
-          provider_message_id: attrs[:provider_message_id]
-        )
 
-        if inbox_message.new_record?
-          created_count += 1
-        else
+        begin
+          inbox_message = InboxMessage.find_or_initialize_by(
+            account: account,
+            provider: attrs[:provider],
+            provider_message_id: attrs[:provider_message_id]
+          )
+          new_record = inbox_message.new_record?
+
+          inbox_message.assign_attributes(attrs.except(:provider_message_id, :provider))
+          inbox_message.save!
+
+          if new_record
+            created_count += 1
+          else
+            deduped_count += 1
+          end
+        rescue ActiveRecord::RecordNotUnique
+          # Another worker created this inbox_message concurrently.
+          inbox_message = InboxMessage.find_by(
+            account: account,
+            provider: attrs[:provider],
+            provider_message_id: attrs[:provider_message_id]
+          )
+
+          # If for some reason the record still doesn't exist, re-raise.
+          raise unless inbox_message
+
+          inbox_message.assign_attributes(attrs.except(:provider_message_id, :provider))
+          inbox_message.save!
           deduped_count += 1
         end
 
-        inbox_message.assign_attributes(attrs.except(:provider_message_id, :provider))
-        inbox_message.save!
         messages << inbox_message
       end
 
