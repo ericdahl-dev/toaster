@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-950">
@@ -29,6 +31,15 @@ export default function Home() {
             </div>
           ))}
         </section>
+
+        <div>
+          <Link
+            href="/inbox"
+            className="inline-flex items-center rounded-full bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
+          >
+            Open operator inbox
+          </Link>
+        </div>
       </div>
     </main>
   );
