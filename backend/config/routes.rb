@@ -17,6 +17,10 @@ Rails.application.routes.draw do
         end
       end
     end
+
+    namespace :agent_mailbox do
+      resource :sync, only: :create, controller: :syncs
+    end
   end
 
   # Ops/observability endpoints for operators
