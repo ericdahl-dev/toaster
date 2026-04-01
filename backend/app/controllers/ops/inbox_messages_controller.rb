@@ -1,5 +1,7 @@
 module Ops
   class InboxMessagesController < ApplicationController
+    before_action :require_ops_auth!
+
     def index
       messages = InboxMessage
         .inbound
@@ -26,7 +28,7 @@ module Ops
     end
 
     def show
-      message = InboxMessage.includes(:booking_request).find(params[:id])
+      message = InboxMessage.inbound.includes(:booking_request).find(params[:id])
 
       render json: {
         inbox_message: {
@@ -51,6 +53,16 @@ module Ops
     end
 
     private
+
+    def require_ops_auth!
+      token = ENV["OPS_AUTH_TOKEN"].presence
+      return unless token
+
+      provided = request.headers["X-Ops-Token"]
+      return if ActiveSupport::SecurityUtils.secure_compare(provided.to_s, token)
+
+      render json: { error: "Unauthorized" }, status: :unauthorized
+    end
 
     def booking_request_summary(booking_request)
       return nil unless booking_request
