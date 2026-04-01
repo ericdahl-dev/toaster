@@ -1,4 +1,4 @@
-class OpsController < ApplicationController
+class OpsController < OpsBaseController
   # Queue/system observability endpoints for operators.
   # All responses are scoped to the last 24 hours unless otherwise noted.
 

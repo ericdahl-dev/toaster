@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe "Ops inbox messages", type: :request do
+  let(:ops_headers) { { "Authorization" => ActionController::HttpAuthentication::Basic.encode_credentials("ops", "ops") } }
+
   describe "GET /ops/inbox_messages" do
     it "returns captured inbox messages with linked booking request summary" do
       account = create(:account)
@@ -18,7 +20,7 @@ RSpec.describe "Ops inbox messages", type: :request do
         status: "reviewing"
       )
 
-      get "/ops/inbox_messages"
+      get "/ops/inbox_messages", headers: ops_headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -32,6 +34,12 @@ RSpec.describe "Ops inbox messages", type: :request do
         "id" => booking_request.id,
         "status" => "reviewing"
       )
+    end
+
+    it "returns 401 without credentials" do
+      get "/ops/inbox_messages"
+
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 
@@ -65,7 +73,7 @@ RSpec.describe "Ops inbox messages", type: :request do
         review_reasons: []
       )
 
-      get "/ops/inbox_messages/#{inbox_message.id}"
+      get "/ops/inbox_messages/#{inbox_message.id}", headers: ops_headers
 
       expect(response).to have_http_status(:ok)
       detail = response.parsed_body.fetch("inbox_message")
@@ -87,10 +95,16 @@ RSpec.describe "Ops inbox messages", type: :request do
     end
 
     it "returns 404 for an unknown inbox message" do
-      get "/ops/inbox_messages/999999"
+      get "/ops/inbox_messages/999999", headers: ops_headers
 
       expect(response).to have_http_status(:not_found)
       expect(response.parsed_body).to include("error" => "Inbox message not found")
+    end
+
+    it "returns 401 without credentials" do
+      get "/ops/inbox_messages/1"
+
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 end

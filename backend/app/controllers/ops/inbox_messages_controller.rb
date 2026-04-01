@@ -1,5 +1,5 @@
 module Ops
-  class InboxMessagesController < ApplicationController
+  class InboxMessagesController < OpsBaseController
     def index
       messages = InboxMessage
         .inbound
@@ -26,7 +26,7 @@ module Ops
     end
 
     def show
-      message = InboxMessage.includes(:booking_request).find(params[:id])
+      message = InboxMessage.inbound.includes(:booking_request).find(params[:id])
 
       render json: {
         inbox_message: {

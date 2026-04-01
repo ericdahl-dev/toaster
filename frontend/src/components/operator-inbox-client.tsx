@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { OperatorInboxView, type InboxDetail, type InboxListItem } from './operator-inbox-view';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_TOASTER_API_BASE_URL ?? 'http://localhost:3001';
-
 export function OperatorInboxClient({
   initialMessages,
   initialSelectedMessage,
@@ -16,7 +14,7 @@ export function OperatorInboxClient({
   const [selectedMessage, setSelectedMessage] = useState<InboxDetail | null>(initialSelectedMessage);
 
   async function handleSelectMessage(messageId: number) {
-    const response = await fetch(`${API_BASE_URL}/ops/inbox_messages/${messageId}`);
+    const response = await fetch(`/api/ops/inbox_messages/${messageId}`);
     if (!response.ok) return;
 
     const body = await response.json();

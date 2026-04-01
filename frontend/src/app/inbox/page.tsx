@@ -1,7 +1,6 @@
 import type { InboxDetail, InboxListItem } from '@/components/operator-inbox-view';
 import { OperatorInboxClient } from '@/components/operator-inbox-client';
-
-const API_BASE_URL = process.env.TOASTER_API_BASE_URL ?? process.env.NEXT_PUBLIC_TOASTER_API_BASE_URL ?? 'http://localhost:3001';
+import { opsApiUrl, opsAuthHeaders } from '@/lib/ops-auth';
 
 export default async function InboxPage() {
   const messages = await fetchInboxMessages();
@@ -14,8 +13,9 @@ export default async function InboxPage() {
 
 async function fetchInboxMessages(): Promise<InboxListItem[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/ops/inbox_messages`, {
+    const response = await fetch(opsApiUrl('/ops/inbox_messages'), {
       cache: 'no-store',
+      headers: opsAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -43,8 +43,9 @@ async function fetchInboxMessages(): Promise<InboxListItem[]> {
 
 async function fetchInboxMessage(messageId: number): Promise<InboxDetail | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/ops/inbox_messages/${messageId}`, {
+    const response = await fetch(opsApiUrl(`/ops/inbox_messages/${messageId}`), {
       cache: 'no-store',
+      headers: opsAuthHeaders(),
     });
 
     if (!response.ok) {
