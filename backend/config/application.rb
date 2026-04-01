@@ -40,5 +40,20 @@ module Backend
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
+
+    # Use Solid Queue as the Active Job backend
+    config.active_job.queue_adapter = :solid_queue
+    config.solid_queue.silence_polling = true
+
+    # Allow Mission Control (HTML engine) to function inside the API-only app
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore
+    config.middleware.use ActionDispatch::Flash
+
+    # Stub asset pipeline so gems that expect Sprockets (e.g. mission_control-jobs)
+    # can register asset paths without a full Sprockets setup.
+    config.assets = ActiveSupport::OrderedOptions.new
+    config.assets.paths = []
+    config.assets.precompile = []
   end
 end

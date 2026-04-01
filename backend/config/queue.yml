@@ -1,0 +1,23 @@
+default: &default
+  dispatchers:
+    - polling_interval: 1
+      batch_size: 500
+  workers:
+    - queues: "default,webhooks,ai,mailers"
+      threads: 3
+      processes: <%= ENV.fetch("JOB_CONCURRENCY", 1) %>
+      polling_interval: 0.1
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default
+  workers:
+    - queues: "default,webhooks,ai,mailers"
+      threads: 5
+      processes: <%= ENV.fetch("JOB_CONCURRENCY", 2) %>
+      polling_interval: 0.1
