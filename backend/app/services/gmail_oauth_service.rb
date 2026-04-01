@@ -1,3 +1,5 @@
+require "net/http"
+
 class GmailOauthService
   class Error < StandardError; end
 
