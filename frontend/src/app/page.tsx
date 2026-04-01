@@ -1,0 +1,35 @@
+export default function Home() {
+  return (
+    <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-950">
+      <div className="mx-auto flex max-w-4xl flex-col gap-8">
+        <header className="space-y-4">
+          <p className="text-sm font-medium uppercase tracking-[0.2em] text-zinc-500">
+            Toaster
+          </p>
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+            Toaster is a Gmail booking assistant.
+          </h1>
+          <p className="max-w-2xl text-lg leading-8 text-zinc-600">
+            It ingests booking inquiries, extracts structured details, tracks
+            request state, and helps operators draft or send the next reply.
+          </p>
+        </header>
+
+        <section className="grid gap-4 sm:grid-cols-3">
+          {[
+            'Rails API backend',
+            'Next.js operator dashboard',
+            'Neon Postgres + background jobs',
+          ].map((item) => (
+            <div
+              key={item}
+              className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm"
+            >
+              <p className="text-sm font-medium text-zinc-700">{item}</p>
+            </div>
+          ))}
+        </section>
+      </div>
+    </main>
+  );
+}

@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  backend:
+    name: Backend test suite
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: backend_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d backend_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: backend
+
+    env:
+      RAILS_ENV: test
+      RAILS_MAX_THREADS: 5
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/backend_test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.3.6
+          bundler-cache: true
+          working-directory: backend
+
+      - name: Prepare database
+        run: bundle exec rails db:prepare
+
+      - name: Run backend specs
+        run: bundle exec rspec
+
+  frontend:
+    name: Frontend test suite
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.1
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install frontend dependencies
+        run: yarn install --immutable
+
+      - name: Run frontend tests
+        run: yarn test
