@@ -59,6 +59,7 @@ RSpec.describe GmailWatchService do
 
     context "when token is still valid" do
       it "does not refresh the token" do
+        allow(oauth_service).to receive(:refresh_access_token)
         allow(service).to receive(:call_watch_api).and_return(watch_response_data)
 
         service.setup(topic_name: "projects/test/topics/gmail")

@@ -41,7 +41,7 @@ RSpec.describe GmailOauthService do
     end
 
     it "returns token data on success" do
-      fake_response = instance_double(Net::HTTPResponse, body: token_response.to_json)
+      fake_response = double("http_response", body: token_response.to_json)
       allow(Net::HTTP).to receive(:post_form).and_return(fake_response)
 
       result = service.exchange_code("auth_code")
@@ -52,7 +52,7 @@ RSpec.describe GmailOauthService do
 
     it "raises Error when Google returns an error" do
       error_response = { "error" => "invalid_grant", "error_description" => "Token has been expired" }
-      fake_response = instance_double(Net::HTTPResponse, body: error_response.to_json)
+      fake_response = double("http_response", body: error_response.to_json)
       allow(Net::HTTP).to receive(:post_form).and_return(fake_response)
 
       expect { service.exchange_code("bad_code") }.to raise_error(GmailOauthService::Error, "Token has been expired")
@@ -60,7 +60,7 @@ RSpec.describe GmailOauthService do
 
     it "raises Error with error code when no description is present" do
       error_response = { "error" => "invalid_client" }
-      fake_response = instance_double(Net::HTTPResponse, body: error_response.to_json)
+      fake_response = double("http_response", body: error_response.to_json)
       allow(Net::HTTP).to receive(:post_form).and_return(fake_response)
 
       expect { service.exchange_code("code") }.to raise_error(GmailOauthService::Error, "invalid_client")
@@ -77,7 +77,7 @@ RSpec.describe GmailOauthService do
     end
 
     it "returns a new access token on success" do
-      fake_response = instance_double(Net::HTTPResponse, body: token_response.to_json)
+      fake_response = double("http_response", body: token_response.to_json)
       allow(Net::HTTP).to receive(:post_form).and_return(fake_response)
 
       result = service.refresh_access_token("1//refresh")
@@ -87,7 +87,7 @@ RSpec.describe GmailOauthService do
 
     it "raises Error when refresh fails" do
       error_response = { "error" => "invalid_grant" }
-      fake_response = instance_double(Net::HTTPResponse, body: error_response.to_json)
+      fake_response = double("http_response", body: error_response.to_json)
       allow(Net::HTTP).to receive(:post_form).and_return(fake_response)
 
       expect { service.refresh_access_token("bad_refresh") }.to raise_error(GmailOauthService::Error, "invalid_grant")
