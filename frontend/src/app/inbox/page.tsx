@@ -8,7 +8,7 @@ export default async function InboxPage() {
   const selectedMessage = messages[0] ? await fetchInboxMessage(messages[0].id) : null;
 
   return (
-    <OperatorInboxClient initialMessages={messages} initialSelectedMessage={selectedMessage} />
+    <OperatorInboxClient initialMessages={messages} initialSelectedMessage={selectedMessage} apiBaseUrl={API_BASE_URL} />
   );
 }
 

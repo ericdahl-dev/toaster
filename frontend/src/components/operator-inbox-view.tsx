@@ -147,7 +147,7 @@ export function OperatorInboxView({
                       <Field
                         label="Headcount"
                         value={
-                          selectedMessage.bookingRequest.headcount
+                          selectedMessage.bookingRequest.headcount != null
                             ? `${selectedMessage.bookingRequest.headcount} guests`
                             : 'Unknown'
                         }
