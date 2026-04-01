@@ -57,6 +57,43 @@ request.
 Issue #2 is the active foundation issue. It is now underway in branch
 `feat/issue-2-foundation`.
 
+## POC demo path
+
+The current POC uses the agent mailbox path instead of Gmail OAuth.
+
+1. Start the backend:
+
+```bash
+cd backend
+bin/rails db:prepare
+bin/rails s
+```
+
+2. Seed the repeatable demo data:
+
+```bash
+cd backend
+bin/rails poc:seed_agent_mailbox_demo
+```
+
+3. Start the frontend in another shell:
+
+```bash
+cd frontend
+yarn dev
+```
+
+4. Open the operator inbox:
+
+```text
+http://localhost:3000/inbox
+```
+
+What you should see:
+- one captured inbox message from `demo.lead@example.com`
+- one linked booking request snapshot
+- extracted event date, headcount, and budget in the request detail
+
 ## Project principles
 
 - BookingRequest is the system of record
