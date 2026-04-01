@@ -15,28 +15,74 @@ module AgentMailbox
     end
 
     def call
-      ActiveRecord::Base.transaction do
-        contact = find_or_build_contact
-        contact.save!
+      attempts = 0
 
-        thread = find_or_build_thread(contact)
-        thread.save!
+      begin
+        ActiveRecord::Base.transaction do
+          contact = find_or_build_contact
+          contact.save!
 
-        extracted = extract_fields
+          thread = find_or_build_thread(contact)
+          thread.save!
 
-        booking_request = BookingRequest.find_or_initialize_by(source_inbox_message: inbox_message)
-        booking_request.account = inbox_message.account
-        booking_request.contact = contact
-        booking_request.conversation_thread = thread
-        booking_request.event_date = extracted[:event_date]
-        booking_request.headcount = extracted[:headcount]
-        booking_request.budget_cents = extracted[:budget_cents]
-        booking_request.extraction_snapshot = extracted[:snapshot]
-        booking_request.missing_fields = extracted[:missing_fields]
-        booking_request.review_reasons = extracted[:review_reasons]
-        booking_request.status = extracted[:status]
-        booking_request.save!
+          extracted = extract_fields
 
+          booking_request = BookingRequest.find_or_initialize_by(source_inbox_message: inbox_message)
+          booking_request.account = inbox_message.account
+          booking_request.contact = contact
+          booking_request.conversation_thread = thread
+          booking_request.event_date = extracted[:event_date]
+          booking_request.headcount = extracted[:headcount]
+          booking_request.budget_cents = extracted[:budget_cents]
+          booking_request.extraction_snapshot = extracted[:snapshot]
+          booking_request.missing_fields = extracted[:missing_fields]
+          booking_request.review_reasons = extracted[:review_reasons]
+          booking_request.status = extracted[:status]
+          booking_request.save!
+
+          message = find_or_build_canonical_message(booking_request, thread)
+
+          Result.new(
+            booking_request: booking_request,
+            contact: contact,
+            conversation_thread: thread,
+            message: message
+          )
+        end
+      rescue ActiveRecord::RecordNotUnique
+        attempts += 1
+        retry if attempts <= 3
+        raise
+      end
+    end
+
+    private
+
+    attr_reader :inbox_message
+
+    def find_or_build_contact
+      account = inbox_message.account
+
+      if inbox_message.from_email.present?
+        normalized_email = inbox_message.from_email.downcase
+
+        account.with_lock do
+          contact = account.contacts.find_by(email: normalized_email)
+          contact ||= account.contacts.new(email: normalized_email)
+          contact.name = inbox_message.from_name.presence || inbox_message.from_email.presence || "Unknown Contact"
+          contact
+        end
+      else
+        account.contacts.new.tap do |contact|
+          contact.name = inbox_message.from_name.presence || inbox_message.from_email.presence || "Unknown Contact"
+        end
+      end
+    end
+
+    def find_or_build_canonical_message(booking_request, thread)
+      attempts = 0
+
+      begin
         message = Message.find_or_initialize_by(
           account: inbox_message.account,
           conversation_thread: thread,
@@ -48,27 +94,20 @@ module AgentMailbox
         message.body_html = inbox_message.body_html
         message.sent_at = inbox_message.received_at
         message.save!
+        message
+      rescue ActiveRecord::RecordNotUnique
+        attempts += 1
 
-        Result.new(
-          booking_request: booking_request,
-          contact: contact,
+        message = Message.find_by(
+          account: inbox_message.account,
           conversation_thread: thread,
-          message: message
+          gmail_message_id: canonical_message_id
         )
-      end
-    end
 
-    private
+        retry if message.nil? && attempts <= 3
+        raise if message.nil?
 
-    attr_reader :inbox_message
-
-    def find_or_build_contact
-      if inbox_message.from_email.present?
-        inbox_message.account.contacts.find_or_initialize_by(email: inbox_message.from_email.downcase)
-      else
-        inbox_message.account.contacts.new
-      end.tap do |contact|
-        contact.name = inbox_message.from_name.presence || inbox_message.from_email.presence || "Unknown Contact"
+        message
       end
     end
 
@@ -127,9 +166,15 @@ module AgentMailbox
     end
 
     def extract_event_dates
-      source_text.scan(MONTH_NAME_DATE).map { |match| Date.parse(match).to_date }.uniq.sort
-    rescue Date::Error
-      []
+      source_text.scan(MONTH_NAME_DATE).filter_map do |match|
+        next unless match.match?(/\d{4}/)
+
+        begin
+          Date.parse(match)
+        rescue Date::Error
+          nil
+        end
+      end.uniq.sort
     end
 
     def extract_headcounts

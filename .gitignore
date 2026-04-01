@@ -6,6 +6,7 @@
 backend/log/
 backend/tmp/
 backend/.bundle/
+backend/vendor/bundle/
 backend/config/master.key
 backend/config/credentials.yml.enc
 
