@@ -38,6 +38,7 @@ RSpec.describe "Agent mailbox POC flow", type: :request do
     get "/ops/inbox_messages"
     expect(response).to have_http_status(:ok)
     list_entry = response.parsed_body.fetch("inbox_messages").find { |item| item["id"] == inbox_message.id }
+    expect(list_entry).to be_present
     expect(list_entry.fetch("booking_request")).to include(
       "id" => extraction.booking_request.id,
       "status" => "pending"

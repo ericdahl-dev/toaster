@@ -32,7 +32,12 @@ module AgentMailbox
         fetcher: StaticFetcher.new([ SAMPLE_PAYLOAD ])
       )
 
-      inbox_message = sync_result.messages.first || account.inbox_messages.find_by!(provider_message_id: SAMPLE_PAYLOAD[:provider_message_id])
+      inbox_message = sync_result.messages.first ||
+        account.inbox_messages.find_by!(
+          provider: SAMPLE_PAYLOAD[:provider],
+          provider_message_id: SAMPLE_PAYLOAD[:provider_message_id],
+          provider_thread_id: SAMPLE_PAYLOAD[:provider_thread_id]
+        )
       extraction = AgentMailbox::ExtractBookingRequest.call(inbox_message: inbox_message)
 
       Result.new(

@@ -61,12 +61,12 @@ Issue #2 is the active foundation issue. It is now underway in branch
 
 The current POC uses the agent mailbox path instead of Gmail OAuth.
 
-1. Start the backend:
+1. Start the backend on port 3001:
 
 ```bash
 cd backend
 bin/rails db:prepare
-bin/rails s
+PORT=3001 bin/rails s
 ```
 
 2. Seed the repeatable demo data:
@@ -76,11 +76,11 @@ cd backend
 bin/rails poc:seed_agent_mailbox_demo
 ```
 
-3. Start the frontend in another shell:
+3. Start the frontend in another shell (defaults to port 3000):
 
 ```bash
 cd frontend
-yarn dev
+NEXT_PUBLIC_TOASTER_API_BASE_URL=http://localhost:3001 yarn dev
 ```
 
 4. Open the operator inbox:
