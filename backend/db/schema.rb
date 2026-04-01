@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_01_150500) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_01_160000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -48,9 +48,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_150500) do
     t.text "notes"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "source_inbox_message_id"
+    t.jsonb "extraction_snapshot", default: {}, null: false
+    t.jsonb "missing_fields", default: [], null: false
+    t.jsonb "review_reasons", default: [], null: false
     t.index ["account_id"], name: "index_booking_requests_on_account_id"
     t.index ["contact_id"], name: "index_booking_requests_on_contact_id"
     t.index ["conversation_thread_id"], name: "index_booking_requests_on_conversation_thread_id"
+    t.index ["source_inbox_message_id"], name: "index_booking_requests_on_source_inbox_message_id", unique: true
     t.index ["status"], name: "index_booking_requests_on_status"
     t.index ["venue_id"], name: "index_booking_requests_on_venue_id"
   end
@@ -62,7 +67,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_150500) do
     t.string "phone"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["account_id", "email"], name: "index_contacts_on_account_id_and_email"
+    t.index ["account_id", "email"], name: "index_contacts_on_account_id_and_email", unique: true, where: "email IS NOT NULL"
     t.index ["account_id"], name: "index_contacts_on_account_id"
   end
 
@@ -165,6 +170,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_150500) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_messages_on_account_id"
+    t.index ["account_id", "gmail_message_id"], name: "index_messages_on_account_id_and_gmail_message_id", unique: true, where: "gmail_message_id IS NOT NULL"
     t.index ["booking_request_id"], name: "index_messages_on_booking_request_id"
     t.index ["conversation_thread_id"], name: "index_messages_on_conversation_thread_id"
     t.index ["direction"], name: "index_messages_on_direction"
@@ -329,6 +335,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_150500) do
   add_foreign_key "booking_requests", "accounts"
   add_foreign_key "booking_requests", "contacts"
   add_foreign_key "booking_requests", "conversation_threads"
+  add_foreign_key "booking_requests", "inbox_messages", column: "source_inbox_message_id"
   add_foreign_key "booking_requests", "venues"
   add_foreign_key "contacts", "accounts"
   add_foreign_key "conversation_threads", "accounts"
