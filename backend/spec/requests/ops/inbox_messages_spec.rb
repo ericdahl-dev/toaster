@@ -51,13 +51,13 @@ RSpec.describe "Ops inbox messages", type: :request do
       end
 
       it "returns 401 when the token header is wrong" do
-        get "/ops/inbox_messages", headers: { "X-Ops-Token" => "wrong-token" }
+        get "/ops/inbox_messages", headers: {"X-Ops-Token" => "wrong-token"}
 
         expect(response).to have_http_status(:unauthorized)
       end
 
       it "returns 200 when the correct token header is provided" do
-        get "/ops/inbox_messages", headers: { "X-Ops-Token" => "secret-token" }
+        get "/ops/inbox_messages", headers: {"X-Ops-Token" => "secret-token"}
 
         expect(response).to have_http_status(:ok)
       end
@@ -76,7 +76,7 @@ RSpec.describe "Ops inbox messages", type: :request do
         from_email: "jamie@example.com",
         subject: "Wedding inquiry",
         body_text: "Looking for June 14, 2026 for 120 guests.",
-        raw_payload: { "messageId" => "msg-123", "threadId" => "thread-123" }
+        raw_payload: {"messageId" => "msg-123", "threadId" => "thread-123"}
       )
       create(
         :booking_request,
@@ -90,7 +90,7 @@ RSpec.describe "Ops inbox messages", type: :request do
           "headcount" => 120,
           "budget_cents" => nil
         },
-        missing_fields: [ "budget_cents" ],
+        missing_fields: ["budget_cents"],
         review_reasons: []
       )
 
@@ -111,7 +111,7 @@ RSpec.describe "Ops inbox messages", type: :request do
         "status" => "reviewing",
         "headcount" => 120,
         "event_date" => "2026-06-14",
-        "missing_fields" => [ "budget_cents" ]
+        "missing_fields" => ["budget_cents"]
       )
     end
 

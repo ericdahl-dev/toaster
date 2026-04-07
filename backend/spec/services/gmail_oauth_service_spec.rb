@@ -51,7 +51,7 @@ RSpec.describe GmailOauthService do
     end
 
     it "raises Error when Google returns an error" do
-      error_response = { "error" => "invalid_grant", "error_description" => "Token has been expired" }
+      error_response = {"error" => "invalid_grant", "error_description" => "Token has been expired"}
       fake_response = double("http_response", body: error_response.to_json)
       allow(Net::HTTP).to receive(:post_form).and_return(fake_response)
 
@@ -59,7 +59,7 @@ RSpec.describe GmailOauthService do
     end
 
     it "raises Error with error code when no description is present" do
-      error_response = { "error" => "invalid_client" }
+      error_response = {"error" => "invalid_client"}
       fake_response = double("http_response", body: error_response.to_json)
       allow(Net::HTTP).to receive(:post_form).and_return(fake_response)
 
@@ -86,7 +86,7 @@ RSpec.describe GmailOauthService do
     end
 
     it "raises Error when refresh fails" do
-      error_response = { "error" => "invalid_grant" }
+      error_response = {"error" => "invalid_grant"}
       fake_response = double("http_response", body: error_response.to_json)
       allow(Net::HTTP).to receive(:post_form).and_return(fake_response)
 

@@ -165,8 +165,7 @@ RSpec.describe GmailConnection, type: :model do
       connection = build(:gmail_connection,
         active: true,
         token_expires_at: 1.hour.from_now,
-        watch_expiration: 2.days.from_now
-      )
+        watch_expiration: 2.days.from_now)
       expect(connection.healthy?).to be true
     end
 
@@ -174,8 +173,7 @@ RSpec.describe GmailConnection, type: :model do
       connection = build(:gmail_connection,
         active: false,
         token_expires_at: 1.hour.from_now,
-        watch_expiration: 2.days.from_now
-      )
+        watch_expiration: 2.days.from_now)
       expect(connection.healthy?).to be false
     end
 
@@ -183,8 +181,7 @@ RSpec.describe GmailConnection, type: :model do
       connection = build(:gmail_connection,
         active: true,
         token_expires_at: 1.hour.ago,
-        watch_expiration: 2.days.from_now
-      )
+        watch_expiration: 2.days.from_now)
       expect(connection.healthy?).to be false
     end
 
@@ -192,8 +189,7 @@ RSpec.describe GmailConnection, type: :model do
       connection = build(:gmail_connection,
         active: true,
         token_expires_at: 1.hour.from_now,
-        watch_expiration: nil
-      )
+        watch_expiration: nil)
       expect(connection.healthy?).to be false
     end
   end

@@ -44,14 +44,18 @@ module Imap
       imap.login(imap_connection.username, imap_connection.password)
       yield imap
     ensure
-      imap&.disconnect rescue nil
+      begin
+        imap&.disconnect
+      rescue
+        nil
+      end
     end
 
     def search_uids(imap)
       if imap_connection.last_synced_uid.present?
-        imap.uid_search([ "UID", "#{imap_connection.last_synced_uid + 1}:*" ])
+        imap.uid_search(["UID", "#{imap_connection.last_synced_uid + 1}:*"])
       else
-        imap.uid_search([ "ALL" ])
+        imap.uid_search(["ALL"])
       end
     end
 
@@ -85,17 +89,17 @@ module Imap
         body_text: extract_text(mail),
         body_html: extract_html(mail),
         received_at: mail.date&.to_time,
-        raw_payload: { "uid" => uid, "message_id" => message_id }
+        raw_payload: {"uid" => uid, "message_id" => message_id}
       }
     end
 
     def parse_address(value)
-      return [ nil, nil ] if value.blank?
+      return [nil, nil] if value.blank?
 
       match = value.to_s.match(/\A(?:(.+?)\s*<)?([^<>@\s]+@[^<>@\s]+)>?\z/)
-      return [ nil, value.to_s ] unless match
+      return [nil, value.to_s] unless match
 
-      [ match[1]&.strip, match[2] ]
+      [match[1]&.strip, match[2]]
     end
 
     def extract_text(mail)

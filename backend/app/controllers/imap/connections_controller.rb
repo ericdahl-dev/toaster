@@ -1,31 +1,31 @@
 module Imap
   class ConnectionsController < ApplicationController
     before_action :set_account
-    before_action :set_connection, only: [ :show, :update, :destroy ]
+    before_action :set_connection, only: [:show, :update, :destroy]
 
     def index
       connections = @account.imap_connections.order(:created_at)
-      render json: { connections: connections.map { |c| connection_json(c) } }
+      render json: {connections: connections.map { |c| connection_json(c) }}
     end
 
     def show
-      render json: { connection: connection_json(@connection) }
+      render json: {connection: connection_json(@connection)}
     end
 
     def create
       connection = @account.imap_connections.build(connection_params)
       if connection.save
-        render json: { connection: connection_json(connection) }, status: :created
+        render json: {connection: connection_json(connection)}, status: :created
       else
-        render json: { errors: connection.errors.full_messages }, status: :unprocessable_entity
+        render json: {errors: connection.errors.full_messages}, status: :unprocessable_entity
       end
     end
 
     def update
       if @connection.update(connection_params)
-        render json: { connection: connection_json(@connection) }
+        render json: {connection: connection_json(@connection)}
       else
-        render json: { errors: @connection.errors.full_messages }, status: :unprocessable_entity
+        render json: {errors: @connection.errors.full_messages}, status: :unprocessable_entity
       end
     end
 
@@ -39,13 +39,13 @@ module Imap
     def set_account
       @account = Account.find(params[:account_id])
     rescue ActiveRecord::RecordNotFound
-      render json: { error: "Account not found" }, status: :not_found
+      render json: {error: "Account not found"}, status: :not_found
     end
 
     def set_connection
       @connection = @account.imap_connections.find(params[:id])
     rescue ActiveRecord::RecordNotFound
-      render json: { error: "Connection not found" }, status: :not_found
+      render json: {error: "Connection not found"}, status: :not_found
     end
 
     def connection_params

@@ -1,28 +1,28 @@
 module Gmail
   class ConnectionsController < ApplicationController
     before_action :set_account
-    before_action :set_connection, only: [ :show, :reconnect, :resync ]
+    before_action :set_connection, only: [:show, :reconnect, :resync]
 
     def index
       connections = @account.gmail_connections.order(:created_at)
-      render json: { connections: connections.map { |c| connection_json(c) } }
+      render json: {connections: connections.map { |c| connection_json(c) }}
     end
 
     def show
-      render json: { connection: connection_json(@connection) }
+      render json: {connection: connection_json(@connection)}
     end
 
     def reconnect
       state = encode_state(account_id: @account.id, connection_id: @connection.id)
       auth_url = GmailOauthService.new.authorization_url(state: state)
-      render json: { auth_url: auth_url }
+      render json: {auth_url: auth_url}
     end
 
     def resync
       GmailWatchService.new(@connection).renew
-      render json: { connection: connection_json(@connection.reload) }
+      render json: {connection: connection_json(@connection.reload)}
     rescue GmailWatchService::Error => e
-      render json: { error: e.message }, status: :unprocessable_entity
+      render json: {error: e.message}, status: :unprocessable_entity
     end
 
     private
@@ -30,13 +30,13 @@ module Gmail
     def set_account
       @account = Account.find(params[:account_id])
     rescue ActiveRecord::RecordNotFound
-      render json: { error: "Account not found" }, status: :not_found
+      render json: {error: "Account not found"}, status: :not_found
     end
 
     def set_connection
       @connection = @account.gmail_connections.find(params[:id])
     rescue ActiveRecord::RecordNotFound
-      render json: { error: "Connection not found" }, status: :not_found
+      render json: {error: "Connection not found"}, status: :not_found
     end
 
     def encode_state(data)

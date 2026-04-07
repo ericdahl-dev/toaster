@@ -13,11 +13,11 @@ RSpec.describe AgentMailbox::Sync do
           direction: "inbound",
           from_email: "lead@example.com",
           from_name: "Lead Person",
-          to_emails: [ "agent@example.com" ],
+          to_emails: ["agent@example.com"],
           subject: "Wedding inquiry",
           body_text: "Looking for a June date",
           received_at: Time.zone.parse("2026-04-01 10:00:00 UTC"),
-          raw_payload: { "messageId" => "msg-1", "threadId" => "thread-1" }
+          raw_payload: {"messageId" => "msg-1", "threadId" => "thread-1"}
         }
       ])
 
@@ -53,7 +53,7 @@ RSpec.describe AgentMailbox::Sync do
           direction: "inbound",
           from_email: "lead@example.com",
           subject: "Updated subject",
-          raw_payload: { "messageId" => "msg-1" }
+          raw_payload: {"messageId" => "msg-1"}
         }
       ])
 
@@ -76,7 +76,7 @@ RSpec.describe AgentMailbox::Sync do
           direction: "inbound",
           from_email: "lead@example.com",
           subject: "Race condition subject",
-          raw_payload: { "messageId" => "msg-race" }
+          raw_payload: {"messageId" => "msg-race"}
         }
       ])
 
@@ -113,4 +113,3 @@ RSpec.describe AgentMailbox::Sync do
     end
   end
 end
-

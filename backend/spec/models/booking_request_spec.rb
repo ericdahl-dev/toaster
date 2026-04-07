@@ -36,8 +36,7 @@ RSpec.describe BookingRequest, type: :model do
       br = build(:booking_request,
         account: account, contact: contact, conversation_thread: thread,
         event_date: Date.today + 10,
-        event_end_date: Date.today + 5
-      )
+        event_end_date: Date.today + 5)
       expect(br).not_to be_valid
       expect(br.errors[:event_end_date]).to include("must be on or after event_date")
     end
@@ -47,8 +46,7 @@ RSpec.describe BookingRequest, type: :model do
       expect(build(:booking_request,
         account: account, contact: contact, conversation_thread: thread,
         event_date: date,
-        event_end_date: date
-      )).to be_valid
+        event_end_date: date)).to be_valid
     end
 
     it "is invalid when contact belongs to different account" do

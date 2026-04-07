@@ -9,7 +9,7 @@ module AgentMailbox
         account_id: account.id
       }, status: :accepted
     rescue ActiveRecord::RecordNotFound
-      render json: { error: "Account not found" }, status: :not_found
+      render json: {error: "Account not found"}, status: :not_found
     end
   end
 end

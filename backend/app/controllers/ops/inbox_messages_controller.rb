@@ -49,7 +49,7 @@ module Ops
         }
       }
     rescue ActiveRecord::RecordNotFound
-      render json: { error: "Inbox message not found" }, status: :not_found
+      render json: {error: "Inbox message not found"}, status: :not_found
     end
 
     private
@@ -61,7 +61,7 @@ module Ops
       provided = request.headers["X-Ops-Token"]
       return if ActiveSupport::SecurityUtils.secure_compare(provided.to_s, token)
 
-      render json: { error: "Unauthorized" }, status: :unauthorized
+      render json: {error: "Unauthorized"}, status: :unauthorized
     end
 
     def booking_request_summary(booking_request)
