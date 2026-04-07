@@ -8,6 +8,11 @@ require "active_support/core_ext/integer/time"
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # application.rb adds a production FQDN to config.hosts; request specs use
+  # Host www.example.com by default, which would otherwise get 403 from
+  # ActionDispatch::HostAuthorization.
+  config.hosts.clear
+
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false
 
