@@ -55,5 +55,7 @@ module Backend
     config.assets = ActiveSupport::OrderedOptions.new
     config.assets.paths = []
     config.assets.precompile = []
+    config.hosts << "toaster-backend.ger3.ericdahl.dev"
+
   end
 end
