@@ -1,5 +1,4 @@
-# syntax = docker/dockerfile:1
-
+# No #syntax line: Coolify prepends its own; two directives break the build.
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
 # docker build -t my-app .
 # docker run -d -p 80:80 -p 443:443 --name my-app -e RAILS_MASTER_KEY=<value from config/master.key> my-app
@@ -53,9 +52,11 @@ COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
 # Run and own only the runtime files as a non-root user for security
+# log/tmp may be absent from the build context (gitignored); create before chown.
 RUN groupadd --system --gid 1000 rails && \
     useradd rails --uid 1000 --gid 1000 --create-home --shell /bin/bash && \
-    chown -R rails:rails db log tmp
+    mkdir -p log tmp tmp/pids storage && \
+    chown -R rails:rails db log tmp storage
 USER 1000:1000
 
 # Entrypoint prepares the database.
