@@ -2,6 +2,10 @@ module Imap
   class Sync
     Result = Struct.new(:created_count, :deduped_count, :messages, keyword_init: true)
 
+    MessageResult = Struct.new(:inbox_message, :created, keyword_init: true) do
+      def created? = created
+    end
+
     def self.call(imap_connection:, fetcher: nil)
       fetcher ||= Fetcher.new(imap_connection: imap_connection)
       new(imap_connection: imap_connection, fetcher: fetcher).call
@@ -19,10 +23,10 @@ module Imap
       max_uid = imap_connection.last_synced_uid
 
       fetcher.fetch_messages.each do |payload|
-        inbox_message = persist_message(payload)
-        messages << inbox_message
+        result = persist_message(payload)
+        messages << result.inbox_message
 
-        if inbox_message.previously_new_record?
+        if result.created?
           created_count += 1
         else
           deduped_count += 1
@@ -51,19 +55,17 @@ module Imap
           provider: attrs[:provider],
           provider_message_id: attrs[:provider_message_id]
         )
-        new_record = msg.new_record?
+        created = msg.new_record?
         msg.assign_attributes(attrs.except(:provider, :provider_message_id))
         msg.save!
-        msg.instance_variable_set(:@previously_new_record, new_record)
-        msg
+        MessageResult.new(inbox_message: msg, created: created)
       rescue ActiveRecord::RecordNotUnique
         msg = InboxMessage.find_by!(
           account: account,
           provider: attrs[:provider],
           provider_message_id: attrs[:provider_message_id]
         )
-        msg.instance_variable_set(:@previously_new_record, false)
-        msg
+        MessageResult.new(inbox_message: msg, created: false)
       end
     end
   end
