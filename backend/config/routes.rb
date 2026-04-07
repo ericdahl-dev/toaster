@@ -21,6 +21,12 @@ Rails.application.routes.draw do
     namespace :agent_mailbox do
       resource :sync, only: :create, controller: :syncs
     end
+
+    namespace :imap do
+      resources :connections, only: [ :index, :show, :create, :update, :destroy ] do
+        resource :sync, only: :create, controller: :syncs
+      end
+    end
   end
 
   # Ops/observability endpoints for operators

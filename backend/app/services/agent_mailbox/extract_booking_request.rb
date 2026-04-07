@@ -86,7 +86,7 @@ module AgentMailbox
         message = Message.find_or_initialize_by(
           account: inbox_message.account,
           conversation_thread: thread,
-          gmail_message_id: canonical_message_id
+          provider_message_id: canonical_message_id
         )
         message.booking_request = booking_request
         message.direction = inbox_message.direction
@@ -101,7 +101,7 @@ module AgentMailbox
         message = Message.find_by(
           account: inbox_message.account,
           conversation_thread: thread,
-          gmail_message_id: canonical_message_id
+          provider_message_id: canonical_message_id
         )
 
         retry if message.nil? && attempts <= 3
@@ -112,18 +112,18 @@ module AgentMailbox
     end
 
     def find_or_build_thread(contact)
-      inbox_message.account.conversation_threads.find_or_initialize_by(gmail_thread_id: canonical_thread_id).tap do |thread|
+      inbox_message.account.conversation_threads.find_or_initialize_by(provider_thread_id: canonical_thread_id).tap do |thread|
         thread.contact = contact
         thread.subject = inbox_message.subject
       end
     end
 
     def canonical_thread_id
-      "agent_mailbox:#{inbox_message.provider_thread_id.presence || inbox_message.provider_message_id}"
+      "#{inbox_message.provider}:#{inbox_message.provider_thread_id.presence || inbox_message.provider_message_id}"
     end
 
     def canonical_message_id
-      "agent_mailbox:#{inbox_message.provider_message_id}"
+      "#{inbox_message.provider}:#{inbox_message.provider_message_id}"
     end
 
     def extract_fields

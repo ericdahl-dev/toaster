@@ -6,6 +6,7 @@ class Message < ApplicationRecord
   enum :direction, { inbound: "inbound", outbound: "outbound" }
 
   validates :direction, presence: true
+  validates :provider_message_id, uniqueness: { scope: :account_id }, allow_nil: true
 
   validate :conversation_thread_belongs_to_account
   validate :booking_request_belongs_to_account

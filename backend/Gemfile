@@ -7,6 +7,9 @@ gem "pg", "~> 1.1"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 
+# IMAP support for polling-based inbox sync
+gem "net-imap"
+
 # Database-backed Active Job backend
 gem "solid_queue", "~> 1.4"
 
