@@ -195,7 +195,7 @@ module AgentMailbox
     end
 
     def source_text
-      @source_text ||= [ inbox_message.subject, inbox_message.body_text ].compact.join("\n")
+      @source_text ||= [inbox_message.subject, inbox_message.body_text].compact.join("\n")
     end
   end
 end

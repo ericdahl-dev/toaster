@@ -25,7 +25,7 @@ class OpsController < ApplicationController
         created_at: conn.created_at
       }
     end
-    render json: { gmail_connections: connections }
+    render json: {gmail_connections: connections}
   end
 
   def webhook_events
@@ -42,7 +42,7 @@ class OpsController < ApplicationController
           created_at: ev.created_at
         }
       end
-    render json: { webhook_events: events }
+    render json: {webhook_events: events}
   end
 
   def failed_jobs
@@ -60,7 +60,7 @@ class OpsController < ApplicationController
           failed_at: fe.created_at
         }
       end
-    render json: { failed_jobs: failures }
+    render json: {failed_jobs: failures}
   end
 
   def ai_runs
@@ -79,34 +79,34 @@ class OpsController < ApplicationController
           created_at: run.created_at
         }
       end
-    render json: { ai_runs: runs }
+    render json: {ai_runs: runs}
   end
 
   def retry_failed_job
     fe = SolidQueue::FailedExecution.find(params[:id])
     fe.retry
-    render json: { status: "retried", job_id: fe.job_id }
+    render json: {status: "retried", job_id: fe.job_id}
   rescue ActiveRecord::RecordNotFound
-    render json: { error: "Failed job not found" }, status: :not_found
+    render json: {error: "Failed job not found"}, status: :not_found
   end
 
   def retry_webhook_event
     event = GmailWebhookEvent.find(params[:id])
     event.update!(processed_at: nil)
     ProcessGmailWebhookEventJob.perform_later(event.id)
-    render json: { status: "enqueued", webhook_event_id: event.id }
+    render json: {status: "enqueued", webhook_event_id: event.id}
   rescue ActiveRecord::RecordNotFound
-    render json: { error: "Webhook event not found" }, status: :not_found
+    render json: {error: "Webhook event not found"}, status: :not_found
   end
 
   def retry_draft
     draft = Draft.find(params[:id])
     unless draft.approved?
-      return render json: { error: "Draft is not in approved state" }, status: :unprocessable_entity
+      return render json: {error: "Draft is not in approved state"}, status: :unprocessable_entity
     end
     SendDraftJob.perform_later(draft.id)
-    render json: { status: "enqueued", draft_id: draft.id }
+    render json: {status: "enqueued", draft_id: draft.id}
   rescue ActiveRecord::RecordNotFound
-    render json: { error: "Draft not found" }, status: :not_found
+    render json: {error: "Draft not found"}, status: :not_found
   end
 end

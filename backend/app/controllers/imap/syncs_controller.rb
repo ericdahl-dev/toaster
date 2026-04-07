@@ -11,7 +11,7 @@ module Imap
         imap_connection_id: connection.id
       }, status: :accepted
     rescue ActiveRecord::RecordNotFound => e
-      render json: { error: e.message }, status: :not_found
+      render json: {error: e.message}, status: :not_found
     end
   end
 end

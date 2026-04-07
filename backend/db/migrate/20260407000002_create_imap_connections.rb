@@ -13,7 +13,7 @@ class CreateImapConnections < ActiveRecord::Migration[7.2]
       t.timestamps
     end
 
-    add_index :imap_connections, [ :account_id, :username, :host ], unique: true,
-              name: "index_imap_connections_on_account_username_host"
+    add_index :imap_connections, [:account_id, :username, :host], unique: true,
+      name: "index_imap_connections_on_account_username_host"
   end
 end

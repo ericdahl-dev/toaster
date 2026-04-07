@@ -9,7 +9,7 @@ RSpec.describe InboxMessage, type: :model do
         provider: "agent_mailbox",
         provider_message_id: "msg-123",
         direction: :inbound,
-        raw_payload: { "messageId" => "msg-123" }
+        raw_payload: {"messageId" => "msg-123"}
       )
 
       expect(message).to be_valid

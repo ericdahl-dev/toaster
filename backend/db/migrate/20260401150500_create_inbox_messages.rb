@@ -18,8 +18,8 @@ class CreateInboxMessages < ActiveRecord::Migration[7.2]
       t.timestamps
     end
 
-    add_index :inbox_messages, [ :account_id, :provider, :provider_message_id ], unique: true, name: "idx_inbox_messages_unique_provider_message"
-    add_index :inbox_messages, [ :account_id, :provider_thread_id ], name: "idx_inbox_messages_on_account_and_thread"
+    add_index :inbox_messages, [:account_id, :provider, :provider_message_id], unique: true, name: "idx_inbox_messages_unique_provider_message"
+    add_index :inbox_messages, [:account_id, :provider_thread_id], name: "idx_inbox_messages_on_account_and_thread"
     add_index :inbox_messages, :direction
   end
 end

@@ -4,9 +4,9 @@ module Gmail
       account = Account.find(params.require(:account_id))
       state = encode_state(account_id: account.id)
       auth_url = GmailOauthService.new.authorization_url(state: state)
-      render json: { auth_url: auth_url }
+      render json: {auth_url: auth_url}
     rescue ActiveRecord::RecordNotFound
-      render json: { error: "Account not found" }, status: :not_found
+      render json: {error: "Account not found"}, status: :not_found
     end
 
     def callback
@@ -27,13 +27,13 @@ module Gmail
         user: connection.user || account.users.first
       )
 
-      render json: { connection: connection_json(connection) }
+      render json: {connection: connection_json(connection)}
     rescue ActionController::ParameterMissing => e
-      render json: { error: e.message }, status: :bad_request
+      render json: {error: e.message}, status: :bad_request
     rescue ActiveRecord::RecordNotFound
-      render json: { error: "Account not found" }, status: :not_found
+      render json: {error: "Account not found"}, status: :not_found
     rescue GmailOauthService::Error => e
-      render json: { error: e.message }, status: :unprocessable_entity
+      render json: {error: e.message}, status: :unprocessable_entity
     end
 
     private

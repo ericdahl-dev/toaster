@@ -75,7 +75,7 @@ RSpec.describe "Imap::Connections", type: :request do
     end
 
     it "returns 422 when required fields are missing" do
-      post "/accounts/#{account.id}/imap/connections", params: { imap_connection: { host: "" } }
+      post "/accounts/#{account.id}/imap/connections", params: {imap_connection: {host: ""}}
 
       expect(response).to have_http_status(:unprocessable_entity)
       expect(response.parsed_body["errors"]).to be_present
@@ -90,7 +90,7 @@ RSpec.describe "Imap::Connections", type: :request do
   describe "PATCH /accounts/:account_id/imap/connections/:id" do
     it "updates the connection" do
       patch "/accounts/#{account.id}/imap/connections/#{connection.id}",
-            params: { imap_connection: { inbox_folder: "Bookings" } }
+        params: {imap_connection: {inbox_folder: "Bookings"}}
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["connection"]["inbox_folder"]).to eq("Bookings")
@@ -98,7 +98,7 @@ RSpec.describe "Imap::Connections", type: :request do
 
     it "returns 404 for an unknown connection" do
       patch "/accounts/#{account.id}/imap/connections/99999",
-            params: { imap_connection: { inbox_folder: "Other" } }
+        params: {imap_connection: {inbox_folder: "Other"}}
       expect(response).to have_http_status(:not_found)
     end
   end

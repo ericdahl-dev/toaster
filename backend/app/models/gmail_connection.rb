@@ -2,8 +2,8 @@ class GmailConnection < ApplicationRecord
   belongs_to :account
   belongs_to :user
 
-  validates :email, presence: true, uniqueness: { scope: :account_id, case_sensitive: false }
-  validates :active, inclusion: { in: [true, false] }
+  validates :email, presence: true, uniqueness: {scope: :account_id, case_sensitive: false}
+  validates :active, inclusion: {in: [true, false]}
 
   validate :user_belongs_to_account
 
