@@ -5,7 +5,7 @@ class ConversationThread < ApplicationRecord
   has_many :booking_requests, dependent: :destroy
   has_many :messages, dependent: :destroy
 
-  validates :gmail_thread_id, presence: true, uniqueness: { scope: :account_id }
+  validates :provider_thread_id, presence: true, uniqueness: { scope: :account_id }
 
   validate :contact_belongs_to_account
 

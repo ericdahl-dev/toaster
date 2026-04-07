@@ -23,7 +23,7 @@ RSpec.describe AgentMailbox::ExtractBookingRequest do
       expect(booking_request.account).to eq(account)
       expect(booking_request.source_inbox_message).to eq(inbox_message)
       expect(booking_request.contact.email).to eq("jamie@example.com")
-      expect(booking_request.conversation_thread.gmail_thread_id).to eq("agent_mailbox:thread-123")
+      expect(booking_request.conversation_thread.provider_thread_id).to eq("agent_mailbox:thread-123")
       expect(booking_request.event_date).to eq(Date.new(2026, 6, 14))
       expect(booking_request.headcount).to eq(120)
       expect(booking_request.budget_cents).to eq(1_500_000)
@@ -38,7 +38,7 @@ RSpec.describe AgentMailbox::ExtractBookingRequest do
 
       message = Message.find_by!(booking_request: booking_request)
       expect(message.direction).to eq("inbound")
-      expect(message.gmail_message_id).to eq("agent_mailbox:msg-123")
+      expect(message.provider_message_id).to eq("agent_mailbox:msg-123")
       expect(message.body_text).to include("budget of $15000")
     end
 
@@ -90,6 +90,25 @@ RSpec.describe AgentMailbox::ExtractBookingRequest do
       expect(booking_request.missing_fields).to include("event_date")
       expect(booking_request.headcount).to eq(80)
       expect(booking_request.budget_cents).to eq(800_000)
+    end
+
+    it "uses the inbox message provider to namespace canonical thread and message ids" do
+      account = create(:account)
+      inbox_message = create(
+        :inbox_message,
+        account: account,
+        provider: "imap",
+        provider_thread_id: "<thread@domain.com>",
+        provider_message_id: "<msg@domain.com>",
+        from_email: "guest@example.com",
+        subject: "Event for 60 guests on July 4, 2026",
+        body_text: "Looking for a venue for 60 guests on July 4, 2026 with a budget of $6000."
+      )
+
+      result = described_class.call(inbox_message: inbox_message)
+
+      expect(result.conversation_thread.provider_thread_id).to eq("imap:<thread@domain.com>")
+      expect(result.message.provider_message_id).to eq("imap:<msg@domain.com>")
     end
   end
 end
