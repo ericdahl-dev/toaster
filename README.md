@@ -31,6 +31,9 @@ bundle exec rspec
 bin/rails s
 ```
 
+> **Note:** The default backend port is **:3000**, which conflicts with the Next.js dev server.
+> For the POC demo path (see below) the backend must be started on **:3001** using `PORT=3001 bin/rails s`.
+
 The backend uses PostgreSQL by default. For local development it uses the
 Rails database config in `backend/config/database.yml`. To point it at Neon,
 set `DATABASE_URL` for the pooled application connection. For migrations,
