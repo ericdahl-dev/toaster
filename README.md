@@ -57,6 +57,11 @@ request.
 Issue #2 is the active foundation issue. It is now underway in branch
 `feat/issue-2-foundation`.
 
+## RAG pipeline
+
+See [`docs/rag-pipeline.md`](docs/rag-pipeline.md) for the proposed ingestion,
+retrieval, and operator-review architecture.
+
 ## POC demo path
 
 The current POC uses the agent mailbox path instead of Gmail OAuth.
