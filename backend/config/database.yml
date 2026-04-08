@@ -17,7 +17,10 @@ default: &default
   encoding: unicode
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  #
+  # Solid Queue validates pool >= max(worker threads in config/queue.yml) + 2 per supervisor.
+  # Production uses threads: 5 → need at least 7. Override with DB_POOL if you raise worker threads.
+  pool: <%= ENV.fetch("DB_POOL") { [ENV.fetch("RAILS_MAX_THREADS", 5).to_i, 7].max } %>
   url: <%= ENV["DATABASE_URL"] %>
 
 
