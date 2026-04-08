@@ -138,7 +138,7 @@ export function AddEmailAccountForm({
   }
 
   const inputClass =
-    'w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200';
+    'w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-200 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-cyan-400 dark:focus:ring-cyan-900';
 
   const errorClass = 'mt-1 text-xs text-red-600';
 
@@ -147,7 +147,7 @@ export function AddEmailAccountForm({
       {status.type === 'success' && (
         <div
           role="status"
-          className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+          className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-300"
         >
           Email account added successfully.
         </div>
@@ -156,14 +156,14 @@ export function AddEmailAccountForm({
       {status.type === 'error' && (
         <div
           role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"
+          className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300"
         >
           {status.message}
         </div>
       )}
 
       <div className="space-y-1">
-        <label htmlFor="provider" className="block text-sm font-medium text-zinc-700">
+        <label htmlFor="provider" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Email provider
         </label>
         <select
@@ -183,7 +183,7 @@ export function AddEmailAccountForm({
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="username" className="block text-sm font-medium text-zinc-700">
+        <label htmlFor="username" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Email address
         </label>
         <input
@@ -205,7 +205,7 @@ export function AddEmailAccountForm({
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="password" className="block text-sm font-medium text-zinc-700">
+        <label htmlFor="password" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
           Password
         </label>
         <input
@@ -225,13 +225,13 @@ export function AddEmailAccountForm({
           </p>
         )}
         {form.provider === 'gmail' && (
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
             For Gmail, use an{' '}
             <a
               href="https://support.google.com/accounts/answer/185833"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-zinc-700"
+              className="underline hover:text-zinc-700 dark:hover:text-zinc-200"
             >
               app password
             </a>{' '}
@@ -241,10 +241,10 @@ export function AddEmailAccountForm({
       </div>
 
       <fieldset className="space-y-4">
-        <legend className="text-sm font-medium text-zinc-700">Server settings</legend>
+        <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Server settings</legend>
 
         <div className="space-y-1">
-          <label htmlFor="host" className="block text-sm text-zinc-700">
+          <label htmlFor="host" className="block text-sm text-zinc-700 dark:text-zinc-300">
             IMAP server
           </label>
           <input
@@ -266,7 +266,7 @@ export function AddEmailAccountForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1">
-            <label htmlFor="port" className="block text-sm text-zinc-700">
+            <label htmlFor="port" className="block text-sm text-zinc-700 dark:text-zinc-300">
               Port
             </label>
             <input
@@ -295,14 +295,14 @@ export function AddEmailAccountForm({
               onChange={(e) => setForm((prev) => ({ ...prev, ssl: e.target.checked }))}
               className="h-4 w-4 rounded border-zinc-300 accent-cyan-600"
             />
-            <label htmlFor="ssl" className="text-sm text-zinc-700">
+            <label htmlFor="ssl" className="text-sm text-zinc-700 dark:text-zinc-300">
               Use SSL / TLS
             </label>
           </div>
         </div>
 
         <div className="space-y-1">
-          <label htmlFor="inboxFolder" className="block text-sm text-zinc-700">
+          <label htmlFor="inboxFolder" className="block text-sm text-zinc-700 dark:text-zinc-300">
             Inbox folder
           </label>
           <input
@@ -327,7 +327,7 @@ export function AddEmailAccountForm({
         <button
           type="submit"
           disabled={status.type === 'submitting'}
-          className="inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center rounded-full bg-zinc-950 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
         >
           {status.type === 'submitting' ? 'Adding account…' : 'Add email account'}
         </button>
