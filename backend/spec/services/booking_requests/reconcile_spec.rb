@@ -44,7 +44,7 @@ RSpec.describe BookingRequests::Reconcile do
         expect(log.payload).to include("status" => "pending")
       end
 
-      it "includes missing_fields and review_reasons in the EventLog payload" do
+      it "includes missing_fields and review_reasons in the EventLog payload and creates a review task" do
         inbox_message = create(
           :inbox_message,
           account: account,
@@ -53,7 +53,9 @@ RSpec.describe BookingRequests::Reconcile do
           body_text: "We'd like to learn more about availability."
         )
 
-        described_class.call(inbox_message: inbox_message)
+        expect {
+          described_class.call(inbox_message: inbox_message)
+        }.to change(Task, :count).by(1)
 
         log = EventLog.last
         expect(log.payload).to include(
@@ -129,6 +131,21 @@ RSpec.describe BookingRequests::Reconcile do
         expect {
           described_class.call(inbox_message: inbox_message)
         }.not_to change(BookingRequest, :count)
+      end
+    end
+
+    context "when extraction raises an error" do
+      it "rolls back the transaction and propagates the error" do
+        inbox_message = build_inbox_message
+
+        allow(AgentMailbox::ExtractBookingRequest).to receive(:call).and_raise(StandardError, "extraction failed")
+
+        expect {
+          described_class.call(inbox_message: inbox_message)
+        }.to raise_error(StandardError, "extraction failed")
+
+        expect(BookingRequest.count).to eq(0)
+        expect(EventLog.count).to eq(0)
       end
     end
   end
