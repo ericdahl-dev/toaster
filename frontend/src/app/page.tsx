@@ -32,12 +32,18 @@ export default function Home() {
           ))}
         </section>
 
-        <div>
+        <div className="flex flex-wrap gap-3">
           <Link
             href="/inbox"
             className="inline-flex items-center rounded-full bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800"
           >
             Open operator inbox
+          </Link>
+          <Link
+            href="/email-accounts"
+            className="inline-flex items-center rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-400 hover:bg-zinc-50"
+          >
+            Add email account
           </Link>
         </div>
       </div>
