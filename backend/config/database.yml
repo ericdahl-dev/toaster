@@ -79,8 +79,7 @@ test:
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
+# Use DATABASE_URL only (e.g. Neon). Do not set database/username/password here:
+# when DATABASE_URL is missing, those keys make pg connect via local socket and fail in Docker.
 production:
   <<: *default
-  database: backend_production
-  username: backend
-  password: <%= ENV["BACKEND_DATABASE_PASSWORD"] %>

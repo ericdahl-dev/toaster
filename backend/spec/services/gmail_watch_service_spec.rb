@@ -9,8 +9,7 @@ RSpec.describe GmailWatchService do
       user: user,
       access_token: "ya29.access",
       refresh_token: "1//refresh",
-      token_expires_at: 1.hour.from_now
-    )
+      token_expires_at: 1.hour.from_now)
   end
   let(:oauth_service) { instance_double(GmailOauthService) }
   let(:service) { described_class.new(connection, oauth_service: oauth_service) }

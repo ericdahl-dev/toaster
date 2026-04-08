@@ -8,7 +8,7 @@ backend/tmp/
 backend/.bundle/
 backend/vendor/bundle/
 backend/config/master.key
-backend/config/credentials.yml.enc
+# credentials.yml.enc is encrypted; safe to commit. RAILS_MASTER_KEY in deploy must decrypt it.
 
 # Next.js runtime artifacts
 frontend/.next/

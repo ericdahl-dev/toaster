@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_01_160000) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_07_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -67,18 +67,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_160000) do
     t.string "phone"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["account_id", "email"], name: "index_contacts_on_account_id_and_email", unique: true, where: "email IS NOT NULL"
+    t.index ["account_id", "email"], name: "index_contacts_on_account_id_and_email", unique: true, where: "(email IS NOT NULL)"
     t.index ["account_id"], name: "index_contacts_on_account_id"
   end
 
   create_table "conversation_threads", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "contact_id", null: false
-    t.string "gmail_thread_id", null: false
+    t.string "provider_thread_id", null: false
     t.string "subject"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["account_id", "gmail_thread_id"], name: "index_conversation_threads_on_account_id_and_gmail_thread_id", unique: true
+    t.index ["account_id", "provider_thread_id"], name: "idx_on_account_id_provider_thread_id_f9411ec04c", unique: true
     t.index ["account_id"], name: "index_conversation_threads_on_account_id"
     t.index ["contact_id"], name: "index_conversation_threads_on_contact_id"
   end
@@ -136,6 +136,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_160000) do
     t.index ["account_id"], name: "index_gmail_webhook_events_on_account_id"
   end
 
+  create_table "imap_connections", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "host", null: false
+    t.integer "port", default: 993, null: false
+    t.boolean "ssl", default: true, null: false
+    t.string "username", null: false
+    t.text "password"
+    t.string "inbox_folder", default: "INBOX", null: false
+    t.integer "last_synced_uid"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "username", "host"], name: "index_imap_connections_on_account_username_host", unique: true
+    t.index ["account_id"], name: "index_imap_connections_on_account_id"
+  end
+
   create_table "inbox_messages", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.string "provider", null: false
@@ -163,14 +179,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_160000) do
     t.bigint "conversation_thread_id", null: false
     t.bigint "booking_request_id"
     t.string "direction", null: false
-    t.string "gmail_message_id"
+    t.string "provider_message_id"
     t.text "body_text"
     t.text "body_html"
     t.datetime "sent_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["account_id", "provider_message_id"], name: "index_messages_on_account_id_and_provider_message_id", unique: true, where: "(provider_message_id IS NOT NULL)"
     t.index ["account_id"], name: "index_messages_on_account_id"
-    t.index ["account_id", "gmail_message_id"], name: "index_messages_on_account_id_and_gmail_message_id", unique: true, where: "gmail_message_id IS NOT NULL"
     t.index ["booking_request_id"], name: "index_messages_on_booking_request_id"
     t.index ["conversation_thread_id"], name: "index_messages_on_conversation_thread_id"
     t.index ["direction"], name: "index_messages_on_direction"
@@ -346,6 +362,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_01_160000) do
   add_foreign_key "gmail_connections", "accounts"
   add_foreign_key "gmail_connections", "users"
   add_foreign_key "gmail_webhook_events", "accounts"
+  add_foreign_key "imap_connections", "accounts"
   add_foreign_key "inbox_messages", "accounts"
   add_foreign_key "messages", "accounts"
   add_foreign_key "messages", "booking_requests"

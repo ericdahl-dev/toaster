@@ -1,0 +1,36 @@
+# Backend: Puma + Solid Queue worker (same image, two processes).
+# Coolify: set "Docker Compose Location" to this file and base directory to `backend/`
+# (or repo root with `context`/`dockerfile` paths adjusted). Required env at runtime:
+#   DATABASE_URL, RAILS_MASTER_KEY (must match the key for config/credentials.yml.enc in the image)
+#
+# Local: from `backend/` run `docker compose up --build`
+
+services:
+  web:
+    build: .
+    command: [ "./bin/rails", "server", "-b", "0.0.0.0" ]
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL
+      - RAILS_MASTER_KEY
+      - RAILS_ENV=production
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://127.0.0.1:3000/up" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: [ "./bin/rails", "solid_queue:start" ]
+    environment:
+      - DATABASE_URL
+      - RAILS_MASTER_KEY
+      - RAILS_ENV=production
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped

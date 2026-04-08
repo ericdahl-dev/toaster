@@ -49,7 +49,7 @@ class GmailWatchService
     request = Net::HTTP::Post.new(uri)
     request["Authorization"] = "Bearer #{@connection.access_token}"
     request["Content-Type"] = "application/json"
-    request.body = { topicName: topic_name, labelIds: %w[INBOX] }.to_json
+    request.body = {topicName: topic_name, labelIds: %w[INBOX]}.to_json
     response = http.request(request)
     parse_response!(response)
   end

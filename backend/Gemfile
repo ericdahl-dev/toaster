@@ -7,6 +7,9 @@ gem "pg", "~> 1.1"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 
+# IMAP support for polling-based inbox sync
+gem "net-imap"
+
 # Database-backed Active Job backend
 gem "solid_queue", "~> 1.4"
 
@@ -22,7 +25,7 @@ gem "mission_control-jobs", "~> 1.1"
 # gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
-gem "tzinfo-data", platforms: %i[ windows jruby ]
+gem "tzinfo-data", platforms: %i[windows jruby]
 
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
@@ -32,16 +35,20 @@ gem "bootsnap", require: false
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
-  gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
+  gem "debug", platforms: %i[mri windows], require: "debug/prelude"
+  gem "dotenv-rails"
 
   # Static analysis for security vulnerabilities [https://brakemanscanner.org/]
   gem "brakeman", require: false
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Run web + Solid Queue worker together locally (`bin/dev`)
+  gem "foreman", "~> 0.90.0", require: false
 end
-
-
 
 gem "rspec-rails", "~> 8.0"
 gem "factory_bot_rails", "~> 6.5"
+
+gem "standard", ">= 1.35.1", groups: %i[development test]
