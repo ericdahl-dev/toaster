@@ -1,7 +1,7 @@
 # Backend: Puma + Solid Queue worker (same image, two processes).
 # Coolify: set "Docker Compose Location" to this file and base directory to `backend/`
 # (or repo root with `context`/`dockerfile` paths adjusted). Required env at runtime:
-#   DATABASE_URL, RAILS_MASTER_KEY
+#   DATABASE_URL, RAILS_MASTER_KEY (must match the key for config/credentials.yml.enc in the image)
 #
 # Local: from `backend/` run `docker compose up --build`
 
