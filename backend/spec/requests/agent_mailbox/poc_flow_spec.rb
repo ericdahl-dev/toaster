@@ -1,6 +1,18 @@
 require "rails_helper"
 
 RSpec.describe "Agent mailbox POC flow", type: :request do
+  around do |example|
+    prev = ENV["OPS_AUTH_TOKEN"]
+    ENV["OPS_AUTH_TOKEN"] = "test-ops-token"
+    example.run
+  ensure
+    if prev.nil?
+      ENV.delete("OPS_AUTH_TOKEN")
+    else
+      ENV["OPS_AUTH_TOKEN"] = prev
+    end
+  end
+
   it "covers sync, duplicate delivery protection, extraction, and operator inspection" do
     account = create(:account)
     fetcher = instance_double(AgentMailbox::Fetcher)
@@ -35,7 +47,7 @@ RSpec.describe "Agent mailbox POC flow", type: :request do
     expect(extraction.booking_request.event_date).to eq(Date.new(2026, 6, 14))
     expect(extraction.booking_request.budget_cents).to eq(1_500_000)
 
-    get "/ops/inbox_messages"
+    get "/ops/inbox_messages", headers: { "X-Ops-Token" => "test-ops-token" }
     expect(response).to have_http_status(:ok)
     list_entry = response.parsed_body.fetch("inbox_messages").find { |item| item["id"] == inbox_message.id }
     expect(list_entry).to be_present
@@ -44,7 +56,7 @@ RSpec.describe "Agent mailbox POC flow", type: :request do
       "status" => "pending"
     )
 
-    get "/ops/inbox_messages/#{inbox_message.id}"
+    get "/ops/inbox_messages/#{inbox_message.id}", headers: { "X-Ops-Token" => "test-ops-token" }
     expect(response).to have_http_status(:ok)
     detail = response.parsed_body.fetch("inbox_message")
     expect(detail.fetch("booking_request")).to include(
