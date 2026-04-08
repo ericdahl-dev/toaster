@@ -1,6 +1,18 @@
 require "rails_helper"
 
 RSpec.describe "Ops inbox messages", type: :request do
+  around do |example|
+    prev = ENV["OPS_AUTH_TOKEN"]
+    ENV["OPS_AUTH_TOKEN"] = "secret-token"
+    example.run
+  ensure
+    if prev.nil?
+      ENV.delete("OPS_AUTH_TOKEN")
+    else
+      ENV["OPS_AUTH_TOKEN"] = prev
+    end
+  end
+
   describe "GET /ops/inbox_messages" do
     it "returns captured inbox messages with linked booking request summary" do
       account = create(:account)
@@ -18,7 +30,7 @@ RSpec.describe "Ops inbox messages", type: :request do
         status: "reviewing"
       )
 
-      get "/ops/inbox_messages"
+      get "/ops/inbox_messages", headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -34,32 +46,31 @@ RSpec.describe "Ops inbox messages", type: :request do
       )
     end
 
-    context "when OPS_AUTH_TOKEN is configured" do
+    it "returns 401 when the token header is missing" do
+      get "/ops/inbox_messages"
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body).to include("error" => "Unauthorized")
+    end
+
+    it "returns 401 when the token header is wrong" do
+      get "/ops/inbox_messages", headers: { "X-Ops-Token" => "wrong-token" }
+
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    context "when OPS_AUTH_TOKEN is not configured" do
       around do |example|
-        prev = ENV.delete("OPS_AUTH_TOKEN")
-        ENV["OPS_AUTH_TOKEN"] = "secret-token"
+        saved = ENV.delete("OPS_AUTH_TOKEN")
         example.run
       ensure
-        ENV["OPS_AUTH_TOKEN"] = prev
+        ENV["OPS_AUTH_TOKEN"] = saved if saved
       end
 
-      it "returns 401 when the token header is missing" do
-        get "/ops/inbox_messages"
+      it "returns 401" do
+        get "/ops/inbox_messages", headers: { "X-Ops-Token" => "any-token" }
 
         expect(response).to have_http_status(:unauthorized)
-        expect(response.parsed_body).to include("error" => "Unauthorized")
-      end
-
-      it "returns 401 when the token header is wrong" do
-        get "/ops/inbox_messages", headers: {"X-Ops-Token" => "wrong-token"}
-
-        expect(response).to have_http_status(:unauthorized)
-      end
-
-      it "returns 200 when the correct token header is provided" do
-        get "/ops/inbox_messages", headers: {"X-Ops-Token" => "secret-token"}
-
-        expect(response).to have_http_status(:ok)
       end
     end
   end
@@ -76,7 +87,7 @@ RSpec.describe "Ops inbox messages", type: :request do
         from_email: "jamie@example.com",
         subject: "Wedding inquiry",
         body_text: "Looking for June 14, 2026 for 120 guests.",
-        raw_payload: {"messageId" => "msg-123", "threadId" => "thread-123"}
+        raw_payload: { "messageId" => "msg-123", "threadId" => "thread-123" }
       )
       create(
         :booking_request,
@@ -90,11 +101,11 @@ RSpec.describe "Ops inbox messages", type: :request do
           "headcount" => 120,
           "budget_cents" => nil
         },
-        missing_fields: ["budget_cents"],
+        missing_fields: [ "budget_cents" ],
         review_reasons: []
       )
 
-      get "/ops/inbox_messages/#{inbox_message.id}"
+      get "/ops/inbox_messages/#{inbox_message.id}", headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       detail = response.parsed_body.fetch("inbox_message")
@@ -111,12 +122,12 @@ RSpec.describe "Ops inbox messages", type: :request do
         "status" => "reviewing",
         "headcount" => 120,
         "event_date" => "2026-06-14",
-        "missing_fields" => ["budget_cents"]
+        "missing_fields" => [ "budget_cents" ]
       )
     end
 
     it "returns 404 for an unknown inbox message" do
-      get "/ops/inbox_messages/999999"
+      get "/ops/inbox_messages/999999", headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:not_found)
       expect(response.parsed_body).to include("error" => "Inbox message not found")
@@ -126,10 +137,19 @@ RSpec.describe "Ops inbox messages", type: :request do
       account = create(:account)
       outbound_message = create(:inbox_message, account: account, direction: "outbound")
 
-      get "/ops/inbox_messages/#{outbound_message.id}"
+      get "/ops/inbox_messages/#{outbound_message.id}", headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:not_found)
       expect(response.parsed_body).to include("error" => "Inbox message not found")
+    end
+
+    it "returns 401 when the token header is missing" do
+      account = create(:account)
+      inbox_message = create(:inbox_message, account: account)
+
+      get "/ops/inbox_messages/#{inbox_message.id}"
+
+      expect(response).to have_http_status(:unauthorized)
     end
   end
 end

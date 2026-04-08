@@ -31,6 +31,9 @@ bundle exec rspec
 bin/rails s
 ```
 
+> **Note:** The default backend port is **:3000**, which conflicts with the Next.js dev server.
+> For the POC demo path (see below) the backend must be started on **:3001** using `PORT=3001 bin/rails s`.
+
 The backend uses PostgreSQL by default. For local development it uses the
 Rails database config in `backend/config/database.yml`. To point it at Neon,
 set `DATABASE_URL` for the pooled application connection. For migrations,
@@ -56,6 +59,48 @@ request.
 
 Issue #2 is the active foundation issue. It is now underway in branch
 `feat/issue-2-foundation`.
+
+## RAG pipeline
+
+See [`docs/rag-pipeline.md`](docs/rag-pipeline.md) for the proposed ingestion,
+retrieval, and operator-review architecture.
+
+## POC demo path
+
+The current POC uses the agent mailbox path instead of Gmail OAuth.
+
+1. Start the backend on port 3001:
+
+```bash
+cd backend
+bin/rails db:prepare
+PORT=3001 bin/rails s
+```
+
+2. Seed the repeatable demo data:
+
+```bash
+cd backend
+bin/rails poc:seed_agent_mailbox_demo
+```
+
+3. Start the frontend in another shell (defaults to port 3000):
+
+```bash
+cd frontend
+NEXT_PUBLIC_TOASTER_API_BASE_URL=http://localhost:3001 yarn dev
+```
+
+4. Open the operator inbox:
+
+```text
+http://localhost:3000/inbox
+```
+
+What you should see:
+- one captured inbox message from `demo.lead@example.com`
+- one linked booking request snapshot
+- extracted event date, headcount, and budget in the request detail
 
 ## Project principles
 
