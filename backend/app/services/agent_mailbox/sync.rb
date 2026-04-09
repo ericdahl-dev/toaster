@@ -2,13 +2,16 @@ module AgentMailbox
   class Sync
     Result = Struct.new(:created_count, :deduped_count, :messages, keyword_init: true)
 
-    def self.call(connection:, fetcher: nil)
+    def self.call(connection: nil, account: nil, fetcher: nil)
+      effective_account = connection&.account || account
+      raise ArgumentError, "connection or account required" unless effective_account
       fetcher ||= Fetcher.new(connection: connection)
-      new(connection: connection, fetcher: fetcher).call
+      new(connection: connection, account: effective_account, fetcher: fetcher).call
     end
 
-    def initialize(connection:, fetcher:)
+    def initialize(connection:, account:, fetcher:)
       @connection = connection
+      @account = account
       @fetcher = fetcher
     end
 
@@ -49,17 +52,13 @@ module AgentMailbox
         messages << inbox_message
       end
 
-      connection.update!(last_synced_at: synced_at)
+      connection&.update!(last_synced_at: synced_at)
       Result.new(created_count: created_count, deduped_count: deduped_count, messages: messages)
     end
 
     private
 
-    attr_reader :connection, :fetcher
-
-    def account
-      connection.account
-    end
+    attr_reader :connection, :account, :fetcher
 
     def normalize(payload)
       data = payload.deep_symbolize_keys
