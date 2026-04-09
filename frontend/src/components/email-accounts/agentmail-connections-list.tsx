@@ -101,6 +101,10 @@ export function AgentmailConnectionsList({
     );
   }
 
+  if (state.status !== 'ok') {
+    return null;
+  }
+
   if (state.connections.length === 0) {
     return null;
   }
