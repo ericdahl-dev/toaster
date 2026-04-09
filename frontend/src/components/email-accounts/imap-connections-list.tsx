@@ -38,8 +38,8 @@ export function ImapConnectionsList({
   useEffect(() => {
     const timeouts = syncTimeouts.current;
     return () => {
-      for (const id of Object.values(timeouts)) {
-        clearTimeout(id);
+      for (const timeoutId of Object.values(timeouts)) {
+        clearTimeout(timeoutId);
       }
     };
   }, []);
