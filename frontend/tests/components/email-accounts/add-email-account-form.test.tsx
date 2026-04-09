@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { AddEmailAccountForm } from './add-email-account-form';
+import { AddEmailAccountForm } from '@/components/email-accounts/add-email-account-form';
 
 const defaultProps = {
   accountId: '1',
@@ -131,6 +131,28 @@ describe('AddEmailAccountForm', () => {
         headers: { 'Content-Type': 'application/json' },
       })
     );
+  });
+
+  it('shows API error field when present (e.g. account not found)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: async () => ({ error: 'Account not found' }),
+      })
+    );
+
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/email address/i), {
+      target: { value: 'test@gmail.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'apppassword' } });
+    fireEvent.click(screen.getByRole('button', { name: /add email account/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/account not found/i);
+    });
   });
 
   it('shows error message from server on failure', async () => {

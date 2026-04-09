@@ -4,6 +4,21 @@ RSpec.describe "Imap::Connections", type: :request do
   let(:account) { create(:account) }
   let!(:connection) { create(:imap_connection, account: account) }
 
+  describe "CORS preflight (OPTIONS)" do
+    it "allows POST from a configured browser origin" do
+      process :options, "/accounts/#{account.id}/imap/connections",
+        headers: {
+          "HTTP_ORIGIN" => "http://localhost:3000",
+          "HTTP_ACCESS_CONTROL_REQUEST_METHOD" => "POST",
+          "HTTP_ACCESS_CONTROL_REQUEST_HEADERS" => "content-type"
+        }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.headers["Access-Control-Allow-Origin"]).to eq("http://localhost:3000")
+      expect(response.headers["Access-Control-Allow-Methods"].to_s).to include("POST")
+    end
+  end
+
   describe "GET /accounts/:account_id/imap/connections" do
     it "returns all IMAP connections for the account" do
       get "/accounts/#{account.id}/imap/connections"
@@ -65,6 +80,8 @@ RSpec.describe "Imap::Connections", type: :request do
     end
 
     it "creates a new IMAP connection" do
+      allow(SyncImapJob).to receive(:perform_later)
+
       post "/accounts/#{account.id}/imap/connections", params: valid_params
 
       expect(response).to have_http_status(:created)
@@ -72,6 +89,15 @@ RSpec.describe "Imap::Connections", type: :request do
       expect(body["connection"]["host"]).to eq("imap.fastmail.com")
       expect(body["connection"]["username"]).to eq("booking@venue.example")
       expect(body["connection"]).not_to have_key("password")
+    end
+
+    it "enqueues a sync job after creating a connection" do
+      allow(SyncImapJob).to receive(:perform_later)
+
+      post "/accounts/#{account.id}/imap/connections", params: valid_params
+
+      new_id = response.parsed_body.dig("connection", "id")
+      expect(SyncImapJob).to have_received(:perform_later).with(new_id)
     end
 
     it "returns 422 when required fields are missing" do

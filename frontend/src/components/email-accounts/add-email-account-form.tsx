@@ -32,9 +32,11 @@ type SubmitStatus =
 export function AddEmailAccountForm({
   accountId,
   apiBaseUrl,
+  onSuccess,
 }: {
   accountId: string;
   apiBaseUrl: string;
+  onSuccess?: () => void;
 }) {
   const [form, setForm] = useState<FormState>({
     provider: 'gmail',
@@ -124,12 +126,15 @@ export function AddEmailAccountForm({
           inboxFolder: 'INBOX',
         });
         setErrors({});
+        onSuccess?.();
       } else {
-        const body = await response.json().catch(() => ({})) as { errors?: unknown };
+        const body = await response.json().catch(() => ({})) as { errors?: unknown; error?: unknown };
         const message =
-          Array.isArray(body.errors) && body.errors.length > 0
-            ? (body.errors as string[]).join(', ')
-            : 'Failed to add email account. Please check your details and try again.';
+          typeof body.error === 'string' && body.error.length > 0
+            ? body.error
+            : Array.isArray(body.errors) && body.errors.length > 0
+              ? (body.errors as string[]).join(', ')
+              : 'Failed to add email account. Please check your details and try again.';
         setStatus({ type: 'error', message });
       }
     } catch {
