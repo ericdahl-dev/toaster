@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type ImapConnectionRow = {
   id: number;
@@ -33,6 +33,16 @@ export function ImapConnectionsList({
 }) {
   const [state, setState] = useState<ListState>({ status: 'idle' });
   const [syncState, setSyncState] = useState<Record<number, SyncState>>({});
+  const syncTimeouts = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+
+  useEffect(() => {
+    const timeouts = syncTimeouts.current;
+    return () => {
+      for (const id of Object.values(timeouts)) {
+        clearTimeout(id);
+      }
+    };
+  }, []);
 
   const load = useCallback(async () => {
     setState({ status: 'loading' });
@@ -73,7 +83,11 @@ export function ImapConnectionsList({
       if (response.ok) {
         setSyncState((s) => ({ ...s, [connectionId]: 'done' }));
         await load();
-        setTimeout(() => setSyncState((s) => ({ ...s, [connectionId]: 'idle' })), 2000);
+        clearTimeout(syncTimeouts.current[connectionId]);
+        syncTimeouts.current[connectionId] = setTimeout(
+          () => setSyncState((s) => ({ ...s, [connectionId]: 'idle' })),
+          2000
+        );
       } else {
         setSyncState((s) => ({ ...s, [connectionId]: 'error' }));
       }
