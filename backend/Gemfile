@@ -46,6 +46,9 @@ group :development, :test do
 
   # Run web + Solid Queue worker together locally (`bin/dev`)
   gem "foreman", "~> 0.90.0", require: false
+
+  gem "simplecov", require: false
+  gem "simplecov_json_formatter", require: false
 end
 
 gem "rspec-rails", "~> 8.0"

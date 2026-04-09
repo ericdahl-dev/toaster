@@ -30,7 +30,7 @@ RSpec.describe "Ops inbox messages", type: :request do
         status: "reviewing"
       )
 
-      get "/ops/inbox_messages", headers: { "X-Ops-Token" => "secret-token" }
+      get "/ops/inbox_messages", headers: {"X-Ops-Token" => "secret-token"}
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -54,7 +54,7 @@ RSpec.describe "Ops inbox messages", type: :request do
     end
 
     it "returns 401 when the token header is wrong" do
-      get "/ops/inbox_messages", headers: { "X-Ops-Token" => "wrong-token" }
+      get "/ops/inbox_messages", headers: {"X-Ops-Token" => "wrong-token"}
 
       expect(response).to have_http_status(:unauthorized)
     end
@@ -68,7 +68,7 @@ RSpec.describe "Ops inbox messages", type: :request do
       end
 
       it "returns 401" do
-        get "/ops/inbox_messages", headers: { "X-Ops-Token" => "any-token" }
+        get "/ops/inbox_messages", headers: {"X-Ops-Token" => "any-token"}
 
         expect(response).to have_http_status(:unauthorized)
       end
@@ -87,7 +87,7 @@ RSpec.describe "Ops inbox messages", type: :request do
         from_email: "jamie@example.com",
         subject: "Wedding inquiry",
         body_text: "Looking for June 14, 2026 for 120 guests.",
-        raw_payload: { "messageId" => "msg-123", "threadId" => "thread-123" }
+        raw_payload: {"messageId" => "msg-123", "threadId" => "thread-123"}
       )
       create(
         :booking_request,
@@ -101,11 +101,11 @@ RSpec.describe "Ops inbox messages", type: :request do
           "headcount" => 120,
           "budget_cents" => nil
         },
-        missing_fields: [ "budget_cents" ],
+        missing_fields: ["budget_cents"],
         review_reasons: []
       )
 
-      get "/ops/inbox_messages/#{inbox_message.id}", headers: { "X-Ops-Token" => "secret-token" }
+      get "/ops/inbox_messages/#{inbox_message.id}", headers: {"X-Ops-Token" => "secret-token"}
 
       expect(response).to have_http_status(:ok)
       detail = response.parsed_body.fetch("inbox_message")
@@ -122,12 +122,12 @@ RSpec.describe "Ops inbox messages", type: :request do
         "status" => "reviewing",
         "headcount" => 120,
         "event_date" => "2026-06-14",
-        "missing_fields" => [ "budget_cents" ]
+        "missing_fields" => ["budget_cents"]
       )
     end
 
     it "returns 404 for an unknown inbox message" do
-      get "/ops/inbox_messages/999999", headers: { "X-Ops-Token" => "secret-token" }
+      get "/ops/inbox_messages/999999", headers: {"X-Ops-Token" => "secret-token"}
 
       expect(response).to have_http_status(:not_found)
       expect(response.parsed_body).to include("error" => "Inbox message not found")
@@ -137,7 +137,7 @@ RSpec.describe "Ops inbox messages", type: :request do
       account = create(:account)
       outbound_message = create(:inbox_message, account: account, direction: "outbound")
 
-      get "/ops/inbox_messages/#{outbound_message.id}", headers: { "X-Ops-Token" => "secret-token" }
+      get "/ops/inbox_messages/#{outbound_message.id}", headers: {"X-Ops-Token" => "secret-token"}
 
       expect(response).to have_http_status(:not_found)
       expect(response.parsed_body).to include("error" => "Inbox message not found")

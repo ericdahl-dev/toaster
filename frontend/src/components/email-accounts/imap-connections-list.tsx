@@ -70,7 +70,11 @@ export function ImapConnectionsList({
   }, [accountId, apiBaseUrl]);
 
   useEffect(() => {
-    void load();
+    const timeoutId = setTimeout(() => {
+      void load();
+    }, 0);
+
+    return () => clearTimeout(timeoutId);
   }, [load, refreshKey]);
 
   async function handleSync(connectionId: number) {
