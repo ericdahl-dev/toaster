@@ -1,22 +1,11 @@
 require "rails_helper"
 
 RSpec.describe AgentMailbox::Fetcher do
-  around do |example|
-    original_api_key = ENV["AGENTMAIL_API_KEY"]
-    original_inbox_id = ENV["AGENTMAIL_INBOX_ID"]
-
-    ENV["AGENTMAIL_API_KEY"] = "test-api-key"
-    ENV["AGENTMAIL_INBOX_ID"] = "test-inbox@agentmail.to"
-
-    example.run
-  ensure
-    ENV["AGENTMAIL_API_KEY"] = original_api_key
-    ENV["AGENTMAIL_INBOX_ID"] = original_inbox_id
-  end
+  let(:connection) { build(:agentmail_connection, inbox_id: "test-inbox@agentmail.to", api_key: "test-api-key") }
 
   describe "#fetch_messages" do
-    it "fetches and normalizes messages from AgentMail" do
-      response_body = {
+    let(:response_body) do
+      {
         count: 1,
         messages: [
           {
@@ -35,22 +24,24 @@ RSpec.describe AgentMailbox::Fetcher do
           }
         ]
       }
+    end
 
+    it "fetches and normalizes messages from AgentMail" do
       http = instance_double(Net::HTTP)
-      request = nil
+      built_request = nil
       response = instance_double(Net::HTTPResponse, body: response_body.to_json)
 
       allow(Net::HTTP).to receive(:new).with("api.agentmail.to", 443).and_return(http)
       allow(http).to receive(:use_ssl=).with(true)
-      allow(http).to receive(:request) do |built_request|
-        request = built_request
+      allow(http).to receive(:request) do |req|
+        built_request = req
         response
       end
 
-      messages = described_class.new.fetch_messages
+      messages = described_class.new(connection: connection).fetch_messages
 
-      expect(request.path).to eq("/v0/inboxes/test-inbox@agentmail.to/messages")
-      expect(request["Authorization"]).to eq("Bearer test-api-key")
+      expect(built_request["Authorization"]).to eq("Bearer test-api-key")
+      expect(built_request.path).to start_with("/v0/inboxes/test-inbox@agentmail.to/messages")
 
       expect(messages).to eq([
         {
@@ -69,18 +60,23 @@ RSpec.describe AgentMailbox::Fetcher do
       ])
     end
 
-    it "raises a clear error when the API key is missing" do
-      ENV["AGENTMAIL_API_KEY"] = nil
+    it "includes after param when connection has been previously synced" do
+      connection.last_synced_at = Time.zone.parse("2026-04-01T10:00:00Z")
 
-      expect { described_class.new.fetch_messages }
-        .to raise_error(AgentMailbox::Fetcher::Error, "AGENTMAIL_API_KEY is not set")
-    end
+      http = instance_double(Net::HTTP)
+      built_request = nil
+      response = instance_double(Net::HTTPResponse, body: {count: 0, messages: []}.to_json)
 
-    it "raises a clear error when the inbox id is missing" do
-      ENV["AGENTMAIL_INBOX_ID"] = nil
+      allow(Net::HTTP).to receive(:new).and_return(http)
+      allow(http).to receive(:use_ssl=).with(true)
+      allow(http).to receive(:request) { |req|
+        built_request = req
+        response
+      }
 
-      expect { described_class.new.fetch_messages }
-        .to raise_error(AgentMailbox::Fetcher::Error, "AGENTMAIL_INBOX_ID is not set")
+      described_class.new(connection: connection).fetch_messages
+
+      expect(built_request.path).to include("after=")
     end
 
     it "raises a clear error when AgentMail returns an API error" do
@@ -90,11 +86,11 @@ RSpec.describe AgentMailbox::Fetcher do
         body: {name: "not_found", message: "Inbox not found"}.to_json
       )
 
-      allow(Net::HTTP).to receive(:new).with("api.agentmail.to", 443).and_return(http)
+      allow(Net::HTTP).to receive(:new).and_return(http)
       allow(http).to receive(:use_ssl=).with(true)
       allow(http).to receive(:request).and_return(response)
 
-      expect { described_class.new.fetch_messages }
+      expect { described_class.new(connection: connection).fetch_messages }
         .to raise_error(AgentMailbox::Fetcher::Error, "Inbox not found")
     end
   end

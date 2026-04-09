@@ -53,6 +53,39 @@ describe('AddEmailAccountForm', () => {
     expect(screen.getByLabelText(/imap server/i)).toHaveValue('imap.mail.yahoo.com');
   });
 
+  it('shows API key label and hides server settings for AgentMail', () => {
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/email provider/i), { target: { value: 'agentmail' } });
+
+    expect(screen.getByLabelText(/api key/i)).toBeInTheDocument();
+    expect(screen.getByText(/agentmail console/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/imap server/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/port/i)).not.toBeInTheDocument();
+  });
+
+  it('submits to the agent_mailbox endpoint for AgentMail', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+    vi.stubGlobal('fetch', mockFetch);
+
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/email provider/i), { target: { value: 'agentmail' } });
+    fireEvent.change(screen.getByLabelText(/inbox address/i), { target: { value: 'inbox@agentmail.to' } });
+    fireEvent.change(screen.getByLabelText(/api key/i), { target: { value: 'my-secret-key' } });
+    fireEvent.click(screen.getByRole('button', { name: /add email account/i }));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost:3001/accounts/1/agent_mailbox/connections',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ agentmail_connection: { inbox_id: 'inbox@agentmail.to', api_key: 'my-secret-key' } }),
+        })
+      );
+    });
+  });
+
   it('clears the host field when Other is selected', () => {
     render(<AddEmailAccountForm {...defaultProps} />);
 

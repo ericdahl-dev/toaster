@@ -19,6 +19,9 @@ Rails.application.routes.draw do
     end
 
     namespace :agent_mailbox do
+      resources :connections, only: [:index, :show, :create, :update, :destroy] do
+        resource :sync, only: :create, controller: :connection_syncs
+      end
       resource :sync, only: :create, controller: :syncs
     end
 
