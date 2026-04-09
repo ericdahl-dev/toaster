@@ -14,9 +14,7 @@ describe('Home', () => {
     expect(
       screen.getByRole('heading', { name: /toaster/i })
     ).toBeInTheDocument();
-    expect(
-      screen.getByText(/gmail booking assistant/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/email booking assistant/i)).toBeInTheDocument();
   });
 
   it('links to the operator inbox', () => {

@@ -9,7 +9,7 @@ export default function Home() {
             Toaster
           </p>
           <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            Toaster is a Gmail booking assistant.
+            Toaster is an email booking assistant.
           </h1>
           <p className="max-w-2xl text-lg leading-8 text-zinc-600 dark:text-zinc-400">
             It ingests booking inquiries, extracts structured details, tracks

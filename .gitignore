@@ -15,3 +15,5 @@ frontend/.next/
 frontend/node_modules/
 frontend/.yarn/unplugged/
 frontend/.yarn/install-state.gz
+/backend/coverage
+/frontend/coverage
