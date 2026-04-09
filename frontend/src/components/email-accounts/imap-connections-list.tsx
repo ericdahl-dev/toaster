@@ -119,6 +119,10 @@ export function ImapConnectionsList({
     );
   }
 
+  if (state.status !== 'ok') {
+    return null;
+  }
+
   if (state.connections.length === 0) {
     return (
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
