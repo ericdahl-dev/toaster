@@ -2,11 +2,15 @@ module AgentMailbox
   class Sync
     Result = Struct.new(:created_count, :deduped_count, :messages, keyword_init: true)
 
-    def self.call(account:, fetcher: Fetcher.new)
-      new(account: account, fetcher: fetcher).call
+    def self.call(connection: nil, account: nil, fetcher: nil)
+      effective_account = connection&.account || account
+      raise ArgumentError, "connection or account required" unless effective_account
+      fetcher ||= Fetcher.new(connection: connection)
+      new(connection: connection, account: effective_account, fetcher: fetcher).call
     end
 
-    def initialize(account:, fetcher:)
+    def initialize(connection:, account:, fetcher:)
+      @connection = connection
       @account = account
       @fetcher = fetcher
     end
@@ -15,6 +19,7 @@ module AgentMailbox
       created_count = 0
       deduped_count = 0
       messages = []
+      synced_at = Time.current
 
       fetcher.fetch_messages.each do |payload|
         attrs = normalize(payload)
@@ -30,20 +35,13 @@ module AgentMailbox
           inbox_message.assign_attributes(attrs.except(:provider_message_id, :provider))
           inbox_message.save!
 
-          if new_record
-            created_count += 1
-          else
-            deduped_count += 1
-          end
+          new_record ? (created_count += 1) : (deduped_count += 1)
         rescue ActiveRecord::RecordNotUnique
-          # Another worker created this inbox_message concurrently.
           inbox_message = InboxMessage.find_by(
             account: account,
             provider: attrs[:provider],
             provider_message_id: attrs[:provider_message_id]
           )
-
-          # If for some reason the record still doesn't exist, re-raise.
           raise unless inbox_message
 
           inbox_message.assign_attributes(attrs.except(:provider_message_id, :provider))
@@ -54,18 +52,19 @@ module AgentMailbox
         messages << inbox_message
       end
 
+      connection&.update!(last_synced_at: synced_at)
       Result.new(created_count: created_count, deduped_count: deduped_count, messages: messages)
     end
 
     private
 
-    attr_reader :account, :fetcher
+    attr_reader :connection, :account, :fetcher
 
     def normalize(payload)
       data = payload.deep_symbolize_keys
 
       {
-        provider: data.fetch(:provider, "agent_mailbox"),
+        provider: data.fetch(:provider, "agentmail"),
         provider_message_id: data.fetch(:provider_message_id),
         provider_thread_id: data[:provider_thread_id],
         direction: data.fetch(:direction, "inbound"),

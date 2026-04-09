@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { AddEmailAccountForm } from './add-email-account-form';
+import { AddEmailAccountForm } from '@/components/email-accounts/add-email-account-form';
 
 const defaultProps = {
   accountId: '1',
@@ -51,6 +51,39 @@ describe('AddEmailAccountForm', () => {
     fireEvent.change(screen.getByLabelText(/email provider/i), { target: { value: 'yahoo' } });
 
     expect(screen.getByLabelText(/imap server/i)).toHaveValue('imap.mail.yahoo.com');
+  });
+
+  it('shows API key label and hides server settings for AgentMail', () => {
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/email provider/i), { target: { value: 'agentmail' } });
+
+    expect(screen.getByLabelText(/api key/i)).toBeInTheDocument();
+    expect(screen.getByText(/agentmail console/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/imap server/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/port/i)).not.toBeInTheDocument();
+  });
+
+  it('submits to the agent_mailbox endpoint for AgentMail', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({ ok: true, json: async () => ({}) });
+    vi.stubGlobal('fetch', mockFetch);
+
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/email provider/i), { target: { value: 'agentmail' } });
+    fireEvent.change(screen.getByLabelText(/inbox address/i), { target: { value: 'inbox@agentmail.to' } });
+    fireEvent.change(screen.getByLabelText(/api key/i), { target: { value: 'my-secret-key' } });
+    fireEvent.click(screen.getByRole('button', { name: /add email account/i }));
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        'http://localhost:3001/accounts/1/agent_mailbox/connections',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ agentmail_connection: { inbox_id: 'inbox@agentmail.to', api_key: 'my-secret-key' } }),
+        })
+      );
+    });
   });
 
   it('clears the host field when Other is selected', () => {
@@ -131,6 +164,28 @@ describe('AddEmailAccountForm', () => {
         headers: { 'Content-Type': 'application/json' },
       })
     );
+  });
+
+  it('shows API error field when present (e.g. account not found)', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: async () => ({ error: 'Account not found' }),
+      })
+    );
+
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/email address/i), {
+      target: { value: 'test@gmail.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'apppassword' } });
+    fireEvent.click(screen.getByRole('button', { name: /add email account/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(/account not found/i);
+    });
   });
 
   it('shows error message from server on failure', async () => {

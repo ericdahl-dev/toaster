@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { AddEmailAccountForm } from '@/components/add-email-account-form';
+import { EmailAccountsClient } from '@/components/email-accounts/email-accounts-client';
 
 const API_BASE_URL =
   process.env.TOASTER_API_BASE_URL ??
@@ -22,16 +22,14 @@ export default function EmailAccountsPage() {
               ← Toaster
             </Link>
           </nav>
-          <h1 className="text-3xl font-semibold tracking-tight">Add email account</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Email accounts</h1>
           <p className="text-sm leading-6 text-zinc-600 dark:text-zinc-400">
-            Connect an IMAP mailbox so Toaster can ingest booking inquiries. Credentials are
-            stored securely and never shared.
+            View connected IMAP mailboxes and add more. Credentials are stored securely and never
+            shared.
           </p>
         </header>
 
-        <div className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
-          <AddEmailAccountForm accountId={ACCOUNT_ID} apiBaseUrl={API_BASE_URL} />
-        </div>
+        <EmailAccountsClient accountId={ACCOUNT_ID} apiBaseUrl={API_BASE_URL} />
       </div>
     </main>
   );

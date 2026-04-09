@@ -1,0 +1,9 @@
+sync_all_imap_connections:
+  class: SyncAllImapConnectionsJob
+  schedule: every 5 minutes
+  queue: webhooks
+
+sync_all_agentmail_connections:
+  class: SyncAllAgentmailConnectionsJob
+  schedule: every 5 minutes
+  queue: webhooks

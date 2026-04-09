@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { ThemeToggle } from './theme-toggle';
-import { ThemeProvider } from './theme-provider';
+import { ThemeToggle } from '@/components/shared/theme-toggle';
+import { ThemeProvider } from '@/components/shared/theme-provider';
 
 // Mock matchMedia for jsdom
 Object.defineProperty(window, 'matchMedia', {

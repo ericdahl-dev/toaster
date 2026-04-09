@@ -7,9 +7,11 @@ module AgentMailbox
 
     API_BASE_URL = "https://api.agentmail.to".freeze
 
-    def fetch_messages
-      validate_config!
+    def initialize(connection:)
+      @connection = connection
+    end
 
+    def fetch_messages
       response = perform_request
       data = JSON.parse(response.body)
 
@@ -20,13 +22,19 @@ module AgentMailbox
 
     private
 
+    attr_reader :connection
+
     def perform_request
-      uri = URI("#{API_BASE_URL}/v0/inboxes/#{inbox_id}/messages")
+      uri = URI("#{API_BASE_URL}/v0/inboxes/#{connection.inbox_id}/messages")
+      params = {limit: 100}
+      params[:after] = connection.last_synced_at.iso8601 if connection.last_synced_at
+      uri.query = URI.encode_www_form(params)
+
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
 
       request = Net::HTTP::Get.new(uri)
-      request["Authorization"] = "Bearer #{api_key}"
+      request["Authorization"] = "Bearer #{connection.api_key}"
 
       http.request(request)
     end
@@ -54,19 +62,6 @@ module AgentMailbox
       return [nil, value] unless match
 
       [match[1]&.strip, match[2]]
-    end
-
-    def validate_config!
-      raise Error, "AGENTMAIL_API_KEY is not set" if api_key.blank?
-      raise Error, "AGENTMAIL_INBOX_ID is not set" if inbox_id.blank?
-    end
-
-    def api_key
-      ENV["AGENTMAIL_API_KEY"]
-    end
-
-    def inbox_id
-      ENV["AGENTMAIL_INBOX_ID"]
     end
   end
 end

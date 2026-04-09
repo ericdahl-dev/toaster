@@ -4,8 +4,8 @@ class SyncAgentMailboxJob < ApplicationJob
   retry_on StandardError, wait: :polynomially_longer, attempts: 5
   discard_on ActiveRecord::RecordNotFound
 
-  def perform(account_id)
-    account = Account.find(account_id)
-    AgentMailbox::Sync.call(account: account)
+  def perform(agentmail_connection_id)
+    connection = AgentmailConnection.find(agentmail_connection_id)
+    AgentMailbox::Sync.call(connection: connection)
   end
 end

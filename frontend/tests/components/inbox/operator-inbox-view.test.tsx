@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { OperatorInboxView } from './operator-inbox-view';
+import { OperatorInboxView } from '@/components/inbox/operator-inbox-view';
 
 describe('OperatorInboxView', () => {
   it('renders an inbox list and the selected request snapshot', () => {

@@ -1,14 +1,64 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 
-type Provider = 'gmail' | 'outlook' | 'yahoo' | 'other';
+type Provider = 'gmail' | 'outlook' | 'yahoo' | 'agentmail' | 'other';
 
-const PROVIDER_PRESETS: Record<Provider, { label: string; host: string; port: number; ssl: boolean }> = {
-  gmail: { label: 'Gmail', host: 'imap.gmail.com', port: 993, ssl: true },
-  outlook: { label: 'Outlook / Hotmail', host: 'outlook.office365.com', port: 993, ssl: true },
-  yahoo: { label: 'Yahoo Mail', host: 'imap.mail.yahoo.com', port: 993, ssl: true },
-  other: { label: 'Other / Manual', host: '', port: 993, ssl: true },
+type ProviderPreset = {
+  label: string;
+  host: string;
+  port: number;
+  ssl: boolean;
+  passwordLabel: string;
+  passwordHint?: React.ReactNode;
+};
+
+const PROVIDER_PRESETS: Record<Provider, ProviderPreset> = {
+  gmail: {
+    label: 'Gmail',
+    host: 'imap.gmail.com',
+    port: 993,
+    ssl: true,
+    passwordLabel: 'Password',
+    passwordHint: (
+      <>
+        Use an{' '}
+        <a
+          href="https://support.google.com/accounts/answer/185833"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-zinc-700 dark:hover:text-zinc-200"
+        >
+          app password
+        </a>{' '}
+        if 2-Step Verification is enabled.
+      </>
+    ),
+  },
+  outlook: { label: 'Outlook / Hotmail', host: 'outlook.office365.com', port: 993, ssl: true, passwordLabel: 'Password' },
+  yahoo: { label: 'Yahoo Mail', host: 'imap.mail.yahoo.com', port: 993, ssl: true, passwordLabel: 'Password' },
+  agentmail: {
+    label: 'AgentMail',
+    host: 'imap.agentmail.to',
+    port: 993,
+    ssl: true,
+    passwordLabel: 'API key',
+    passwordHint: (
+      <>
+        Find your API key in the{' '}
+        <a
+          href="https://console.agentmail.to/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-zinc-700 dark:hover:text-zinc-200"
+        >
+          AgentMail Console
+        </a>{' '}
+        under Dashboard → API Keys.
+      </>
+    ),
+  },
+  other: { label: 'Other / Manual', host: '', port: 993, ssl: true, passwordLabel: 'Password' },
 };
 
 type FormState = {
@@ -32,9 +82,11 @@ type SubmitStatus =
 export function AddEmailAccountForm({
   accountId,
   apiBaseUrl,
+  onSuccess,
 }: {
   accountId: string;
   apiBaseUrl: string;
+  onSuccess?: () => void;
 }) {
   const [form, setForm] = useState<FormState>({
     provider: 'gmail',
@@ -96,11 +148,13 @@ export function AddEmailAccountForm({
 
     setStatus({ type: 'submitting' });
 
-    try {
-      const response = await fetch(`${apiBaseUrl}/accounts/${accountId}/imap/connections`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+    const isAgentmail = form.provider === 'agentmail';
+    const endpoint = isAgentmail
+      ? `${apiBaseUrl}/accounts/${accountId}/agent_mailbox/connections`
+      : `${apiBaseUrl}/accounts/${accountId}/imap/connections`;
+    const body = isAgentmail
+      ? JSON.stringify({ agentmail_connection: { inbox_id: form.username.trim(), api_key: form.password } })
+      : JSON.stringify({
           imap_connection: {
             username: form.username.trim(),
             password: form.password,
@@ -109,7 +163,13 @@ export function AddEmailAccountForm({
             ssl: form.ssl,
             inbox_folder: form.inboxFolder.trim(),
           },
-        }),
+        });
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
       });
 
       if (response.ok) {
@@ -124,12 +184,15 @@ export function AddEmailAccountForm({
           inboxFolder: 'INBOX',
         });
         setErrors({});
+        onSuccess?.();
       } else {
-        const body = await response.json().catch(() => ({})) as { errors?: unknown };
+        const body = await response.json().catch(() => ({})) as { errors?: unknown; error?: unknown };
         const message =
-          Array.isArray(body.errors) && body.errors.length > 0
-            ? (body.errors as string[]).join(', ')
-            : 'Failed to add email account. Please check your details and try again.';
+          typeof body.error === 'string' && body.error.length > 0
+            ? body.error
+            : Array.isArray(body.errors) && body.errors.length > 0
+              ? (body.errors as string[]).join(', ')
+              : 'Failed to add email account. Please check your details and try again.';
         setStatus({ type: 'error', message });
       }
     } catch {
@@ -184,7 +247,7 @@ export function AddEmailAccountForm({
 
       <div className="space-y-1">
         <label htmlFor="username" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Email address
+          {form.provider === 'agentmail' ? 'Inbox address' : 'Email address'}
         </label>
         <input
           id="username"
@@ -206,7 +269,7 @@ export function AddEmailAccountForm({
 
       <div className="space-y-1">
         <label htmlFor="password" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          Password
+          {PROVIDER_PRESETS[form.provider].passwordLabel}
         </label>
         <input
           id="password"
@@ -224,23 +287,14 @@ export function AddEmailAccountForm({
             {errors.password}
           </p>
         )}
-        {form.provider === 'gmail' && (
+        {PROVIDER_PRESETS[form.provider].passwordHint && (
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-            For Gmail, use an{' '}
-            <a
-              href="https://support.google.com/accounts/answer/185833"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-zinc-700 dark:hover:text-zinc-200"
-            >
-              app password
-            </a>{' '}
-            if 2-Step Verification is enabled.
+            {PROVIDER_PRESETS[form.provider].passwordHint}
           </p>
         )}
       </div>
 
-      <fieldset className="space-y-4">
+      {form.provider !== 'agentmail' && <fieldset className="space-y-4">
         <legend className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Server settings</legend>
 
         <div className="space-y-1">
@@ -321,7 +375,7 @@ export function AddEmailAccountForm({
             </p>
           )}
         </div>
-      </fieldset>
+      </fieldset>}
 
       <div className="pt-2">
         <button

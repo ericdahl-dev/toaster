@@ -1,7 +1,8 @@
-import type { InboxDetail, InboxListItem } from '@/components/operator-inbox-view';
-import { OperatorInboxClient } from '@/components/operator-inbox-client';
+import type { InboxDetail, InboxListItem } from '@/components/inbox/operator-inbox-view';
+import { OperatorInboxClient } from '@/components/inbox/operator-inbox-client';
 
 const API_BASE_URL = process.env.TOASTER_API_BASE_URL ?? process.env.NEXT_PUBLIC_TOASTER_API_BASE_URL ?? 'http://localhost:3001';
+const OPS_TOKEN = process.env.OPS_AUTH_TOKEN ?? '';
 
 export default async function InboxPage() {
   const messages = await fetchInboxMessages();
@@ -16,6 +17,7 @@ async function fetchInboxMessages(): Promise<InboxListItem[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/ops/inbox_messages`, {
       cache: 'no-store',
+      headers: OPS_TOKEN ? { 'X-Ops-Token': OPS_TOKEN } : {},
     });
 
     if (!response.ok) {
@@ -45,6 +47,7 @@ async function fetchInboxMessage(messageId: number): Promise<InboxDetail | null>
   try {
     const response = await fetch(`${API_BASE_URL}/ops/inbox_messages/${messageId}`, {
       cache: 'no-store',
+      headers: OPS_TOKEN ? { 'X-Ops-Token': OPS_TOKEN } : {},
     });
 
     if (!response.ok) {

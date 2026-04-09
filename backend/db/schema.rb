@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_07_000002) do
+ActiveRecord::Schema[7.2].define(version: 2026_04_09_054750) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -19,6 +19,18 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_07_000002) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "agentmail_connections", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "inbox_id", null: false
+    t.text "api_key", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "last_synced_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["account_id", "inbox_id"], name: "index_agentmail_connections_on_account_id_and_inbox_id", unique: true
+    t.index ["account_id"], name: "index_agentmail_connections_on_account_id"
   end
 
   create_table "ai_runs", force: :cascade do |t|
@@ -346,6 +358,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_07_000002) do
     t.index ["account_id"], name: "index_venues_on_account_id"
   end
 
+  add_foreign_key "agentmail_connections", "accounts"
   add_foreign_key "ai_runs", "accounts"
   add_foreign_key "ai_runs", "booking_requests"
   add_foreign_key "booking_requests", "accounts"
