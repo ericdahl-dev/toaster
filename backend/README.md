@@ -1,24 +1,13 @@
-# README
+# Backend
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Mission Control for Solid Queue
 
-Things you may want to cover:
+Mission Control is mounted at `/jobs` and provides queue/job visibility plus retry/discard controls for Solid Queue.
 
-* Ruby version
+- `development` / `test`: HTTP basic auth is disabled for faster local iteration and specs.
+- non-development/test environments (for example `staging`, `production`): HTTP basic auth is required.
 
-* System dependencies
+Set these environment variables in non-development/test environments:
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+- `MISSION_CONTROL_USERNAME` (optional, defaults to `ops`)
+- `MISSION_CONTROL_PASSWORD` (required)

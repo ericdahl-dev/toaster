@@ -1,13 +1,13 @@
 Rails.application.config.after_initialize do
   MissionControl::Jobs.base_controller_class = "ActionController::Base"
 
-  if Rails.env.production?
+  if Rails.env.development? || Rails.env.test?
+    MissionControl::Jobs.http_basic_auth_enabled = false
+  else
     MissionControl::Jobs.http_basic_auth_enabled = true
     MissionControl::Jobs.http_basic_auth_user = ENV.fetch("MISSION_CONTROL_USERNAME", "ops")
     MissionControl::Jobs.http_basic_auth_password = ENV.fetch("MISSION_CONTROL_PASSWORD") do
-      raise "MISSION_CONTROL_PASSWORD environment variable is required in production"
+      raise "MISSION_CONTROL_PASSWORD environment variable is required outside development/test"
     end
-  else
-    MissionControl::Jobs.http_basic_auth_enabled = false
   end
 end

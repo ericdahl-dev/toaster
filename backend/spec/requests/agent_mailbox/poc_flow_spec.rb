@@ -23,14 +23,14 @@ RSpec.describe "Agent mailbox POC flow", type: :request do
       direction: "inbound",
       from_email: "lead@example.com",
       from_name: "Demo Lead",
-      to_emails: [ "agent@example.com" ],
+      to_emails: ["agent@example.com"],
       subject: "Wedding for 120 guests on June 14, 2026",
       body_text: "Hi, we're looking for a venue on June 14, 2026 for 120 guests with a budget of $15000.",
       received_at: Time.zone.parse("2026-04-01 10:00:00 UTC"),
-      raw_payload: { "messageId" => "demo-msg-1", "threadId" => "demo-thread-1" }
+      raw_payload: {"messageId" => "demo-msg-1", "threadId" => "demo-thread-1"}
     }
 
-    allow(fetcher).to receive(:fetch_messages).and_return([ payload ])
+    allow(fetcher).to receive(:fetch_messages).and_return([payload])
 
     first_sync = AgentMailbox::Sync.call(account: account, fetcher: fetcher)
     second_sync = AgentMailbox::Sync.call(account: account, fetcher: fetcher)
@@ -47,7 +47,7 @@ RSpec.describe "Agent mailbox POC flow", type: :request do
     expect(extraction.booking_request.event_date).to eq(Date.new(2026, 6, 14))
     expect(extraction.booking_request.budget_cents).to eq(1_500_000)
 
-    get "/ops/inbox_messages", headers: { "X-Ops-Token" => "test-ops-token" }
+    get "/ops/inbox_messages", headers: {"X-Ops-Token" => "test-ops-token"}
     expect(response).to have_http_status(:ok)
     list_entry = response.parsed_body.fetch("inbox_messages").find { |item| item["id"] == inbox_message.id }
     expect(list_entry).to be_present
@@ -56,7 +56,7 @@ RSpec.describe "Agent mailbox POC flow", type: :request do
       "status" => "pending"
     )
 
-    get "/ops/inbox_messages/#{inbox_message.id}", headers: { "X-Ops-Token" => "test-ops-token" }
+    get "/ops/inbox_messages/#{inbox_message.id}", headers: {"X-Ops-Token" => "test-ops-token"}
     expect(response).to have_http_status(:ok)
     detail = response.parsed_body.fetch("inbox_message")
     expect(detail.fetch("booking_request")).to include(

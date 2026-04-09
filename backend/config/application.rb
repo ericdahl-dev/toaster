@@ -56,6 +56,5 @@ module Backend
     config.assets.paths = []
     config.assets.precompile = []
     config.hosts << "toaster-backend.ger3.ericdahl.dev"
-
   end
 end
