@@ -1,11 +1,11 @@
 require "rails_helper"
 
-RSpec.describe SyncAgentMailboxJob, type: :job do
+RSpec.describe SyncImapJob, type: :job do
   describe "#perform" do
-    it "delegates to AgentMailbox::Sync for the connection" do
-      connection = create(:agentmail_connection)
+    it "delegates to Imap::Sync for the connection" do
+      connection = create(:imap_connection)
 
-      expect(AgentMailbox::Sync).to receive(:call).with(connection: connection)
+      expect(Imap::Sync).to receive(:call).with(imap_connection: connection)
 
       described_class.perform_now(connection.id)
     end
@@ -21,17 +21,17 @@ RSpec.describe SyncAgentMailboxJob, type: :job do
     end
 
     it "logs a sync result summary" do
-      connection = create(:agentmail_connection, last_synced_at: Time.current)
-      result = AgentMailbox::Sync::Result.new(created_count: 3, deduped_count: 2, messages: [])
-      allow(AgentMailbox::Sync).to receive(:call).and_return(result)
+      connection = create(:imap_connection, last_synced_uid: 3)
+      result = Imap::Sync::Result.new(created_count: 2, deduped_count: 1, messages: [])
+      allow(Imap::Sync).to receive(:call).and_return(result)
       allow(Rails.logger).to receive(:info)
 
       described_class.perform_now(connection.id)
 
-      expect(Rails.logger).to have_received(:info).with(include("agentmail_sync_result"))
+      expect(Rails.logger).to have_received(:info).with(include("imap_sync_result"))
       expect(Rails.logger).to have_received(:info).with(include("created_count"))
       expect(Rails.logger).to have_received(:info).with(include("deduped_count"))
-      expect(Rails.logger).to have_received(:info).with(include("last_synced_at"))
+      expect(Rails.logger).to have_received(:info).with(include("last_synced_uid"))
     end
   end
 end

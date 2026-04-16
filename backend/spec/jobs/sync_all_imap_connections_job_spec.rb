@@ -29,5 +29,18 @@ RSpec.describe SyncAllImapConnectionsJob, type: :job do
 
       expect(SyncImapJob).not_to have_received(:perform_later)
     end
+
+    it "logs fan-out enqueue counts" do
+      account = create(:account)
+      create(:imap_connection, account: account, active: true)
+      create(:imap_connection, account: account, host: "imap.second.com", active: true)
+      allow(SyncImapJob).to receive(:perform_later)
+      allow(Rails.logger).to receive(:info)
+
+      described_class.perform_now
+
+      expect(Rails.logger).to have_received(:info).with(include("imap_fanout_enqueued"))
+      expect(Rails.logger).to have_received(:info).with(include("enqueued_count"))
+    end
   end
 end
