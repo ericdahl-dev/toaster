@@ -42,10 +42,10 @@ Rails.application.configure do
   config.force_ssl = true
 
   # Allow plain HTTP for /up so Docker/Coolify healthchecks (curl to 127.0.0.1) succeed.
-  config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
+  config.ssl_options = {redirect: {exclude: ->(request) { request.path == "/up" }}}
 
   # Log to STDOUT by default
-  config.logger = ActiveSupport::Logger.new(STDOUT)
+  config.logger = ActiveSupport::Logger.new($stdout)
     .tap { |logger| logger.formatter = ::Logger::Formatter.new }
     .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
 
@@ -91,5 +91,5 @@ Rails.application.configure do
   #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
   # ]
   # Allow /up with Host 127.0.0.1 / localhost (Docker healthchecks); real traffic uses config.hosts in application.rb.
-  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  config.host_authorization = {exclude: ->(request) { request.path == "/up" }}
 end

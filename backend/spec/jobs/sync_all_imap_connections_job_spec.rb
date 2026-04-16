@@ -6,7 +6,7 @@ RSpec.describe SyncAllImapConnectionsJob, type: :job do
       account = create(:account)
       active1 = create(:imap_connection, account: account, active: true)
       active2 = create(:imap_connection, account: account, host: "imap.other.com", active: true)
-      _inactive = create(:imap_connection, account: account, host: "imap.inactive.com", active: false)
+      inactive = create(:imap_connection, account: account, host: "imap.inactive.com", active: false)
 
       allow(SyncImapJob).to receive(:perform_later)
 
@@ -14,7 +14,7 @@ RSpec.describe SyncAllImapConnectionsJob, type: :job do
 
       expect(SyncImapJob).to have_received(:perform_later).with(active1.id)
       expect(SyncImapJob).to have_received(:perform_later).with(active2.id)
-      expect(SyncImapJob).not_to have_received(:perform_later).with(_inactive.id)
+      expect(SyncImapJob).not_to have_received(:perform_later).with(inactive.id)
     end
 
     it "uses the webhooks queue" do
