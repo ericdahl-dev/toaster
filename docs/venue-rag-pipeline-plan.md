@@ -148,7 +148,7 @@ If validator removes all chunks, the flow must ask for clarification or degrade 
 1. Intake booking request.
 2. Resolve venue (or ask clarification).
 3. Pull canonical structured venue fields from venue model.
-4. Retrieve top-k venue-scoped chunks from vector store.
+4. Retrieve top-k venue-scoped chunks from **Postgres with `pgvector` on Neon** (see §10).
 5. Re-rank and dedupe chunks; keep concise evidence set.
 6. Generate response draft with:
    - structured facts first,
@@ -204,10 +204,22 @@ Block rollout unless:
 3. **Phase 2 (multi-venue):** enable disambiguation + confidence prompting.
 4. **Phase 3 (production hardening):** monitoring, incident playbooks, eval automation.
 
-## 10) Open decisions to finalize during implementation
+## 10) Infrastructure: Neon + pgvector
+
+**Decision:** use **`pgvector` on Neon** as the vector store. Neon remains the primary Postgres host; vectors live in the same database as venue and document metadata so `tenant_id` / `venue_id` filters stay mandatory and transactional.
+
+**Implementation notes:**
+
+- Enable the **`vector`** extension on the Neon database (and in migration/schema for all environments).
+- Store embeddings on `venue_document_chunk` (or a dedicated table keyed to chunk id) with a **`vector(n)`** column matching the chosen embedding model dimension.
+- Create an ANN index appropriate to Postgres version (e.g. **HNSW** or **IVFFlat** per Neon/pg support); tune lists / `ef_construction` during load testing.
+- Use **Neon’s pooled connection string** for the Rails API so short-lived workers do not exhaust connections; keep retrieval queries parameterized with explicit `tenant_id` and `venue_id` predicates.
+- Treat Neon **branches** as dev/staging DBs; run migrations (including `vector` + indexes) on each branch used for RAG testing.
+
+## 11) Open decisions to finalize during implementation
 
 - Final embedding model and re-ranker choice.
-- Vector store choice and partition strategy details.
+- Exact ANN index type and build parameters after representative data volume.
 - Exact confidence thresholds for auto-select vs clarification.
 - OCR budget and limits for low-quality scans.
 
