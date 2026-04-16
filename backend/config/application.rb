@@ -8,6 +8,7 @@ require "active_record/railtie"
 # require "active_storage/engine"
 require "action_controller/railtie"
 require "action_mailer/railtie"
+require "sprockets/railtie"
 # require "action_mailbox/engine"
 # require "action_text/engine"
 require "action_view/railtie"
@@ -50,11 +51,6 @@ module Backend
     config.middleware.use ActionDispatch::Session::CookieStore
     config.middleware.use ActionDispatch::Flash
 
-    # Stub asset pipeline so gems that expect Sprockets (e.g. mission_control-jobs)
-    # can register asset paths without a full Sprockets setup.
-    config.assets = ActiveSupport::OrderedOptions.new
-    config.assets.paths = []
-    config.assets.precompile = []
     config.hosts << "toaster-backend.ger3.ericdahl.dev"
   end
 end

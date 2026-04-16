@@ -32,7 +32,7 @@ module BookingRequests
         event_type: "booking_request.status_changed",
         subject_type: "BookingRequest",
         subject_id: booking_request.id,
-        payload: { from: from, to: to }.merge(metadata)
+        payload: {from: from, to: to}.merge(metadata)
       )
 
       booking_request
