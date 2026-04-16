@@ -15,6 +15,8 @@ gem "solid_queue", "~> 1.4"
 
 # Operational controls for Active Job queues
 gem "mission_control-jobs", "~> 1.1"
+# Asset pipeline required for Mission Control CSS/JS in API-only app
+gem "sprockets-rails"
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 
