@@ -126,6 +126,49 @@ RSpec.describe "Ops inbox messages", type: :request do
       )
     end
 
+    it "includes the pending draft body when a draft awaits review" do
+      account = create(:account)
+      inbox_message = create(
+        :inbox_message,
+        account: account,
+        subject: "Wedding inquiry",
+        body_text: "Looking for a venue."
+      )
+      booking_request = create(
+        :booking_request,
+        account: account,
+        source_inbox_message: inbox_message,
+        status: "reviewing"
+      )
+      draft = create(:draft, account: account, booking_request: booking_request, body: "Thank you for your inquiry!", status: "pending_review")
+
+      get "/ops/inbox_messages/#{inbox_message.id}", headers: {"X-Ops-Token" => "secret-token"}
+
+      expect(response).to have_http_status(:ok)
+      booking = response.parsed_body.dig("inbox_message", "booking_request")
+      expect(booking.fetch("pending_draft")).to include(
+        "id" => draft.id,
+        "body" => "Thank you for your inquiry!"
+      )
+    end
+
+    it "returns nil for pending_draft when no draft is pending review" do
+      account = create(:account)
+      inbox_message = create(:inbox_message, account: account, subject: "Corporate dinner")
+      create(
+        :booking_request,
+        account: account,
+        source_inbox_message: inbox_message,
+        status: "pending"
+      )
+
+      get "/ops/inbox_messages/#{inbox_message.id}", headers: {"X-Ops-Token" => "secret-token"}
+
+      expect(response).to have_http_status(:ok)
+      booking = response.parsed_body.dig("inbox_message", "booking_request")
+      expect(booking.fetch("pending_draft")).to be_nil
+    end
+
     it "returns 404 for an unknown inbox message" do
       get "/ops/inbox_messages/999999", headers: {"X-Ops-Token" => "secret-token"}
 

@@ -44,6 +44,12 @@ export function OperatorInboxClient({
             reviewReasons: Array.isArray(bookingRequest.review_reasons)
               ? bookingRequest.review_reasons.filter((item): item is string => typeof item === 'string')
               : [],
+            pendingDraft: (() => {
+              const draft = bookingRequest.pending_draft as Record<string, unknown> | null | undefined;
+              return draft && typeof draft.id === 'number' && typeof draft.body === 'string'
+                ? { id: draft.id, body: draft.body }
+                : null;
+            })(),
           }
         : null,
     });
