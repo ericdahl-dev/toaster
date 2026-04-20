@@ -28,7 +28,7 @@ module Ops
     end
 
     def show
-      message = InboxMessage.inbound.includes(booking_request: :drafts).find(params[:id])
+      message = InboxMessage.inbound.includes(:booking_request).find(params[:id])
 
       render json: {
         inbox_message: {
@@ -76,7 +76,7 @@ module Ops
     def booking_request_detail(booking_request)
       return nil unless booking_request
 
-      pending_draft = booking_request.drafts.find(&:pending_review?)
+      pending_draft = booking_request.drafts.find_by(status: :pending_review)
 
       {
         id: booking_request.id,
