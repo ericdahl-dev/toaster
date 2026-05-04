@@ -32,4 +32,10 @@ describe('Home', () => {
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/email-accounts');
   });
+
+  it('shows an invite-only notice', () => {
+    render(<Home />);
+
+    expect(screen.getByText(/invite only/i)).toBeInTheDocument();
+  });
 });
