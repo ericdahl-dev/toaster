@@ -1,3 +1,5 @@
+import { DraftEmailPreview } from '@/components/email/draft-email-preview';
+
 export type InboxListItem = {
   id: number;
   fromName: string | null;
@@ -26,6 +28,7 @@ export type InboxDetail = {
     budgetCents: number | null;
     missingFields: string[];
     reviewReasons: string[];
+    pendingDraft: { id: number; body: string } | null;
   } | null;
 };
 
@@ -133,6 +136,14 @@ export function OperatorInboxView({
                       {JSON.stringify(selectedMessage.rawPayload, null, 2)}
                     </pre>
                   </div>
+
+                  {selectedMessage.bookingRequest?.pendingDraft && (
+                    <DraftEmailPreview
+                      draftId={selectedMessage.bookingRequest.pendingDraft.id}
+                      subject={selectedMessage.subject ?? 'Booking inquiry reply'}
+                      bodyText={selectedMessage.bookingRequest.pendingDraft.body}
+                    />
+                  )}
                 </article>
 
                 <aside className="space-y-3">

@@ -40,6 +40,7 @@ describe('OperatorInboxView', () => {
             budgetCents: null,
             missingFields: ['budget_cents'],
             reviewReasons: [],
+            pendingDraft: null,
           },
         }}
       />
@@ -83,5 +84,36 @@ describe('OperatorInboxView', () => {
     render(<OperatorInboxView messages={[]} selectedMessage={null} />);
 
     expect(screen.getByText(/select an inbox message/i)).toBeInTheDocument();
+  });
+
+  it('shows the draft preview label when a pending draft is present', () => {
+    render(
+      <OperatorInboxView
+        messages={[]}
+        selectedMessage={{
+          id: 3,
+          fromName: 'Alex Booker',
+          fromEmail: 'alex@example.com',
+          subject: 'Gala dinner inquiry',
+          receivedAt: '2026-04-01T08:00:00Z',
+          bodyText: 'We need a venue for 200 guests.',
+          rawPayload: {},
+          bookingRequest: {
+            id: 20,
+            status: 'reviewing',
+            eventDate: null,
+            headcount: 200,
+            budgetCents: null,
+            missingFields: [],
+            reviewReasons: [],
+            pendingDraft: { id: 5, body: 'Thank you for your inquiry. We would love to host your event!' },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/draft reply preview/i)).toBeInTheDocument();
+    expect(screen.getByText(/pending approval/i)).toBeInTheDocument();
+    expect(screen.getByText(/draft #5/i)).toBeInTheDocument();
   });
 });

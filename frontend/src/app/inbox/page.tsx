@@ -75,6 +75,12 @@ async function fetchInboxMessage(messageId: number): Promise<InboxDetail | null>
             budgetCents: asNullableNumber(bookingRequest.budget_cents),
             missingFields: asStringArray(bookingRequest.missing_fields),
             reviewReasons: asStringArray(bookingRequest.review_reasons),
+            pendingDraft: (() => {
+              const draft = bookingRequest.pending_draft as Record<string, unknown> | null | undefined;
+              return draft && typeof draft.id === 'number' && typeof draft.body === 'string'
+                ? { id: draft.id, body: draft.body }
+                : null;
+            })(),
           }
         : null,
     };
