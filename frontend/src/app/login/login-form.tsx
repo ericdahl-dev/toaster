@@ -28,7 +28,18 @@ export function LoginForm() {
         body: JSON.stringify({ email: email.trim(), password }),
       });
       if (!res.ok) {
-        setError('Invalid email or password.');
+        const detail = await res.text().catch(() => '');
+        if (res.status === 401) {
+          setError('Invalid email or password.');
+        } else if (res.status === 404 || res.status === 502 || res.status === 503) {
+          setError(
+            'Could not reach the API. Run Rails on port 3001 (e.g. PORT=3001 bin/rails s) and use the /api/backend proxy from this app.',
+          );
+        } else {
+          setError(
+            `Sign-in failed (HTTP ${res.status}).${detail ? ` ${detail.slice(0, 120)}` : ''} If this is a fresh dev DB, run bin/rails db:migrate db:seed in backend, then use dev@toaster.local / password123.`,
+          );
+        }
         return;
       }
       router.replace(returnTo.startsWith('/') ? returnTo : '/email-accounts');
