@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "toaster",
+  "project_id": "f56bfb99-b91f-4c85-8276-b4c141366f41"
+}
