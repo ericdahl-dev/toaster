@@ -17,3 +17,8 @@ frontend/.yarn/unplugged/
 frontend/.yarn/install-state.gz
 /backend/coverage
 /frontend/coverage
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
