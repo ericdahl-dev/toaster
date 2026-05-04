@@ -1,18 +1,12 @@
-import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { EmailAccountsClient } from '@/components/email-accounts/email-accounts-client';
 import { SignOutButton } from '@/components/session/sign-out-button';
-import { browserToasterApiBase, serverRailsBaseUrl } from '@/lib/toaster-api';
+import { browserToasterApiBase } from '@/lib/toaster-api';
+import { serverFetchBackend } from '@/lib/server-toaster-session';
 
 async function requireToasterSession(): Promise<{ accountId: string }> {
-  const jar = await cookies();
-  const cookieHeader = jar.getAll().map((c) => `${c.name}=${c.value}`).join('; ');
-  const base = serverRailsBaseUrl();
-  const res = await fetch(`${base}/auth/me`, {
-    headers: { cookie: cookieHeader },
-    cache: 'no-store',
-  });
+  const res = await serverFetchBackend('/auth/me');
   if (!res.ok) {
     redirect('/login?returnTo=/email-accounts');
   }

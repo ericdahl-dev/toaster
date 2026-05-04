@@ -1,19 +1,13 @@
-import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { InboxDetail, InboxListItem } from '@/components/inbox/operator-inbox-view';
 import { OperatorInboxClient } from '@/components/inbox/operator-inbox-client';
 import { serverRailsBaseUrl } from '@/lib/toaster-api';
+import { serverFetchBackend } from '@/lib/server-toaster-session';
 
 const OPS_TOKEN = process.env.OPS_AUTH_TOKEN ?? '';
 
 async function requireToasterSession(): Promise<void> {
-  const jar = await cookies();
-  const cookieHeader = jar.getAll().map((c) => `${c.name}=${c.value}`).join('; ');
-  const base = serverRailsBaseUrl();
-  const res = await fetch(`${base}/auth/me`, {
-    headers: { cookie: cookieHeader },
-    cache: 'no-store',
-  });
+  const res = await serverFetchBackend('/auth/me');
   if (!res.ok) {
     redirect('/login?returnTo=/inbox');
   }

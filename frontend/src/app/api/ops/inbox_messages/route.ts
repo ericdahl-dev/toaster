@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 import { serverRailsBaseUrl } from '@/lib/toaster-api';
 
 async function toasterSessionOk(request: NextRequest): Promise<boolean> {
-  const base = serverRailsBaseUrl();
-  const res = await fetch(`${base}/auth/me`, {
+  const origin = new URL(request.url).origin;
+  const res = await fetch(`${origin}/api/backend/auth/me`, {
     headers: { cookie: request.headers.get('cookie') ?? '' },
     cache: 'no-store',
   });
