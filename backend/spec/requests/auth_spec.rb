@@ -54,6 +54,52 @@ RSpec.describe "Auth sessions", type: :request do
     end
   end
 
+  describe "remember-me" do
+    it "does not set a remember cookie when remember_me is absent" do
+      post "/auth/login", params: {email: "member@example.com", password: "password123"}, as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(response.cookies).not_to have_key("remember_token")
+    end
+
+    it "does not set a remember cookie when remember_me is false" do
+      post "/auth/login", params: {email: "member@example.com", password: "password123", remember_me: false}, as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(response.cookies).not_to have_key("remember_token")
+    end
+
+    it "sets a remember cookie and persists the session when remember_me is true" do
+      post "/auth/login", params: {email: "member@example.com", password: "password123", remember_me: true}, as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(response.cookies["remember_token"]).to be_present
+      user.reload
+      expect(user.remember_token_digest).to be_present
+    end
+
+    it "allows /auth/me via the remember cookie even after the session is cleared" do
+      post "/auth/login", params: {email: "member@example.com", password: "password123", remember_me: true}, as: :json
+      remember_cookie = response.cookies["remember_token"]
+
+      # Clear the server-side session manually by using a new request without the session.
+      # Simulate a fresh browser restart by re-supplying only the remember cookie.
+      get "/auth/me", headers: {"Cookie" => "remember_token=#{remember_cookie}"}
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["email"]).to eq("member@example.com")
+    end
+
+    it "clears the remember cookie and token on logout" do
+      post "/auth/login", params: {email: "member@example.com", password: "password123", remember_me: true}, as: :json
+
+      post "/auth/logout"
+      expect(response).to have_http_status(:no_content)
+
+      user.reload
+      expect(user.remember_token_digest).to be_nil
+    end
+  end
+
   describe "GET /accounts/:account_id/imap/connections (authorization)" do
     before { create(:imap_connection, account: account) }
 
