@@ -2,10 +2,14 @@ require "rails_helper"
 
 RSpec.describe SyncAgentMailboxJob, type: :job do
   describe "#perform" do
-    it "delegates to AgentMailbox::Sync for the connection" do
+    it "delegates to InboxIngestion::Sync with an AgentMailbox adapter" do
       connection = create(:agentmail_connection)
 
-      expect(AgentMailbox::Sync).to receive(:call).with(connection: connection)
+      expect(InboxIngestion::Sync).to receive(:call) do |kwargs|
+        expect(kwargs[:adapter]).to be_a(InboxIngestion::AgentMailboxAdapter)
+        expect(kwargs[:adapter].account).to eq(connection.account)
+        InboxIngestion::Sync::Result.new(created_count: 0, deduped_count: 0, messages: [])
+      end
 
       described_class.perform_now(connection.id)
     end
@@ -22,8 +26,8 @@ RSpec.describe SyncAgentMailboxJob, type: :job do
 
     it "logs a sync result summary" do
       connection = create(:agentmail_connection, last_synced_at: Time.current)
-      result = AgentMailbox::Sync::Result.new(created_count: 3, deduped_count: 2, messages: [])
-      allow(AgentMailbox::Sync).to receive(:call).and_return(result)
+      result = InboxIngestion::Sync::Result.new(created_count: 3, deduped_count: 2, messages: [])
+      allow(InboxIngestion::Sync).to receive(:call).and_return(result)
       allow(Rails.logger).to receive(:info)
 
       described_class.perform_now(connection.id)

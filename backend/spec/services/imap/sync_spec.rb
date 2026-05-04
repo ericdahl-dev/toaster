@@ -1,7 +1,13 @@
 require "rails_helper"
 
-RSpec.describe Imap::Sync do
-  describe ".call" do
+RSpec.describe "IMAP inbox ingestion" do
+  def ingest(imap_connection:, fetcher:)
+    InboxIngestion::Sync.call(
+      adapter: InboxIngestion::ImapAdapter.new(imap_connection: imap_connection, fetcher: fetcher)
+    )
+  end
+
+  describe "InboxIngestion::Sync + ImapAdapter" do
     it "persists IMAP inbox messages from the fetcher" do
       account = create(:account)
       connection = create(:imap_connection, account: account)
@@ -23,7 +29,7 @@ RSpec.describe Imap::Sync do
         }
       ])
 
-      result = described_class.call(imap_connection: connection, fetcher: fetcher)
+      result = ingest(imap_connection: connection, fetcher: fetcher)
 
       expect(result.created_count).to eq(1)
       expect(result.deduped_count).to eq(0)
@@ -50,7 +56,7 @@ RSpec.describe Imap::Sync do
         }
       ])
 
-      described_class.call(imap_connection: connection, fetcher: fetcher)
+      ingest(imap_connection: connection, fetcher: fetcher)
 
       expect(connection.reload.last_synced_uid).to eq(5)
     end
@@ -78,7 +84,7 @@ RSpec.describe Imap::Sync do
         }
       ])
 
-      result = described_class.call(imap_connection: connection, fetcher: fetcher)
+      result = ingest(imap_connection: connection, fetcher: fetcher)
 
       expect(result.created_count).to eq(0)
       expect(result.deduped_count).to eq(1)
@@ -121,7 +127,7 @@ RSpec.describe Imap::Sync do
         provider_message_id: "<race@example.com>"
       ).and_return(existing)
 
-      result = described_class.call(imap_connection: connection, fetcher: fetcher)
+      result = ingest(imap_connection: connection, fetcher: fetcher)
 
       expect(result.created_count).to eq(0)
       expect(result.deduped_count).to eq(1)
@@ -133,7 +139,7 @@ RSpec.describe Imap::Sync do
       fetcher = instance_double(Imap::Fetcher)
       allow(fetcher).to receive(:fetch_messages).and_return([])
 
-      result = described_class.call(imap_connection: connection, fetcher: fetcher)
+      result = ingest(imap_connection: connection, fetcher: fetcher)
 
       expect(result.created_count).to eq(0)
       expect(result.deduped_count).to eq(0)

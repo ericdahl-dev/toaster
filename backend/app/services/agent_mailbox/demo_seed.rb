@@ -9,11 +9,11 @@ module AgentMailbox
       direction: "inbound",
       from_email: "demo.lead@example.com",
       from_name: "Demo Lead",
-      to_emails: ["agent@example.com"],
+      to_emails: [ "agent@example.com" ],
       subject: "Wedding for 120 guests on June 14, 2026",
       body_text: "Hi, we're looking for a venue on June 14, 2026 for 120 guests with a budget of $15000.",
       received_at: Time.zone.parse("2026-04-01 10:00:00 UTC"),
-      raw_payload: {"messageId" => "demo-msg-1", "threadId" => "demo-thread-1"}
+      raw_payload: { "messageId" => "demo-msg-1", "threadId" => "demo-thread-1" }
     }.freeze
 
     def self.call(account_name: "POC Demo Account")
@@ -27,9 +27,11 @@ module AgentMailbox
     def call
       account = Account.find_or_create_by!(name: account_name)
 
-      sync_result = AgentMailbox::Sync.call(
-        account: account,
-        fetcher: StaticFetcher.new([SAMPLE_PAYLOAD])
+      sync_result = InboxIngestion::Sync.call(
+        adapter: InboxIngestion::AgentMailboxAdapter.new(
+          account: account,
+          fetcher: StaticFetcher.new([ SAMPLE_PAYLOAD ])
+        )
       )
 
       inbox_message = sync_result.messages.first ||

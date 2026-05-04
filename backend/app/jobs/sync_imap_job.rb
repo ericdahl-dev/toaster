@@ -6,7 +6,9 @@ class SyncImapJob < ApplicationJob
 
   def perform(imap_connection_id)
     connection = ImapConnection.find(imap_connection_id)
-    result = Imap::Sync.call(imap_connection: connection)
+    result = InboxIngestion::Sync.call(
+      adapter: InboxIngestion::ImapAdapter.new(imap_connection: connection)
+    )
     log_job_event(
       :imap_sync_result,
       connection_id: connection.id,
