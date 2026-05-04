@@ -1,19 +1,28 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+/** Same default as former next.config rewrite target (Rails dev server). */
+const UPSTREAM_BASE =
+  process.env.TOASTER_API_PROXY_TARGET ?? "http://127.0.0.1:3001";
+
 /**
- * Next rewrites /api/backend/* to Rails on 127.0.0.1:3001. Without X-Forwarded-Host, Rails
- * issues session cookies for 127.0.0.1 while the user is on localhost — cookies won't match.
+ * Proxy /api/backend/* to Rails. We must use NextResponse.rewrite(upstreamUrl) here — headers
+ * added via NextResponse.next() are NOT forwarded to external destinations configured in
+ * next.config rewrites, so Rails never saw X-Forwarded-Host and Set-Cookie stayed on 127.0.0.1.
  */
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host");
-  if (!host) {
-    return NextResponse.next();
-  }
+  let rest = request.nextUrl.pathname.replace(/^\/api\/backend\/?/, "");
+  const pathForUrl =
+    rest === "" ? "/" : rest.startsWith("/") ? rest : `/${rest}`;
+  const dest = new URL(`${pathForUrl}${request.nextUrl.search}`, UPSTREAM_BASE);
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-forwarded-host", host);
-  return NextResponse.next({
+  if (host) {
+    requestHeaders.set("x-forwarded-host", host);
+  }
+
+  return NextResponse.rewrite(dest, {
     request: { headers: requestHeaders },
   });
 }

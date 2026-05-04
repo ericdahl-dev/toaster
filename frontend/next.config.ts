@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
-const proxyTarget = process.env.TOASTER_API_PROXY_TARGET ?? "http://127.0.0.1:3001";
-
-const nextConfig: NextConfig = {
-  async rewrites() {
-    return [{ source: "/api/backend/:path*", destination: `${proxyTarget}/:path*` }];
-  },
-};
+/** /api/backend → Rails is handled in src/middleware.ts so X-Forwarded-Host reaches Puma. */
+const nextConfig: NextConfig = {};
 
 export default nextConfig;
