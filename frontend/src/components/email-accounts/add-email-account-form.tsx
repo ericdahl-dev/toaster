@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { toasterFetch } from '@/lib/toaster-fetch';
 
 type Provider = 'gmail' | 'outlook' | 'yahoo' | 'agentmail' | 'other';
 
@@ -166,7 +167,7 @@ export function AddEmailAccountForm({
         });
 
     try {
-      const response = await fetch(endpoint, {
+      const response = await toasterFetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body,

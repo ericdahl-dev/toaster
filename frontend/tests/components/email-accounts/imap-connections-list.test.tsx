@@ -18,7 +18,9 @@ describe('ImapConnectionsList', () => {
       expect(screen.getByText(/no imap accounts connected yet/i)).toBeInTheDocument();
     });
 
-    expect(fetch).toHaveBeenCalledWith('http://localhost:3001/accounts/1/imap/connections');
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3001/accounts/1/imap/connections', {
+      credentials: 'include',
+    });
   });
 
   it('lists connections from the API', async () => {
@@ -91,10 +93,10 @@ describe('ImapConnectionsList', () => {
     fireEvent.click(screen.getByRole('button', { name: /sync now for sync@example\.com/i }));
 
     await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith(
-        'http://localhost:3001/accounts/1/imap/connections/5/sync',
-        { method: 'POST' }
-      );
+      expect(fetchMock).toHaveBeenCalledWith('http://localhost:3001/accounts/1/imap/connections/5/sync', {
+        method: 'POST',
+        credentials: 'include',
+      });
     });
 
     await waitFor(() => {

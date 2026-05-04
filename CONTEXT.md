@@ -25,6 +25,13 @@ The provider-owned object that implements fetch and checkpoint read/write for on
 - **Inbox ingestion** produces or updates **inbox messages** scoped to that **account**.
 - Each **connection** owns at most one active **checkpoint** semantics for its **provider**.
 
+## Access and identity
+
+- **User** (app user): a person who signs in to Toaster with **Toaster credentials** (email and password). A user belongs to exactly one **Account** for now; session-backed APIs resolve the tenant from that membership.
+- **Toaster sign-in email** is only for authentication. It is unrelated to the addresses or credentials stored on **connections** (IMAP username/host, AgentMailbox inbox identifiers, and so on).
+- API calls that include another account’s id while signed in are **not** treated as “missing data”; they are rejected as **forbidden** (HTTP 403) to signal authorization failure clearly.
+- Self-service **sign-up** (creating a new tenant or user without an operator) is a separate product slice from **sign-in**; until that exists, users are provisioned through normal operator/setup flows.
+
 ## Example dialogue
 
 > **Dev:** "After we unify ingestion, does every provider use the same checkpoint column?"

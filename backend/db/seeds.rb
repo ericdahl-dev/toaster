@@ -10,4 +10,12 @@ if Rails.env.development?
     account.save!
     ActiveRecord::Base.connection.reset_pk_sequence!("accounts")
   end
+
+  dev_password = ENV.fetch("TOASTER_DEV_USER_PASSWORD", "password123")
+  user = User.find_or_initialize_by(email: "dev@toaster.local")
+  user.account = account
+  user.name = "Local dev user"
+  user.password = dev_password
+  user.password_confirmation = dev_password
+  user.save!
 end

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { toasterFetch } from '@/lib/toaster-fetch';
 
 export type ImapConnectionRow = {
   id: number;
@@ -47,7 +48,7 @@ export function ImapConnectionsList({
   const load = useCallback(async () => {
     setState({ status: 'loading' });
     try {
-      const response = await fetch(`${apiBaseUrl}/accounts/${accountId}/imap/connections`);
+      const response = await toasterFetch(`${apiBaseUrl}/accounts/${accountId}/imap/connections`);
       const body = (await response.json().catch(() => ({}))) as {
         connections?: ImapConnectionRow[];
         error?: string;
@@ -80,7 +81,7 @@ export function ImapConnectionsList({
   async function handleSync(connectionId: number) {
     setSyncState((s) => ({ ...s, [connectionId]: 'syncing' }));
     try {
-      const response = await fetch(
+      const response = await toasterFetch(
         `${apiBaseUrl}/accounts/${accountId}/imap/connections/${connectionId}/sync`,
         { method: 'POST' }
       );

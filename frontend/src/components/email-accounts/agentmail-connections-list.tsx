@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { toasterFetch } from '@/lib/toaster-fetch';
 
 export type AgentmailConnectionRow = {
   id: number;
@@ -33,7 +34,7 @@ export function AgentmailConnectionsList({
   const load = useCallback(async () => {
     setState({ status: 'loading' });
     try {
-      const response = await fetch(`${apiBaseUrl}/accounts/${accountId}/agent_mailbox/connections`);
+      const response = await toasterFetch(`${apiBaseUrl}/accounts/${accountId}/agent_mailbox/connections`);
       const body = (await response.json().catch(() => ({}))) as {
         connections?: AgentmailConnectionRow[];
         error?: string;
@@ -66,7 +67,7 @@ export function AgentmailConnectionsList({
   async function handleSync(connectionId: number) {
     setSyncState((s) => ({ ...s, [connectionId]: 'syncing' }));
     try {
-      const response = await fetch(
+      const response = await toasterFetch(
         `${apiBaseUrl}/accounts/${accountId}/agent_mailbox/connections/${connectionId}/sync`,
         { method: 'POST' }
       );

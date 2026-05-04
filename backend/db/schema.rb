@@ -316,8 +316,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_04_153000) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["account_id", "email"], name: "index_users_on_account_id_and_email", unique: true
+    t.string "password_digest", null: false
     t.index ["account_id"], name: "index_users_on_account_id"
+    t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   create_table "venues", force: :cascade do |t|

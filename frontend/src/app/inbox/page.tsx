@@ -1,21 +1,31 @@
+import { redirect } from 'next/navigation';
 import type { InboxDetail, InboxListItem } from '@/components/inbox/operator-inbox-view';
 import { OperatorInboxClient } from '@/components/inbox/operator-inbox-client';
+import { serverRailsBaseUrl } from '@/lib/toaster-api';
+import { serverFetchBackend } from '@/lib/server-toaster-session';
 
-const API_BASE_URL = process.env.TOASTER_API_BASE_URL ?? process.env.NEXT_PUBLIC_TOASTER_API_BASE_URL ?? 'http://localhost:3001';
 const OPS_TOKEN = process.env.OPS_AUTH_TOKEN ?? '';
 
+async function requireToasterSession(): Promise<void> {
+  const res = await serverFetchBackend('/auth/me');
+  if (!res.ok) {
+    redirect('/login?returnTo=/inbox');
+  }
+}
+
 export default async function InboxPage() {
+  await requireToasterSession();
   const messages = await fetchInboxMessages();
   const selectedMessage = messages[0] ? await fetchInboxMessage(messages[0].id) : null;
-
   return (
-    <OperatorInboxClient initialMessages={messages} initialSelectedMessage={selectedMessage} apiBaseUrl={API_BASE_URL} />
+    <OperatorInboxClient initialMessages={messages} initialSelectedMessage={selectedMessage} inboxApiBase="/api/ops" />
   );
 }
 
 async function fetchInboxMessages(): Promise<InboxListItem[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/ops/inbox_messages`, {
+    const base = serverRailsBaseUrl();
+    const response = await fetch(`${base}/ops/inbox_messages`, {
       cache: 'no-store',
       headers: OPS_TOKEN ? { 'X-Ops-Token': OPS_TOKEN } : {},
     });
@@ -45,7 +55,8 @@ async function fetchInboxMessages(): Promise<InboxListItem[]> {
 
 async function fetchInboxMessage(messageId: number): Promise<InboxDetail | null> {
   try {
-    const response = await fetch(`${API_BASE_URL}/ops/inbox_messages/${messageId}`, {
+    const base = serverRailsBaseUrl();
+    const response = await fetch(`${base}/ops/inbox_messages/${messageId}`, {
       cache: 'no-store',
       headers: OPS_TOKEN ? { 'X-Ops-Token': OPS_TOKEN } : {},
     });

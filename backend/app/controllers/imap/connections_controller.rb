@@ -1,6 +1,5 @@
 module Imap
-  class ConnectionsController < ApplicationController
-    before_action :set_account
+  class ConnectionsController < AccountScopedController
     before_action :set_connection, only: [:show, :update, :destroy]
 
     def index
@@ -36,12 +35,6 @@ module Imap
     end
 
     private
-
-    def set_account
-      @account = Account.find(params[:account_id])
-    rescue ActiveRecord::RecordNotFound
-      render json: {error: "Account not found"}, status: :not_found
-    end
 
     def set_connection
       @connection = @account.imap_connections.find(params[:id])
