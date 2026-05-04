@@ -1,6 +1,5 @@
 class Account < ApplicationRecord
   has_many :users, dependent: :destroy
-  has_many :gmail_connections, dependent: :destroy
   has_many :imap_connections, dependent: :destroy
   has_many :agentmail_connections, dependent: :destroy
   has_many :contacts, dependent: :destroy
@@ -12,7 +11,6 @@ class Account < ApplicationRecord
   has_many :drafts, dependent: :destroy
   has_many :tasks, dependent: :destroy
   has_many :event_logs, dependent: :destroy
-  has_many :gmail_webhook_events, dependent: :destroy
   has_many :ai_runs, dependent: :destroy
 
   validates :name, presence: true
