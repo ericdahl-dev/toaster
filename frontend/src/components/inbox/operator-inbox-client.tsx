@@ -1,22 +1,24 @@
 'use client';
 
 import { useState } from 'react';
+import { toasterFetch } from '@/lib/toaster-fetch';
 import { OperatorInboxView, type InboxDetail, type InboxListItem } from './operator-inbox-view';
 
 export function OperatorInboxClient({
   initialMessages,
   initialSelectedMessage,
-  apiBaseUrl,
+  inboxApiBase = '/api/ops',
 }: {
   initialMessages: InboxListItem[];
   initialSelectedMessage: InboxDetail | null;
-  apiBaseUrl: string;
+  /** Session-aware Next proxy for ops inbox routes (default `/api/ops`). */
+  inboxApiBase?: string;
 }) {
   const [messages] = useState(initialMessages);
   const [selectedMessage, setSelectedMessage] = useState<InboxDetail | null>(initialSelectedMessage);
 
   async function handleSelectMessage(messageId: number) {
-    const response = await fetch(`${apiBaseUrl}/ops/inbox_messages/${messageId}`);
+    const response = await toasterFetch(`${inboxApiBase}/inbox_messages/${messageId}`);
     if (!response.ok) return;
 
     const body = await response.json();

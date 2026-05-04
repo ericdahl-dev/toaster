@@ -1,6 +1,16 @@
 class User < ApplicationRecord
   belongs_to :account
 
-  validates :email, presence: true, uniqueness: {scope: :account_id, case_sensitive: false}
+  has_secure_password
+
+  before_validation :normalize_email
+
+  validates :email, presence: true, uniqueness: true
   validates :name, presence: true
+
+  private
+
+  def normalize_email
+    self.email = email.to_s.strip.downcase if email.present?
+  end
 end

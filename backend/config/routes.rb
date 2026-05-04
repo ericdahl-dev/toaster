@@ -3,6 +3,10 @@ Rails.application.routes.draw do
 
   get "/up", to: "up#show"
 
+  post "/auth/login", to: "auth/sessions#create"
+  post "/auth/logout", to: "auth/sessions#destroy"
+  get "/auth/me", to: "auth/sessions#me"
+
   resources :accounts, only: [] do
     namespace :agent_mailbox do
       resources :connections, only: [:index, :show, :create, :update, :destroy] do

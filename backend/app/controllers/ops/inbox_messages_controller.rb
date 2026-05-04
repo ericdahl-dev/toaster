@@ -1,5 +1,6 @@
 module Ops
   class InboxMessagesController < ApplicationController
+    skip_forgery_protection
     before_action :require_ops_auth!
 
     def index

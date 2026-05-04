@@ -1,6 +1,7 @@
 class OpsController < ApplicationController
   # Queue/system observability endpoints for operators.
   # All responses are scoped to the last 24 hours unless otherwise noted.
+  skip_forgery_protection
   before_action :require_ops_auth!
 
   LOOKBACK = 24.hours

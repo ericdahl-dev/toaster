@@ -1,13 +1,12 @@
 module Imap
-  class SyncsController < ApplicationController
+  class SyncsController < AccountScopedController
     def create
-      account = Account.find(params[:account_id])
-      connection = account.imap_connections.find(params[:connection_id])
+      connection = @account.imap_connections.find(params[:connection_id])
       SyncImapJob.perform_later(connection.id)
 
       render json: {
         status: "enqueued",
-        account_id: account.id,
+        account_id: @account.id,
         imap_connection_id: connection.id
       }, status: :accepted
     rescue ActiveRecord::RecordNotFound => e

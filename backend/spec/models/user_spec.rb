@@ -20,10 +20,10 @@ RSpec.describe User, type: :model do
       expect(build(:user, account: account, email: "test@example.com")).not_to be_valid
     end
 
-    it "is valid with same email in different accounts" do
+    it "is invalid with the same email on a different account" do
       create(:user, email: "test@example.com")
       account2 = create(:account)
-      expect(build(:user, account: account2, email: "test@example.com")).to be_valid
+      expect(build(:user, account: account2, email: "test@example.com")).not_to be_valid
     end
 
     it "treats emails case-insensitively for uniqueness" do
