@@ -15,9 +15,7 @@ RSpec.describe "Ops endpoints", type: :request do
 
   describe "GET /ops" do
     it "returns a system health summary" do
-      create(:gmail_connection, active: true)
       create(:draft, status: :pending_review)
-      create(:gmail_webhook_event)  # unprocessed by default
 
       get "/ops", headers: {"X-Ops-Token" => "secret-token"}
 
@@ -26,42 +24,10 @@ RSpec.describe "Ops endpoints", type: :request do
       expect(body).to include(
         "queued_jobs",
         "failed_jobs",
-        "unprocessed_webhook_events",
-        "active_gmail_connections",
         "pending_drafts",
         "approved_drafts"
       )
-      expect(body["active_gmail_connections"]).to be >= 1
       expect(body["pending_drafts"]).to be >= 1
-      expect(body["unprocessed_webhook_events"]).to be >= 1
-    end
-  end
-
-  describe "GET /ops/gmail_connections" do
-    it "returns all gmail connections" do
-      conn = create(:gmail_connection, active: true)
-
-      get "/ops/gmail_connections", headers: {"X-Ops-Token" => "secret-token"}
-
-      expect(response).to have_http_status(:ok)
-      body = response.parsed_body
-      expect(body["gmail_connections"]).to be_an(Array)
-      entry = body["gmail_connections"].find { |c| c["id"] == conn.id }
-      expect(entry).to include("email" => conn.email, "active" => true)
-    end
-  end
-
-  describe "GET /ops/webhook_events" do
-    it "returns webhook events with processed status" do
-      unprocessed = create(:gmail_webhook_event)
-      processed = create(:gmail_webhook_event, processed_at: 1.hour.ago)
-
-      get "/ops/webhook_events", headers: {"X-Ops-Token" => "secret-token"}
-
-      expect(response).to have_http_status(:ok)
-      body = response.parsed_body
-      ids = body["webhook_events"].map { |e| e["id"] }
-      expect(ids).to include(unprocessed.id, processed.id)
     end
   end
 
@@ -93,34 +59,6 @@ RSpec.describe "Ops endpoints", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["failed_jobs"]).to eq([])
-    end
-  end
-
-  describe "POST /ops/retry_webhook_event/:id" do
-    it "re-enqueues an unprocessed webhook event" do
-      event = create(:gmail_webhook_event)
-
-      expect {
-        post "/ops/retry_webhook_event/#{event.id}", headers: {"X-Ops-Token" => "secret-token"}
-      }.to have_enqueued_job(ProcessGmailWebhookEventJob).with(event.id)
-
-      expect(response).to have_http_status(:ok)
-      expect(response.parsed_body["status"]).to eq("enqueued")
-    end
-
-    it "re-queues a previously processed webhook event" do
-      event = create(:gmail_webhook_event, processed_at: 1.hour.ago)
-
-      post "/ops/retry_webhook_event/#{event.id}", headers: {"X-Ops-Token" => "secret-token"}
-
-      expect(response).to have_http_status(:ok)
-      expect(event.reload.processed_at).to be_nil
-    end
-
-    it "returns 404 for a missing webhook event" do
-      post "/ops/retry_webhook_event/0", headers: {"X-Ops-Token" => "secret-token"}
-
-      expect(response).to have_http_status(:not_found)
     end
   end
 

@@ -38,12 +38,5 @@ RSpec.describe User, type: :model do
       user = create(:user)
       expect(user.account).to be_a(Account)
     end
-
-    it "has many gmail_connections" do
-      account = create(:account)
-      user = create(:user, account: account)
-      connection = create(:gmail_connection, account: account, user: user)
-      expect(user.gmail_connections).to include(connection)
-    end
   end
 end

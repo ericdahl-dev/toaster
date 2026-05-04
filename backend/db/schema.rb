@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_04_09_054750) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_04_153000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -118,34 +118,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_09_054750) do
     t.index ["account_id"], name: "index_event_logs_on_account_id"
     t.index ["event_type"], name: "index_event_logs_on_event_type"
     t.index ["subject_type", "subject_id"], name: "index_event_logs_on_subject_type_and_subject_id"
-  end
-
-  create_table "gmail_connections", force: :cascade do |t|
-    t.bigint "account_id", null: false
-    t.bigint "user_id", null: false
-    t.citext "email", null: false
-    t.text "access_token"
-    t.text "refresh_token"
-    t.datetime "token_expires_at"
-    t.boolean "active", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "watch_resource_id"
-    t.string "watch_history_id"
-    t.datetime "watch_expiration"
-    t.index ["account_id", "email"], name: "index_gmail_connections_on_account_id_and_email", unique: true
-    t.index ["account_id"], name: "index_gmail_connections_on_account_id"
-    t.index ["user_id"], name: "index_gmail_connections_on_user_id"
-  end
-
-  create_table "gmail_webhook_events", force: :cascade do |t|
-    t.bigint "account_id", null: false
-    t.string "gmail_history_id"
-    t.jsonb "raw_payload", default: {}, null: false
-    t.datetime "processed_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["account_id"], name: "index_gmail_webhook_events_on_account_id"
   end
 
   create_table "imap_connections", force: :cascade do |t|
@@ -372,9 +344,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_04_09_054750) do
   add_foreign_key "drafts", "accounts"
   add_foreign_key "drafts", "booking_requests"
   add_foreign_key "event_logs", "accounts"
-  add_foreign_key "gmail_connections", "accounts"
-  add_foreign_key "gmail_connections", "users"
-  add_foreign_key "gmail_webhook_events", "accounts"
   add_foreign_key "imap_connections", "accounts"
   add_foreign_key "inbox_messages", "accounts"
   add_foreign_key "messages", "accounts"

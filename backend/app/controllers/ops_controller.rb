@@ -9,41 +9,9 @@ class OpsController < ApplicationController
     render json: {
       queued_jobs: SolidQueue::Job.where(finished_at: nil).count,
       failed_jobs: SolidQueue::FailedExecution.count,
-      unprocessed_webhook_events: GmailWebhookEvent.unprocessed.count,
-      active_gmail_connections: GmailConnection.where(active: true).count,
       pending_drafts: Draft.pending_review.count,
       approved_drafts: Draft.approved.count
     }
-  end
-
-  def gmail_connections
-    connections = GmailConnection.all.map do |conn|
-      {
-        id: conn.id,
-        account_id: conn.account_id,
-        email: conn.email,
-        active: conn.active,
-        created_at: conn.created_at
-      }
-    end
-    render json: {gmail_connections: connections}
-  end
-
-  def webhook_events
-    events = GmailWebhookEvent
-      .order(created_at: :desc)
-      .limit(100)
-      .map do |ev|
-        {
-          id: ev.id,
-          account_id: ev.account_id,
-          gmail_history_id: ev.gmail_history_id,
-          processed: ev.processed?,
-          processed_at: ev.processed_at,
-          created_at: ev.created_at
-        }
-      end
-    render json: {webhook_events: events}
   end
 
   def failed_jobs
@@ -89,15 +57,6 @@ class OpsController < ApplicationController
     render json: {status: "retried", job_id: fe.job_id}
   rescue ActiveRecord::RecordNotFound
     render json: {error: "Failed job not found"}, status: :not_found
-  end
-
-  def retry_webhook_event
-    event = GmailWebhookEvent.find(params[:id])
-    event.update!(processed_at: nil)
-    ProcessGmailWebhookEventJob.perform_later(event.id)
-    render json: {status: "enqueued", webhook_event_id: event.id}
-  rescue ActiveRecord::RecordNotFound
-    render json: {error: "Webhook event not found"}, status: :not_found
   end
 
   def retry_draft

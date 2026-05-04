@@ -47,7 +47,7 @@ RSpec.describe InboxMessage, type: :model do
       other_provider = build(
         :inbox_message,
         account: account,
-        provider: "gmail",
+        provider: "imap",
         provider_message_id: "msg-123"
       )
 
