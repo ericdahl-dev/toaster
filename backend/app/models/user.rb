@@ -13,13 +13,13 @@ class User < ApplicationRecord
   # Generates a random token, stores its digest, and returns the raw token.
   def remember
     raw_token = SecureRandom.urlsafe_base64(32)
-    update_columns(remember_token_digest: BCrypt::Password.create(raw_token))
+    update!(remember_token_digest: BCrypt::Password.create(raw_token))
     raw_token
   end
 
   # Clears the stored remember-token digest so any existing cookies are invalidated.
   def forget
-    update_columns(remember_token_digest: nil)
+    update!(remember_token_digest: nil)
   end
 
   # Returns true if +raw_token+ matches the stored digest.
