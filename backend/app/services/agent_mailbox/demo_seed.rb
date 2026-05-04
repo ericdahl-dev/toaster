@@ -27,9 +27,11 @@ module AgentMailbox
     def call
       account = Account.find_or_create_by!(name: account_name)
 
-      sync_result = AgentMailbox::Sync.call(
-        account: account,
-        fetcher: StaticFetcher.new([SAMPLE_PAYLOAD])
+      sync_result = InboxIngestion::Sync.call(
+        adapter: InboxIngestion::AgentMailboxAdapter.new(
+          account: account,
+          fetcher: StaticFetcher.new([SAMPLE_PAYLOAD])
+        )
       )
 
       inbox_message = sync_result.messages.first ||

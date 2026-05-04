@@ -2,10 +2,14 @@ require "rails_helper"
 
 RSpec.describe SyncImapJob, type: :job do
   describe "#perform" do
-    it "delegates to Imap::Sync for the connection" do
+    it "delegates to InboxIngestion::Sync with an IMAP adapter" do
       connection = create(:imap_connection)
 
-      expect(Imap::Sync).to receive(:call).with(imap_connection: connection)
+      expect(InboxIngestion::Sync).to receive(:call) do |kwargs|
+        expect(kwargs[:adapter]).to be_a(InboxIngestion::ImapAdapter)
+        expect(kwargs[:adapter].account).to eq(connection.account)
+        InboxIngestion::Sync::Result.new(created_count: 0, deduped_count: 0, messages: [])
+      end
 
       described_class.perform_now(connection.id)
     end
@@ -22,8 +26,8 @@ RSpec.describe SyncImapJob, type: :job do
 
     it "logs a sync result summary" do
       connection = create(:imap_connection, last_synced_uid: 3)
-      result = Imap::Sync::Result.new(created_count: 2, deduped_count: 1, messages: [])
-      allow(Imap::Sync).to receive(:call).and_return(result)
+      result = InboxIngestion::Sync::Result.new(created_count: 2, deduped_count: 1, messages: [])
+      allow(InboxIngestion::Sync).to receive(:call).and_return(result)
       allow(Rails.logger).to receive(:info)
 
       described_class.perform_now(connection.id)

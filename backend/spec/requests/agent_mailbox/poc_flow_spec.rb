@@ -32,8 +32,12 @@ RSpec.describe "Agent mailbox POC flow", type: :request do
 
     allow(fetcher).to receive(:fetch_messages).and_return([payload])
 
-    first_sync = AgentMailbox::Sync.call(account: account, fetcher: fetcher)
-    second_sync = AgentMailbox::Sync.call(account: account, fetcher: fetcher)
+    first_sync = InboxIngestion::Sync.call(
+      adapter: InboxIngestion::AgentMailboxAdapter.new(account: account, fetcher: fetcher)
+    )
+    second_sync = InboxIngestion::Sync.call(
+      adapter: InboxIngestion::AgentMailboxAdapter.new(account: account, fetcher: fetcher)
+    )
 
     expect(first_sync.created_count).to eq(1)
     expect(second_sync.deduped_count).to eq(1)

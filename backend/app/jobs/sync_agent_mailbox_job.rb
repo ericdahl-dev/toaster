@@ -6,7 +6,9 @@ class SyncAgentMailboxJob < ApplicationJob
 
   def perform(agentmail_connection_id)
     connection = AgentmailConnection.find(agentmail_connection_id)
-    result = AgentMailbox::Sync.call(connection: connection)
+    result = InboxIngestion::Sync.call(
+      adapter: InboxIngestion::AgentMailboxAdapter.new(connection: connection)
+    )
     log_job_event(
       :agentmail_sync_result,
       connection_id: connection.id,

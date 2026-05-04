@@ -1,8 +1,14 @@
 require "rails_helper"
 
-RSpec.describe AgentMailbox::Sync do
+RSpec.describe "AgentMailbox inbox ingestion" do
   let(:account) { create(:account) }
   let(:connection) { create(:agentmail_connection, account: account) }
+
+  def ingest(connection:, fetcher:)
+    InboxIngestion::Sync.call(
+      adapter: InboxIngestion::AgentMailboxAdapter.new(connection: connection, fetcher: fetcher)
+    )
+  end
 
   def stub_fetcher(messages)
     fetcher = instance_double(AgentMailbox::Fetcher)
@@ -10,7 +16,7 @@ RSpec.describe AgentMailbox::Sync do
     fetcher
   end
 
-  describe ".call" do
+  describe "InboxIngestion::Sync + AgentMailboxAdapter" do
     it "persists raw inbox messages from the fetcher" do
       fetcher = stub_fetcher([
         {
@@ -28,7 +34,7 @@ RSpec.describe AgentMailbox::Sync do
         }
       ])
 
-      result = described_class.call(connection: connection, fetcher: fetcher)
+      result = ingest(connection: connection, fetcher: fetcher)
 
       expect(result.created_count).to eq(1)
       expect(result.deduped_count).to eq(0)
@@ -44,7 +50,7 @@ RSpec.describe AgentMailbox::Sync do
       fetcher = stub_fetcher([])
       before = Time.current
 
-      described_class.call(connection: connection, fetcher: fetcher)
+      ingest(connection: connection, fetcher: fetcher)
 
       expect(connection.reload.last_synced_at).to be >= before
     end
@@ -70,7 +76,7 @@ RSpec.describe AgentMailbox::Sync do
         }
       ])
 
-      result = described_class.call(connection: connection, fetcher: fetcher)
+      result = ingest(connection: connection, fetcher: fetcher)
 
       expect(result.created_count).to eq(0)
       expect(result.deduped_count).to eq(1)
@@ -105,13 +111,13 @@ RSpec.describe AgentMailbox::Sync do
         allow(record).to receive(:save!).and_raise(ActiveRecord::RecordNotUnique) if call_count == 1
         record
       end
-      allow(InboxMessage).to receive(:find_by).with(
+      allow(InboxMessage).to receive(:find_by!).with(
         account: account,
         provider: "agentmail",
         provider_message_id: "msg-race"
       ).and_return(existing)
 
-      result = described_class.call(connection: connection, fetcher: fetcher)
+      result = ingest(connection: connection, fetcher: fetcher)
 
       expect(result.created_count).to eq(0)
       expect(result.deduped_count).to eq(1)
