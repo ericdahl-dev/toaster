@@ -15,6 +15,9 @@ export default function Home() {
             It ingests booking inquiries, extracts structured details, tracks
             request state, and helps operators draft or send the next reply.
           </p>
+          <span className="inline-flex items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-sm font-medium text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-300">
+            🔒 Invite only — access is by invitation only at this time.
+          </span>
         </header>
 
         <section className="grid gap-4 sm:grid-cols-3">
