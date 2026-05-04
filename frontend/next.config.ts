@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-/** /api/backend → Rails is handled in src/middleware.ts so X-Forwarded-Host reaches Puma. */
+/** /api/backend → Rails: see app/api/backend/[[...path]]/route.ts (proxy preserves Set-Cookie). */
 const nextConfig: NextConfig = {};
 
 export default nextConfig;
