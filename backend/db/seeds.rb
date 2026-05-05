@@ -2,6 +2,26 @@
 # development, test). The code here should be idempotent so that it can be executed at any point in every environment.
 # The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
 
+if Rails.env.production?
+  # Create the initial account if none exists. Configure via env vars before first deploy.
+  # TOASTER_SEED_ACCOUNT_NAME — account display name (default: "Toaster")
+  # TOASTER_ADMIN_EMAIL / TOASTER_ADMIN_PASSWORD / TOASTER_ADMIN_NAME — bootstrap admin user (optional)
+  account = Account.first_or_create!(name: ENV.fetch("TOASTER_SEED_ACCOUNT_NAME", "Toaster"))
+
+  admin_email = ENV["TOASTER_ADMIN_EMAIL"]
+  admin_password = ENV["TOASTER_ADMIN_PASSWORD"]
+  if admin_email.present? && admin_password.present?
+    user = User.find_or_initialize_by(email: admin_email)
+    user.account ||= account
+    user.name = ENV.fetch("TOASTER_ADMIN_NAME", admin_email)
+    if user.new_record?
+      user.password = admin_password
+      user.password_confirmation = admin_password
+    end
+    user.save!
+  end
+end
+
 if Rails.env.development?
   # Matches frontend default NEXT_PUBLIC_TOASTER_ACCOUNT_ID / TOASTER_ACCOUNT_ID ("1").
   account = Account.find_or_initialize_by(id: 1)
