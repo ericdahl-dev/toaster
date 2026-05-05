@@ -1,13 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { browserToasterApiBase } from '@/lib/toaster-api';
 import { toasterFetch } from '@/lib/toaster-fetch';
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get('returnTo') ?? '/email-accounts';
 
@@ -42,8 +41,10 @@ export function LoginForm() {
         }
         return;
       }
-      router.replace(returnTo.startsWith('/') ? returnTo : '/email-accounts');
-      router.refresh();
+      // Full navigation so the session cookie from this response is applied before the next
+      // document load (RSC `cookies()`). `router.replace` + `refresh` often runs too early.
+      const path = returnTo.startsWith('/') ? returnTo : '/email-accounts';
+      window.location.assign(path);
     } catch {
       setError('Network error. Try again.');
     } finally {
@@ -68,7 +69,7 @@ export function LoginForm() {
             Use your Toaster account email and password (not your mailbox IMAP password).
           </p>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form method="post" onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
               Email

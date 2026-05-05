@@ -20,6 +20,7 @@ describe('ImapConnectionsList', () => {
 
     expect(fetch).toHaveBeenCalledWith('http://localhost:3001/accounts/1/imap/connections', {
       credentials: 'include',
+      cache: 'no-store',
     });
   });
 
@@ -96,6 +97,7 @@ describe('ImapConnectionsList', () => {
       expect(fetchMock).toHaveBeenCalledWith('http://localhost:3001/accounts/1/imap/connections/5/sync', {
         method: 'POST',
         credentials: 'include',
+        cache: 'no-store',
       });
     });
 

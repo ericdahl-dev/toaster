@@ -37,14 +37,26 @@ function buildProxyRequestHeaders(request: NextRequest): Headers {
   return out;
 }
 
-function copyUpstreamHeadersToNext(upstream: Response, out: NextResponse) {
+function appendSetCookieHeaders(upstream: Response, out: NextResponse): void {
   const h = upstream.headers as Headers & { getSetCookie?: () => string[] };
   if (typeof h.getSetCookie === "function") {
-    for (const cookie of h.getSetCookie()) {
-      out.headers.append("Set-Cookie", cookie);
+    const list = h.getSetCookie();
+    if (list?.length) {
+      for (const cookie of list) {
+        out.headers.append("Set-Cookie", cookie);
+      }
+      return;
     }
   }
-  h.forEach((value, key) => {
+  const single = upstream.headers.get("set-cookie");
+  if (single) {
+    out.headers.append("Set-Cookie", single);
+  }
+}
+
+function copyUpstreamHeadersToNext(upstream: Response, out: NextResponse) {
+  appendSetCookieHeaders(upstream, out);
+  upstream.headers.forEach((value, key) => {
     if (key.toLowerCase() === "set-cookie") return;
     out.headers.append(key, value);
   });
@@ -66,7 +78,8 @@ async function proxy(
   }
 
   const upstream = await fetch(url, init);
-  const res = new NextResponse(upstream.body, {
+  const body = await upstream.arrayBuffer();
+  const res = new NextResponse(body, {
     status: upstream.status,
     statusText: upstream.statusText,
   });

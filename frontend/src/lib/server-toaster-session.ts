@@ -17,7 +17,9 @@ export async function serverFetchBackend(
   const origin = `${proto}://${host}`;
   const base = '/api/backend';
   const p = path.startsWith('/') ? path : `/${path}`;
-  const cookieHeader = jar.getAll().map((c) => `${c.name}=${c.value}`).join('; ');
+  const rawCookie = (h.get('cookie') ?? '').trim();
+  const fromJar = jar.getAll().map((c) => `${c.name}=${c.value}`).join('; ');
+  const cookieHeader = rawCookie || fromJar;
 
   const merged = new Headers(init?.headers ?? undefined);
   if (cookieHeader) {

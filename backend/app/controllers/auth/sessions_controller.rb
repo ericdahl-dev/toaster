@@ -7,9 +7,10 @@ module Auth
     before_action :require_authenticated_user!, only: [:me]
 
     def create
-      email = login_params[:email].to_s.strip.downcase
+      creds = login_credentials
+      email = creds[:email].to_s.strip.downcase
       user = User.find_by(email: email)
-      if user&.authenticate(login_params[:password].to_s)
+      if user&.authenticate(creds[:password].to_s)
         session[:user_id] = user.id
         head :ok
       else
@@ -32,8 +33,12 @@ module Auth
 
     private
 
-    def login_params
-      params.permit(:email, :password)
+    def login_credentials
+      p = params.permit(:email, :password, session: %i[email password])
+      nested = p[:session]
+      email = p[:email].presence || nested&.dig(:email) || nested&.dig("email")
+      password = p[:password].presence || nested&.dig(:password) || nested&.dig("password")
+      {email:, password:}
     end
   end
 end
