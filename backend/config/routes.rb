@@ -29,6 +29,8 @@ Rails.application.routes.draw do
     get "/ai_runs", to: "ops#ai_runs"
     get "/inbox_messages", to: "ops/inbox_messages#index"
     get "/inbox_messages/:id", to: "ops/inbox_messages#show"
+    get "/inbox_threads", to: "ops/inbox_threads#index"
+    get "/inbox_threads/view", to: "ops/inbox_threads#show"
 
     post "/retry_failed_job/:id", to: "ops#retry_failed_job"
     post "/retry_draft/:id", to: "ops#retry_draft"
