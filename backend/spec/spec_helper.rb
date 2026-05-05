@@ -7,6 +7,10 @@ SimpleCov.formatters = SimpleCov::Formatter::MultiFormatter.new([
   SimpleCov::Formatter::JSONFormatter
 ])
 
+# parallel_tests sets TEST_ENV_NUMBER per process so SimpleCov can merge results.
+SimpleCov.command_name "RSpec#{ENV["TEST_ENV_NUMBER"]}"
+SimpleCov.merge_timeout 3600
+
 SimpleCov.start "rails" do
   add_filter "/spec/"
 end
