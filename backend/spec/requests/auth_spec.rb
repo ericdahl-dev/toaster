@@ -42,6 +42,58 @@ RSpec.describe "Auth sessions", type: :request do
     end
   end
 
+  describe "remember me" do
+    def forget_all_cookies(jar)
+      jar.to_hash.keys.each { |name| jar.delete(name) }
+    end
+
+    it "GET /auth/me succeeds with only remember cookie (no session cookie)" do
+      post "/auth/login",
+        params: {email: user.email, password: "password123", remember_me: true},
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+      remember_raw = cookies.get_cookie("toaster_remember")&.raw
+      expect(remember_raw).to be_present
+
+      forget_all_cookies(cookies)
+
+      get "/auth/me", headers: {"Cookie" => remember_raw}
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body["email"]).to eq(user.email)
+      expect(user.reload.remember_token_digest).to be_present
+    end
+
+    it "does not restore session from cookie without remember_me at login" do
+      post "/auth/login",
+        params: {email: user.email, password: "password123"},
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload.remember_token_digest).to be_blank
+      forget_all_cookies(cookies)
+
+      get "/auth/me"
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "POST /auth/logout clears remember token so later visits are unauthorized" do
+      post "/auth/login",
+        params: {email: user.email, password: "password123", remember_me: true},
+        as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(user.reload.remember_token_digest).to be_present
+
+      post "/auth/logout"
+      expect(response).to have_http_status(:no_content)
+
+      get "/auth/me"
+      expect(response).to have_http_status(:unauthorized)
+      expect(user.reload.remember_token_digest).to be_blank
+    end
+  end
+
   describe "POST /auth/login" do
     it "returns 401 for wrong password" do
       post "/auth/login", params: {email: "member@example.com", password: "wrong"}, as: :json

@@ -12,6 +12,13 @@ module Auth
       user = User.find_by(email: email)
       if user&.authenticate(creds[:password].to_s)
         session[:user_id] = user.id
+        if remember_me?(creds)
+          raw = user.issue_remember_token!
+          write_remember_cookie(user.id, raw)
+        else
+          user.clear_remember_token!
+          delete_remember_cookie
+        end
         head :ok
       else
         render json: {error: "Unauthorized"}, status: :unauthorized
@@ -19,7 +26,10 @@ module Auth
     end
 
     def destroy
+      u = current_user
       reset_session
+      u&.clear_remember_token!
+      delete_remember_cookie
       head :no_content
     end
 
@@ -34,11 +44,16 @@ module Auth
     private
 
     def login_credentials
-      p = params.permit(:email, :password, session: %i[email password])
+      p = params.permit(:email, :password, :remember_me, session: %i[email password remember_me])
       nested = p[:session]
       email = p[:email].presence || nested&.dig(:email) || nested&.dig("email")
       password = p[:password].presence || nested&.dig(:password) || nested&.dig("password")
-      {email:, password:}
+      remember_me = p.key?(:remember_me) ? p[:remember_me] : nested&.dig(:remember_me) || nested&.dig("remember_me")
+      {email:, password:, remember_me:}
+    end
+
+    def remember_me?(creds)
+      ActiveModel::Type::Boolean.new.cast(creds[:remember_me])
     end
   end
 end
