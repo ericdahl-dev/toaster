@@ -1,16 +1,17 @@
+# frozen_string_literal: true
+
 module Imap
   class SyncsController < AccountScopedController
-    def create
-      connection = @account.imap_connections.find(params[:connection_id])
-      InboxSyncScheduler.schedule(connection)
+    include MailConnectionSync
 
-      render json: {
-        status: "enqueued",
-        account_id: @account.id,
-        imap_connection_id: connection.id
-      }, status: :accepted
-    rescue ActiveRecord::RecordNotFound => e
-      render json: {error: e.message}, status: :not_found
+    private
+
+    def connections_scope
+      @account.imap_connections
+    end
+
+    def connection_id_key
+      :imap_connection_id
     end
   end
 end

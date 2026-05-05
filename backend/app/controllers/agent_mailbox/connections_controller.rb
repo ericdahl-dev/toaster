@@ -2,46 +2,12 @@
 
 module AgentMailbox
   class ConnectionsController < AccountScopedController
-    before_action :set_connection, only: [:show, :update, :destroy]
-
-    def index
-      connections = @account.agentmail_connections.order(:created_at)
-      render json: {connections: connections.map { |c| connection_json(c) }}
-    end
-
-    def show
-      render json: {connection: connection_json(@connection)}
-    end
-
-    def create
-      connection = @account.agentmail_connections.build(connection_params)
-      if connection.save
-        InboxSyncScheduler.schedule(connection)
-        render json: {connection: connection_json(connection)}, status: :created
-      else
-        render json: {errors: connection.errors.full_messages}, status: :unprocessable_entity
-      end
-    end
-
-    def update
-      if @connection.update(connection_params)
-        render json: {connection: connection_json(@connection)}
-      else
-        render json: {errors: @connection.errors.full_messages}, status: :unprocessable_entity
-      end
-    end
-
-    def destroy
-      @connection.destroy
-      head :no_content
-    end
+    include MailConnections
 
     private
 
-    def set_connection
-      @connection = @account.agentmail_connections.find(params[:id])
-    rescue ActiveRecord::RecordNotFound
-      render json: {error: "Connection not found"}, status: :not_found
+    def connections_scope
+      @account.agentmail_connections
     end
 
     def connection_params
