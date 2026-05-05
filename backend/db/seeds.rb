@@ -18,4 +18,7 @@ if Rails.env.development?
   user.password = dev_password
   user.password_confirmation = dev_password
   user.save!
+
+  load Rails.root.join("db/seeds/development_demo.rb")
+  DevelopmentDemoSeeds.run(account: account)
 end
