@@ -7,3 +7,8 @@ sync_all_agentmail_connections:
   class: SyncAllAgentmailConnectionsJob
   schedule: every 5 minutes
   queue: webhooks
+
+reconcile_all_drafts:
+  class: ReconcileAllDraftsJob
+  schedule: every 5 minutes
+  queue: mailers

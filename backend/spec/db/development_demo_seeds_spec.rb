@@ -17,8 +17,8 @@ RSpec.describe DevelopmentDemoSeeds do
 
       expect(InboxMessage.where(account: account, provider: described_class::PROVIDER).count).to eq(inbox_count)
       expect(BookingRequest.where(account: account).count).to eq(booking_count)
-      expect(inbox_count).to eq(10)
-      expect(booking_count).to eq(8)
+      expect(inbox_count).to eq(13)
+      expect(booking_count).to eq(9)
     end
 
     it "covers booking workflow statuses" do

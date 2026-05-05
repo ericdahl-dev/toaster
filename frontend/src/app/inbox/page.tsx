@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
-import type { InboxDetail, InboxListItem } from '@/components/inbox/operator-inbox-view';
 import { OperatorInboxClient } from '@/components/inbox/operator-inbox-client';
+import type { ThreadDetail, ThreadListItem } from '@/components/inbox/operator-inbox-view';
+import { parseThreadDetail, parseThreadListItem, threadToSearchParams } from '@/lib/ops-inbox';
 import { serverRailsBaseUrl } from '@/lib/toaster-api';
 import { serverFetchBackend } from '@/lib/server-toaster-session';
 
@@ -13,19 +14,46 @@ async function requireToasterSession(): Promise<void> {
   }
 }
 
-export default async function InboxPage() {
+export default async function InboxPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await requireToasterSession();
-  const messages = await fetchInboxMessages();
-  const selectedMessage = messages[0] ? await fetchInboxMessage(messages[0].id) : null;
+  const sp = await searchParams;
+  const threads = await fetchInboxThreads();
+
+  let detail: ThreadDetail | null = null;
+  const accountId = firstString(sp.account_id);
+  const provider = firstString(sp.provider);
+  const providerThreadId = firstString(sp.provider_thread_id);
+  const anchorId = firstString(sp.anchor_inbox_message_id);
+
+  if (accountId && provider && (providerThreadId || anchorId)) {
+    const qs = new URLSearchParams();
+    qs.set('account_id', accountId);
+    qs.set('provider', provider);
+    if (anchorId) qs.set('anchor_inbox_message_id', anchorId);
+    if (providerThreadId) qs.set('provider_thread_id', providerThreadId);
+    detail = await fetchInboxThreadView(qs.toString());
+  } else if (threads[0]) {
+    detail = await fetchInboxThreadView(threadToSearchParams(threads[0]).toString());
+  }
+
   return (
-    <OperatorInboxClient initialMessages={messages} initialSelectedMessage={selectedMessage} inboxApiBase="/api/ops" />
+    <OperatorInboxClient initialThreads={threads} initialThreadDetail={detail} inboxApiBase="/api/ops" />
   );
 }
 
-async function fetchInboxMessages(): Promise<InboxListItem[]> {
+function firstString(v: string | string[] | undefined): string | undefined {
+  if (Array.isArray(v)) return v[0];
+  return v;
+}
+
+async function fetchInboxThreads(): Promise<ThreadListItem[]> {
   try {
     const base = serverRailsBaseUrl();
-    const response = await fetch(`${base}/ops/inbox_messages`, {
+    const response = await fetch(`${base}/ops/inbox_threads`, {
       cache: 'no-store',
       headers: OPS_TOKEN ? { 'X-Ops-Token': OPS_TOKEN } : {},
     });
@@ -35,28 +63,18 @@ async function fetchInboxMessages(): Promise<InboxListItem[]> {
     }
 
     const body = await response.json();
-    return body.inbox_messages.map((message: Record<string, unknown>) => ({
-      id: Number(message.id),
-      fromName: asNullableString(message.from_name),
-      fromEmail: asNullableString(message.from_email),
-      subject: asNullableString(message.subject),
-      receivedAt: asNullableString(message.received_at),
-      bookingRequest: message.booking_request
-        ? {
-            id: Number((message.booking_request as Record<string, unknown>).id),
-            status: String((message.booking_request as Record<string, unknown>).status),
-          }
-        : null,
-    }));
+    const rows = body.inbox_threads as Record<string, unknown>[] | undefined;
+    if (!Array.isArray(rows)) return [];
+    return rows.map((row) => parseThreadListItem(row));
   } catch {
     return [];
   }
 }
 
-async function fetchInboxMessage(messageId: number): Promise<InboxDetail | null> {
+async function fetchInboxThreadView(queryString: string): Promise<ThreadDetail | null> {
   try {
     const base = serverRailsBaseUrl();
-    const response = await fetch(`${base}/ops/inbox_messages/${messageId}`, {
+    const response = await fetch(`${base}/ops/inbox_threads/view?${queryString}`, {
       cache: 'no-store',
       headers: OPS_TOKEN ? { 'X-Ops-Token': OPS_TOKEN } : {},
     });
@@ -66,50 +84,8 @@ async function fetchInboxMessage(messageId: number): Promise<InboxDetail | null>
     }
 
     const body = await response.json();
-    const message = body.inbox_message as Record<string, unknown>;
-    const bookingRequest = message.booking_request as Record<string, unknown> | null;
-
-    return {
-      id: Number(message.id),
-      fromName: asNullableString(message.from_name),
-      fromEmail: asNullableString(message.from_email),
-      subject: asNullableString(message.subject),
-      receivedAt: asNullableString(message.received_at),
-      bodyText: asNullableString(message.body_text),
-      rawPayload: (message.raw_payload as Record<string, unknown>) ?? {},
-      bookingRequest: bookingRequest
-        ? {
-            id: Number(bookingRequest.id),
-            status: String(bookingRequest.status),
-            eventDate: asNullableString(bookingRequest.event_date),
-            headcount: asNullableNumber(bookingRequest.headcount),
-            budgetCents: asNullableNumber(bookingRequest.budget_cents),
-            missingFields: asStringArray(bookingRequest.missing_fields),
-            reviewReasons: asStringArray(bookingRequest.review_reasons),
-            pendingDraft: (() => {
-              const draft = bookingRequest.pending_draft as Record<string, unknown> | null | undefined;
-              return draft && typeof draft.id === 'number' && typeof draft.body === 'string'
-                ? { id: draft.id, body: draft.body }
-                : null;
-            })(),
-          }
-        : null,
-    };
+    return parseThreadDetail(body as Record<string, unknown>);
   } catch {
     return null;
   }
 }
-
-function asNullableString(value: unknown): string | null {
-  return typeof value === 'string' ? value : null;
-}
-
-function asNullableNumber(value: unknown): number | null {
-  return typeof value === 'number' ? value : null;
-}
-
-function asStringArray(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
-}
-
-export { fetchInboxMessages, fetchInboxMessage };

@@ -1,7 +1,8 @@
 module Ops
   class InboxMessagesController < ApplicationController
     skip_forgery_protection
-    before_action :require_ops_auth!
+    include Ops::RequireToken
+    include Ops::BookingPayload
 
     def index
       messages = InboxMessage
@@ -51,45 +52,6 @@ module Ops
       }
     rescue ActiveRecord::RecordNotFound
       render json: {error: "Inbox message not found"}, status: :not_found
-    end
-
-    private
-
-    def require_ops_auth!
-      token = ENV["OPS_AUTH_TOKEN"].presence
-      return render json: {error: "Unauthorized"}, status: :unauthorized unless token
-
-      provided = request.headers["X-Ops-Token"]
-      return if ActiveSupport::SecurityUtils.secure_compare(provided.to_s, token)
-
-      render json: {error: "Unauthorized"}, status: :unauthorized
-    end
-
-    def booking_request_summary(booking_request)
-      return nil unless booking_request
-
-      {
-        id: booking_request.id,
-        status: booking_request.status
-      }
-    end
-
-    def booking_request_detail(booking_request)
-      return nil unless booking_request
-
-      pending_draft = booking_request.drafts.find_by(status: :pending_review)
-
-      {
-        id: booking_request.id,
-        status: booking_request.status,
-        event_date: booking_request.event_date,
-        headcount: booking_request.headcount,
-        budget_cents: booking_request.budget_cents,
-        missing_fields: booking_request.missing_fields,
-        review_reasons: booking_request.review_reasons,
-        extraction_snapshot: booking_request.extraction_snapshot,
-        pending_draft: pending_draft ? {id: pending_draft.id, body: pending_draft.body} : nil
-      }
     end
   end
 end

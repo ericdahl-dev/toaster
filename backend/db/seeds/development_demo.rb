@@ -24,6 +24,8 @@ class DevelopmentDemoSeeds
     seed_thread_cancelled
     seed_thread_multi_message
     seed_thread_with_task
+    seed_thread_outbound_demo
+    seed_thread_singleton_nil
   end
 
   private
@@ -316,6 +318,70 @@ class DevelopmentDemoSeeds
     )
   end
 
+  def seed_thread_outbound_demo
+    contact = upsert_contact(
+      email: "quinn.ng@example.com",
+      name: "Quinn Ng",
+      phone: "555-0110"
+    )
+    thread = upsert_thread(
+      contact: contact,
+      provider_thread_id: "#{PROVIDER}:thread:outbound-demo",
+      subject: "Rehearsal dinner"
+    )
+    inbox = upsert_inbox(
+      contact: contact,
+      provider_thread_id: thread.provider_thread_id,
+      provider_message_id: "#{PROVIDER}:inbox:outbound-demo-in",
+      subject: thread.subject,
+      body_text: "Need a rehearsal space for 18 people on Aug 1.",
+      received_at: 3.days.ago
+    )
+    br = upsert_booking_request(
+      inbox: inbox,
+      thread: thread,
+      contact: contact,
+      status: :reviewing,
+      event_date: Date.current + 60,
+      headcount: 18,
+      budget_cents: 3_200_00,
+      notes: nil,
+      missing_fields: [],
+      review_reasons: [],
+      extraction_snapshot: {}
+    )
+    upsert_outbound(
+      provider_thread_id: thread.provider_thread_id,
+      provider_message_id: "#{PROVIDER}:inbox:outbound-demo-out",
+      subject: "Re: Rehearsal dinner",
+      body_text: "Thanks — confirming Aug 1 for 18. Vegetarian option for two guests.",
+      received_at: 1.day.ago,
+      from_name: "Events team",
+      from_email: "events@toaster.local"
+    )
+    d_sent = br.drafts.find_or_initialize_by(status: :sent)
+    d_sent.assign_attributes(account: account, body: "Hi Quinn — shorter suggested reply from Toaster (differs from outbound).", sent_at: 2.days.ago)
+    d_sent.save!
+    d_rej = br.drafts.find_or_initialize_by(status: :rejected)
+    d_rej.assign_attributes(account: account, body: "Older rejected wording the operator did not use.")
+    d_rej.save!
+  end
+
+  def seed_thread_singleton_nil
+    contact = upsert_contact(
+      email: "casey.singleton@example.com",
+      name: "Casey Singleton",
+      phone: "555-0111"
+    )
+    upsert_inbox_singleton_no_thread(
+      contact: contact,
+      provider_message_id: "#{PROVIDER}:inbox:singleton-nil-1",
+      subject: "One-off question (no thread id)",
+      body_text: "Inbox row with provider_thread_id nil for operator inbox singleton grouping.",
+      received_at: 9.days.ago
+    )
+  end
+
   def seed_thread_with_task
     contact = upsert_contact(
       email: "jordan.kim@example.com",
@@ -368,6 +434,50 @@ class DevelopmentDemoSeeds
     ConversationThread.find_or_initialize_by(account: account, provider_thread_id: provider_thread_id).tap do |t|
       t.assign_attributes(contact: contact, subject: subject)
       t.save!
+    end
+  end
+
+  def upsert_outbound(provider_thread_id:, provider_message_id:, subject:, body_text:, received_at:, from_name:, from_email:)
+    InboxMessage.find_or_initialize_by(
+      account: account,
+      provider: PROVIDER,
+      provider_message_id: provider_message_id
+    ).tap do |m|
+      m.assign_attributes(
+        provider_thread_id: provider_thread_id,
+        direction: :outbound,
+        from_name: from_name,
+        from_email: from_email,
+        to_emails: [],
+        subject: subject,
+        body_text: body_text,
+        body_html: "<p>#{ERB::Util.html_escape(body_text)}</p>",
+        received_at: received_at,
+        raw_payload: {"seed" => true, "provider_message_id" => provider_message_id, "direction" => "outbound"}
+      )
+      m.save!
+    end
+  end
+
+  def upsert_inbox_singleton_no_thread(contact:, provider_message_id:, subject:, body_text:, received_at:)
+    InboxMessage.find_or_initialize_by(
+      account: account,
+      provider: PROVIDER,
+      provider_message_id: provider_message_id
+    ).tap do |m|
+      m.assign_attributes(
+        provider_thread_id: nil,
+        direction: :inbound,
+        from_name: contact.name,
+        from_email: contact.email,
+        to_emails: ["events@toaster.local"],
+        subject: subject,
+        body_text: body_text,
+        body_html: "<p>#{ERB::Util.html_escape(body_text)}</p>",
+        received_at: received_at,
+        raw_payload: {"seed" => true, "singleton" => true}
+      )
+      m.save!
     end
   end
 
