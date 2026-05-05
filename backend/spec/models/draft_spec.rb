@@ -31,6 +31,7 @@ RSpec.describe Draft, type: :model do
       expect(Draft.statuses).to eq({
         "pending_review" => "pending_review",
         "approved" => "approved",
+        "modified" => "modified",
         "rejected" => "rejected",
         "sent" => "sent"
       })
