@@ -2,17 +2,16 @@
 
 module AgentMailbox
   class ConnectionSyncsController < AccountScopedController
-    def create
-      connection = @account.agentmail_connections.find(params[:connection_id])
-      InboxSyncScheduler.schedule(connection)
+    include MailConnectionSync
 
-      render json: {
-        status: "enqueued",
-        account_id: @account.id,
-        agentmail_connection_id: connection.id
-      }, status: :accepted
-    rescue ActiveRecord::RecordNotFound => e
-      render json: {error: e.message}, status: :not_found
+    private
+
+    def connections_scope
+      @account.agentmail_connections
+    end
+
+    def connection_id_key
+      :agentmail_connection_id
     end
   end
 end
