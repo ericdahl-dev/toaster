@@ -3,6 +3,7 @@
 - In the backend directory, use RVM to match the pinned Ruby (`rvm use .` from `backend/` or rely on project `.ruby-version`) before `bundle`, `rspec`, or other gem commands so native extensions match the active interpreter.
 - Prefer local test coverage only (backend SimpleCov, frontend Vitest via `yarn test`); do not add Codecov or other remote coverage upload unless asked.
 - Keep backend `parallel_rspec` usage local-only unless explicitly asked; CI should continue to run serial `bundle exec rspec`.
+- Prefer self-documenting code: clear naming and structure first; use comments for non-obvious rationale (domain rules, invariants, security or performance tradeoffs), not to narrate obvious lines.
 
 ## Learned Workspace Facts
 
