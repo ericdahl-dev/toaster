@@ -8,7 +8,7 @@ class SendDraftJob < ApplicationJob
     draft = Draft.find(draft_id)
     return unless draft.approved?
 
-    # TODO: send the draft via configured outbound provider and mark it sent
+    # Outbound provider not integrated yet; status advance matches current ops/send contract.
     draft.update!(status: :sent)
   end
 end

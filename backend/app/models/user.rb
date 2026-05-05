@@ -11,7 +11,7 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   validates :name, presence: true
 
-  # Returns raw token for the signed cookie; persists bcrypt digest only.
+  # Signed remember-me cookie holds the raw token; only a bcrypt digest is stored.
   def issue_remember_token!
     raw = self.class.new_remember_token
     update!(remember_token_digest: self.class.digest_remember_token(raw))
