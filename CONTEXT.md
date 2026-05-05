@@ -26,7 +26,7 @@ A persisted row derived from an **inbox message** for venue/event intake; extrac
 When a booking request’s status is **confirmed**, **rejected**, or **cancelled**, further **inbox ingestion** does not re-run extraction on that message—human workflow outcomes stay authoritative until someone changes status again via **transition**.
 
 **Venue**:
-A bookable location owned by an **Account**. **Booking requests** may reference a venue (`venue_id` optional). Venues are not tied to a single mail **connection** in the schema today.
+A bookable location managed by an **Account**. **Booking requests** may reference a venue (`venue_id` optional). Venues are not tied to a single mail **connection** in the schema today.
 
 **Mail connection**:
 Credentials plus checkpoint state for one mailbox on a **provider** (for example `ImapConnection` or `AgentmailConnection`). Belongs to an **Account**, not to a specific **Venue**.
