@@ -9,11 +9,11 @@ module AgentMailbox
       direction: "inbound",
       from_email: "demo.lead@example.com",
       from_name: "Demo Lead",
-      to_emails: [ "agent@example.com" ],
+      to_emails: ["agent@example.com"],
       subject: "Wedding for 120 guests on June 14, 2026",
       body_text: "Hi, we're looking for a venue on June 14, 2026 for 120 guests with a budget of $15000.",
       received_at: Time.zone.parse("2026-04-01 10:00:00 UTC"),
-      raw_payload: { "messageId" => "demo-msg-1", "threadId" => "demo-thread-1" }
+      raw_payload: {"messageId" => "demo-msg-1", "threadId" => "demo-thread-1"}
     }.freeze
 
     def self.call(account_name: "POC Demo Account")
@@ -30,7 +30,7 @@ module AgentMailbox
       sync_result = InboxIngestion::Sync.call(
         adapter: InboxIngestion::AgentMailboxAdapter.new(
           account: account,
-          fetcher: StaticFetcher.new([ SAMPLE_PAYLOAD ])
+          fetcher: StaticFetcher.new([SAMPLE_PAYLOAD])
         )
       )
 
@@ -40,13 +40,13 @@ module AgentMailbox
           provider_message_id: SAMPLE_PAYLOAD[:provider_message_id],
           provider_thread_id: SAMPLE_PAYLOAD[:provider_thread_id]
         )
-      extraction = AgentMailbox::ExtractBookingRequest.call(inbox_message: inbox_message)
+      booking_request = inbox_message.booking_request
 
       Result.new(
         account: account,
         inbox_message: inbox_message,
-        booking_request: extraction.booking_request,
-        summary: summary_for(account, inbox_message, extraction.booking_request)
+        booking_request: booking_request,
+        summary: summary_for(account, inbox_message, booking_request)
       )
     end
 
