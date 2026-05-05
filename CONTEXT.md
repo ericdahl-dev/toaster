@@ -19,6 +19,12 @@ Where incremental ingestion resumes for a connection. Meaning is provider-specif
 **Ingestion adapter**:
 The provider-owned object that implements fetch and checkpoint read/write for one connection. Adapters live alongside the shared ingestion orchestrator under `app/services/inbox_ingestion/` and delegate wire-protocol work to existing fetcher modules.
 
+**Booking request**:
+A persisted row derived from an **inbox message** for venue/event intake; extraction fills structured fields and a status. Orchestrated by **reconcile** after each inbox message upsert (see `docs/adr/0001-post-ingestion-booking-reconcile.md`).
+
+**Extraction lock**:
+When a booking request’s status is **confirmed**, **rejected**, or **cancelled**, further **inbox ingestion** does not re-run extraction on that message—human workflow outcomes stay authoritative until someone changes status again via **transition**.
+
 ## Relationships
 
 - An **Account** has one or more inbox **connections** (per provider).
