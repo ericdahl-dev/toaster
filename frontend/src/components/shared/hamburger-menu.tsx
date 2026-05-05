@@ -12,6 +12,7 @@ const LOGGED_OUT_ITEMS: Item[] = [{ href: '/login', label: 'Log in' }];
 const LOGGED_IN_ITEMS: Item[] = [
   { href: '/inbox', label: 'Operator inbox' },
   { href: '/email-accounts', label: 'Email accounts' },
+  { href: '/settings', label: 'Settings' },
 ];
 
 export function HamburgerMenu({ isAuthenticated }: { isAuthenticated: boolean }) {

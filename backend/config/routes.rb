@@ -8,15 +8,19 @@ Rails.application.routes.draw do
   get "/auth/me", to: "auth/sessions#me"
 
   resources :accounts, only: [] do
+    resources :venues, only: [ :index, :show, :create, :update, :destroy ]
+    resources :contacts, only: [ :index, :show, :create, :update, :destroy ]
+    resources :users, only: [ :index, :show, :create, :update, :destroy ]
+
     namespace :agent_mailbox do
-      resources :connections, only: [:index, :show, :create, :update, :destroy] do
+      resources :connections, only: [ :index, :show, :create, :update, :destroy ] do
         resource :sync, only: :create, controller: :connection_syncs
       end
       resource :sync, only: :create, controller: :syncs
     end
 
     namespace :imap do
-      resources :connections, only: [:index, :show, :create, :update, :destroy] do
+      resources :connections, only: [ :index, :show, :create, :update, :destroy ] do
         resource :sync, only: :create, controller: :syncs
       end
     end
