@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
-# Single entry point for enqueueing inbox ingestion work so HTTP layers and
-# fan-out jobs do not reference provider-specific job classes directly.
+# Enqueue ingestion by connection type so callers do not name IMAP vs AgentMail job classes.
 module InboxSyncScheduler
   module_function
 

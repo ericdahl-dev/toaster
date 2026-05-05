@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 module BookingRequests
-  # Orchestration after each {InboxMessage} is persisted by {InboxIngestion::Sync}.
-  # See docs/adr/0001-post-ingestion-booking-reconcile.md.
-  #
-  # Status changes use {Transition} from API/ops/UI — not invoked here.
+  # Runs after InboxIngestion::Sync persists a message (docs/adr/0001-post-ingestion-booking-reconcile.md).
+  # Skips BookingRequests::Transition — human-driven status changes stay in API/ops/UI.
   module PostIngestion
     module_function
 
