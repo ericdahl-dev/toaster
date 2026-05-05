@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_05_160000) do
+ActiveRecord::Schema[7.2].define(version: 2026_05_05_170000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "plpgsql"
@@ -103,6 +103,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_05_160000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "sent_at"
+    t.integer "imap_draft_uid"
+    t.text "original_body"
     t.index ["account_id"], name: "index_drafts_on_account_id"
     t.index ["booking_request_id"], name: "index_drafts_on_booking_request_id"
     t.index ["status"], name: "index_drafts_on_status"

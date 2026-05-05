@@ -5,6 +5,7 @@ class Draft < ApplicationRecord
   enum :status, {
     pending_review: "pending_review",
     approved: "approved",
+    modified: "modified",
     rejected: "rejected",
     sent: "sent"
   }

@@ -2,22 +2,11 @@ require "rails_helper"
 
 RSpec.describe SendDraftJob, type: :job do
   describe "#perform" do
-    it "marks an approved draft as sent" do
-      draft = create(:draft, status: :approved)
-
-      described_class.perform_now(draft.id)
-
-      draft.reload
-      expect(draft.status).to eq("sent")
-      expect(draft.sent_at).to be_present
-    end
-
-    it "does nothing when draft is not approved" do
+    it "enqueues a PushDraftJob for the given draft" do
       draft = create(:draft, status: :pending_review)
 
-      described_class.perform_now(draft.id)
-
-      expect(draft.reload.status).to eq("pending_review")
+      expect { described_class.perform_now(draft.id) }
+        .to have_enqueued_job(PushDraftJob).with(draft.id)
     end
 
     it "discards the job when the draft no longer exists" do
