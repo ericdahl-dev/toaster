@@ -9,15 +9,16 @@ RSpec.describe "Agent mailbox sync", type: :request do
 
     before { sign_in_as(user) }
 
-    it "enqueues a sync job for each active connection" do
+    it "schedules ingestion for each active connection" do
       conn1 = create(:agentmail_connection, account: account)
       conn2 = create(:agentmail_connection, account: account)
 
-      expect {
-        post "/accounts/#{account.id}/agent_mailbox/sync"
-      }.to have_enqueued_job(SyncAgentMailboxJob).with(conn1.id)
-        .and have_enqueued_job(SyncAgentMailboxJob).with(conn2.id)
+      allow(InboxSyncScheduler).to receive(:schedule)
 
+      post "/accounts/#{account.id}/agent_mailbox/sync"
+
+      expect(InboxSyncScheduler).to have_received(:schedule).with(conn1)
+      expect(InboxSyncScheduler).to have_received(:schedule).with(conn2)
       expect(response).to have_http_status(:accepted)
       expect(response.parsed_body).to include(
         "status" => "enqueued",

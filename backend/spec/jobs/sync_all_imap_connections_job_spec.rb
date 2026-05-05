@@ -2,19 +2,19 @@ require "rails_helper"
 
 RSpec.describe SyncAllImapConnectionsJob, type: :job do
   describe "#perform" do
-    it "enqueues SyncImapJob for each active connection" do
+    it "schedules ingestion for each active connection" do
       account = create(:account)
       active1 = create(:imap_connection, account: account, active: true)
       active2 = create(:imap_connection, account: account, host: "imap.other.com", active: true)
       inactive = create(:imap_connection, account: account, host: "imap.inactive.com", active: false)
 
-      allow(SyncImapJob).to receive(:perform_later)
+      allow(InboxSyncScheduler).to receive(:schedule)
 
       described_class.perform_now
 
-      expect(SyncImapJob).to have_received(:perform_later).with(active1.id)
-      expect(SyncImapJob).to have_received(:perform_later).with(active2.id)
-      expect(SyncImapJob).not_to have_received(:perform_later).with(inactive.id)
+      expect(InboxSyncScheduler).to have_received(:schedule).with(active1)
+      expect(InboxSyncScheduler).to have_received(:schedule).with(active2)
+      expect(InboxSyncScheduler).not_to have_received(:schedule).with(inactive)
     end
 
     it "uses the webhooks queue" do
@@ -23,18 +23,18 @@ RSpec.describe SyncAllImapConnectionsJob, type: :job do
 
     it "does nothing when there are no active connections" do
       ImapConnection.update_all(active: false)
-      allow(SyncImapJob).to receive(:perform_later)
+      allow(InboxSyncScheduler).to receive(:schedule)
 
       described_class.perform_now
 
-      expect(SyncImapJob).not_to have_received(:perform_later)
+      expect(InboxSyncScheduler).not_to have_received(:schedule)
     end
 
     it "logs fan-out enqueue counts" do
       account = create(:account)
       create(:imap_connection, account: account, active: true)
       create(:imap_connection, account: account, host: "imap.second.com", active: true)
-      allow(SyncImapJob).to receive(:perform_later)
+      allow(InboxSyncScheduler).to receive(:schedule)
       allow(Rails.logger).to receive(:info)
 
       described_class.perform_now
