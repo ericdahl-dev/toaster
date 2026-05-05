@@ -14,7 +14,7 @@ module Imap
     def create
       connection = @account.imap_connections.build(connection_params)
       if connection.save
-        SyncImapJob.perform_later(connection.id)
+        InboxSyncScheduler.schedule(connection)
         render json: {connection: connection_json(connection)}, status: :created
       else
         render json: {errors: connection.errors.full_messages}, status: :unprocessable_entity

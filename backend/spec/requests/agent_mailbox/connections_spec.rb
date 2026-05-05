@@ -38,15 +38,17 @@ RSpec.describe "AgentMailbox::Connections", type: :request do
         {agentmail_connection: {inbox_id: "new@agentmail.to", api_key: "key-123"}}
       end
 
-      it "creates a connection and enqueues a sync job" do
-        expect {
-          post "/accounts/#{account.id}/agent_mailbox/connections", params: valid_params, as: :json
-        }.to have_enqueued_job(SyncAgentMailboxJob)
+      it "creates a connection and schedules ingestion" do
+        allow(InboxSyncScheduler).to receive(:schedule)
+
+        post "/accounts/#{account.id}/agent_mailbox/connections", params: valid_params, as: :json
 
         expect(response).to have_http_status(:created)
         body = response.parsed_body
         expect(body["connection"]["inbox_id"]).to eq("new@agentmail.to")
         expect(body["connection"]).not_to have_key("api_key")
+        created = AgentmailConnection.find(body["connection"]["id"])
+        expect(InboxSyncScheduler).to have_received(:schedule).with(created)
       end
 
       it "returns errors for invalid params" do
@@ -73,12 +75,13 @@ RSpec.describe "AgentMailbox::Connections", type: :request do
     end
 
     describe "POST /accounts/:account_id/agent_mailbox/connections/:id/sync" do
-      it "enqueues a sync job for the connection" do
-        expect {
-          post "/accounts/#{account.id}/agent_mailbox/connections/#{connection.id}/sync"
-        }.to have_enqueued_job(SyncAgentMailboxJob).with(connection.id)
+      it "schedules ingestion for the connection" do
+        allow(InboxSyncScheduler).to receive(:schedule)
+
+        post "/accounts/#{account.id}/agent_mailbox/connections/#{connection.id}/sync"
 
         expect(response).to have_http_status(:accepted)
+        expect(InboxSyncScheduler).to have_received(:schedule).with(connection)
       end
     end
   end

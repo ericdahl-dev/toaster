@@ -92,7 +92,7 @@ RSpec.describe "Imap::Connections", type: :request do
       end
 
       it "creates a new IMAP connection" do
-        allow(SyncImapJob).to receive(:perform_later)
+        allow(InboxSyncScheduler).to receive(:schedule)
 
         post "/accounts/#{account.id}/imap/connections", params: valid_params
 
@@ -103,13 +103,14 @@ RSpec.describe "Imap::Connections", type: :request do
         expect(body["connection"]).not_to have_key("password")
       end
 
-      it "enqueues a sync job after creating a connection" do
-        allow(SyncImapJob).to receive(:perform_later)
+      it "schedules ingestion after creating a connection" do
+        allow(InboxSyncScheduler).to receive(:schedule)
 
         post "/accounts/#{account.id}/imap/connections", params: valid_params
 
         new_id = response.parsed_body.dig("connection", "id")
-        expect(SyncImapJob).to have_received(:perform_later).with(new_id)
+        created = ImapConnection.find(new_id)
+        expect(InboxSyncScheduler).to have_received(:schedule).with(created)
       end
 
       it "returns 422 when required fields are missing" do
@@ -156,8 +157,8 @@ RSpec.describe "Imap::Connections", type: :request do
     end
 
     describe "POST /accounts/:account_id/imap/connections/:connection_id/sync" do
-      it "enqueues a sync job and returns accepted" do
-        allow(SyncImapJob).to receive(:perform_later)
+      it "schedules ingestion and returns accepted" do
+        allow(InboxSyncScheduler).to receive(:schedule)
 
         post "/accounts/#{account.id}/imap/connections/#{connection.id}/sync"
 
@@ -165,7 +166,7 @@ RSpec.describe "Imap::Connections", type: :request do
         body = response.parsed_body
         expect(body["status"]).to eq("enqueued")
         expect(body["imap_connection_id"]).to eq(connection.id)
-        expect(SyncImapJob).to have_received(:perform_later).with(connection.id)
+        expect(InboxSyncScheduler).to have_received(:schedule).with(connection)
       end
 
       it "returns 404 for an unknown connection" do

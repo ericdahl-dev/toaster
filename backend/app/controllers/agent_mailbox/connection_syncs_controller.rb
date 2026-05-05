@@ -4,7 +4,7 @@ module AgentMailbox
   class ConnectionSyncsController < AccountScopedController
     def create
       connection = @account.agentmail_connections.find(params[:connection_id])
-      SyncAgentMailboxJob.perform_later(connection.id)
+      InboxSyncScheduler.schedule(connection)
 
       render json: {
         status: "enqueued",

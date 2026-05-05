@@ -16,7 +16,7 @@ module AgentMailbox
     def create
       connection = @account.agentmail_connections.build(connection_params)
       if connection.save
-        SyncAgentMailboxJob.perform_later(connection.id)
+        InboxSyncScheduler.schedule(connection)
         render json: {connection: connection_json(connection)}, status: :created
       else
         render json: {errors: connection.errors.full_messages}, status: :unprocessable_entity

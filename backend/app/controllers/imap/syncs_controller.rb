@@ -2,7 +2,7 @@ module Imap
   class SyncsController < AccountScopedController
     def create
       connection = @account.imap_connections.find(params[:connection_id])
-      SyncImapJob.perform_later(connection.id)
+      InboxSyncScheduler.schedule(connection)
 
       render json: {
         status: "enqueued",

@@ -7,7 +7,7 @@ class SyncAllAgentmailConnectionsJob < ApplicationJob
     enqueued_count = 0
 
     AgentmailConnection.active_connections.find_each do |conn|
-      SyncAgentMailboxJob.perform_later(conn.id)
+      InboxSyncScheduler.schedule(conn)
       enqueued_count += 1
     end
 
