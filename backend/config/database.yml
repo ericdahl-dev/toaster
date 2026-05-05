@@ -58,9 +58,20 @@ development:
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
+#
+# parallel_rspec (parallel_tests) sets TEST_ENV_NUMBER to '', '2', '3', ... so each
+# worker uses its own test DB (run `rake parallel:create parallel:prepare` once locally).
+<% unless ENV["DATABASE_URL"].to_s.strip.empty? %>
+<%   test_db_uri = URI.parse(ENV["DATABASE_URL"]) %>
+<%   test_db_uri.path = "/backend_test#{ENV.fetch("TEST_ENV_NUMBER", "")}" %>
+<% end %>
 test:
   <<: *default
-  database: backend_test
+<% unless ENV["DATABASE_URL"].to_s.strip.empty? %>
+  url: <%= test_db_uri.to_s %>
+<% else %>
+  database: backend_test<%= ENV.fetch("TEST_ENV_NUMBER", "") %>
+<% end %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
