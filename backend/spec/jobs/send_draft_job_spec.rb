@@ -7,7 +7,9 @@ RSpec.describe SendDraftJob, type: :job do
 
       described_class.perform_now(draft.id)
 
-      expect(draft.reload.status).to eq("sent")
+      draft.reload
+      expect(draft.status).to eq("sent")
+      expect(draft.sent_at).to be_present
     end
 
     it "does nothing when draft is not approved" do

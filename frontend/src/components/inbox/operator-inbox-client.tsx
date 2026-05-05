@@ -1,67 +1,42 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toasterFetch } from '@/lib/toaster-fetch';
-import { OperatorInboxView, type InboxDetail, type InboxListItem } from './operator-inbox-view';
+import { parseThreadDetail, threadToSearchParams } from '@/lib/ops-inbox';
+import { OperatorInboxView, type ThreadDetail, type ThreadListItem } from './operator-inbox-view';
 
 export function OperatorInboxClient({
-  initialMessages,
-  initialSelectedMessage,
+  initialThreads,
+  initialThreadDetail,
   inboxApiBase = '/api/ops',
 }: {
-  initialMessages: InboxListItem[];
-  initialSelectedMessage: InboxDetail | null;
-  /** Session-aware Next proxy for ops inbox routes (default `/api/ops`). */
+  initialThreads: ThreadListItem[];
+  initialThreadDetail: ThreadDetail | null;
   inboxApiBase?: string;
 }) {
-  const [messages] = useState(initialMessages);
-  const [selectedMessage, setSelectedMessage] = useState<InboxDetail | null>(initialSelectedMessage);
+  const router = useRouter();
+  const [selectedThread, setSelectedThread] = useState<ThreadDetail | null>(initialThreadDetail);
 
-  async function handleSelectMessage(messageId: number) {
-    const response = await toasterFetch(`${inboxApiBase}/inbox_messages/${messageId}`);
-    if (!response.ok) return;
+  async function handleSelectThread(thread: ThreadListItem) {
+    const qs = threadToSearchParams(thread).toString();
+    router.replace(`/inbox?${qs}`, { scroll: false });
+
+    const response = await toasterFetch(`${inboxApiBase}/inbox_threads/view?${qs}`);
+    if (!response.ok) {
+      setSelectedThread(null);
+      return;
+    }
 
     const body = await response.json();
-    const message = body.inbox_message as Record<string, unknown>;
-    const bookingRequest = message.booking_request as Record<string, unknown> | null;
-
-    setSelectedMessage({
-      id: Number(message.id),
-      fromName: typeof message.from_name === 'string' ? message.from_name : null,
-      fromEmail: typeof message.from_email === 'string' ? message.from_email : null,
-      subject: typeof message.subject === 'string' ? message.subject : null,
-      receivedAt: typeof message.received_at === 'string' ? message.received_at : null,
-      bodyText: typeof message.body_text === 'string' ? message.body_text : null,
-      rawPayload: (message.raw_payload as Record<string, unknown>) ?? {},
-      bookingRequest: bookingRequest
-        ? {
-            id: Number(bookingRequest.id),
-            status: String(bookingRequest.status),
-            eventDate: typeof bookingRequest.event_date === 'string' ? bookingRequest.event_date : null,
-            headcount: typeof bookingRequest.headcount === 'number' ? bookingRequest.headcount : null,
-            budgetCents: typeof bookingRequest.budget_cents === 'number' ? bookingRequest.budget_cents : null,
-            missingFields: Array.isArray(bookingRequest.missing_fields)
-              ? bookingRequest.missing_fields.filter((item): item is string => typeof item === 'string')
-              : [],
-            reviewReasons: Array.isArray(bookingRequest.review_reasons)
-              ? bookingRequest.review_reasons.filter((item): item is string => typeof item === 'string')
-              : [],
-            pendingDraft: (() => {
-              const draft = bookingRequest.pending_draft as Record<string, unknown> | null | undefined;
-              return draft && typeof draft.id === 'number' && typeof draft.body === 'string'
-                ? { id: draft.id, body: draft.body }
-                : null;
-            })(),
-          }
-        : null,
-    });
+    setSelectedThread(parseThreadDetail(body as Record<string, unknown>));
   }
 
   return (
     <OperatorInboxView
-      messages={messages}
-      selectedMessage={selectedMessage}
-      onSelectMessage={handleSelectMessage}
+      threads={initialThreads}
+      selectedThread={selectedThread}
+      onSelectThread={handleSelectThread}
     />
   );
 }
