@@ -94,6 +94,50 @@ describe('AddEmailAccountForm', () => {
     expect(screen.getByLabelText(/imap server/i)).toHaveValue('');
   });
 
+  it('lets the user change IMAP host, port, SSL, and inbox folder for non-AgentMail providers', () => {
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/imap server/i), { target: { value: 'imap.custom.test' } });
+    fireEvent.change(screen.getByLabelText(/port/i), { target: { value: '143' } });
+    fireEvent.click(screen.getByLabelText(/use ssl/i));
+    fireEvent.change(screen.getByLabelText(/inbox folder/i), { target: { value: 'MyInbox' } });
+
+    expect(screen.getByLabelText(/imap server/i)).toHaveValue('imap.custom.test');
+    expect(screen.getByLabelText(/port/i)).toHaveValue(143);
+    expect(screen.getByLabelText(/use ssl/i)).not.toBeChecked();
+    expect(screen.getByLabelText(/inbox folder/i)).toHaveValue('MyInbox');
+  });
+
+  it('shows validation when port is not a valid positive whole number', async () => {
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/email address/i), {
+      target: { value: 'user@gmail.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'secret' } });
+    fireEvent.change(screen.getByLabelText(/port/i), { target: { value: '0' } });
+    fireEvent.click(screen.getByRole('button', { name: /add email account/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/port must be a positive whole number/i)).toBeInTheDocument();
+    });
+  });
+
+  it('shows validation when inbox folder is empty', async () => {
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/email address/i), {
+      target: { value: 'user@gmail.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'secret' } });
+    fireEvent.change(screen.getByLabelText(/inbox folder/i), { target: { value: '  ' } });
+    fireEvent.click(screen.getByRole('button', { name: /add email account/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/inbox folder is required/i)).toBeInTheDocument();
+    });
+  });
+
   it('shows validation errors when submitting empty form', async () => {
     render(<AddEmailAccountForm {...defaultProps} />);
 
@@ -145,7 +189,8 @@ describe('AddEmailAccountForm', () => {
       })
     );
 
-    render(<AddEmailAccountForm {...defaultProps} />);
+    const onSuccess = vi.fn();
+    render(<AddEmailAccountForm {...defaultProps} onSuccess={onSuccess} />);
 
     fireEvent.change(screen.getByLabelText(/email address/i), {
       target: { value: 'test@gmail.com' },
@@ -156,6 +201,7 @@ describe('AddEmailAccountForm', () => {
     await waitFor(() => {
       expect(screen.getByRole('status')).toHaveTextContent(/added successfully/i);
     });
+    expect(onSuccess).toHaveBeenCalledTimes(1);
 
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(
       'http://localhost:3001/accounts/1/imap/connections',
@@ -164,6 +210,30 @@ describe('AddEmailAccountForm', () => {
         headers: { 'Content-Type': 'application/json' },
       })
     );
+  });
+
+  it('shows generic message when server returns failure without error fields', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        json: async () => ({}),
+      })
+    );
+
+    render(<AddEmailAccountForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByLabelText(/email address/i), {
+      target: { value: 'test@gmail.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'apppassword' } });
+    fireEvent.click(screen.getByRole('button', { name: /add email account/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        /failed to add email account\. please check your details/i
+      );
+    });
   });
 
   it('shows API error field when present (e.g. account not found)', async () => {
