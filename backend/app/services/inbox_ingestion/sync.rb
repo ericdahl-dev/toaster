@@ -18,6 +18,7 @@ module InboxIngestion
 
       adapter.each_normalized_message do |attrs|
         inbox_message, created = upsert(attrs)
+        BookingRequests::PostIngestion.after_inbox_message_persisted(inbox_message)
         messages << inbox_message
         if created
           created_count += 1
@@ -52,7 +53,7 @@ module InboxIngestion
         created = msg.new_record?
         msg.assign_attributes(attrs.except(:provider, :provider_message_id))
         msg.save!
-        [ msg, created ]
+        [msg, created]
       rescue ActiveRecord::RecordNotUnique
         msg = InboxMessage.find_by!(
           account: account,
@@ -61,7 +62,7 @@ module InboxIngestion
         )
         msg.assign_attributes(attrs.except(:provider, :provider_message_id))
         msg.save!
-        [ msg, false ]
+        [msg, false]
       end
     end
   end
