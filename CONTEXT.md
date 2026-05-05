@@ -25,9 +25,16 @@ A persisted row derived from an **inbox message** for venue/event intake; extrac
 **Extraction lock**:
 When a booking request’s status is **confirmed**, **rejected**, or **cancelled**, further **inbox ingestion** does not re-run extraction on that message—human workflow outcomes stay authoritative until someone changes status again via **transition**.
 
+**Venue**:
+A bookable location owned by an **Account**. **Booking requests** may reference a venue (`venue_id` optional). Venues are not tied to a single mail **connection** in the schema today.
+
+**Mail connection**:
+Credentials plus checkpoint state for one mailbox on a **provider** (for example `ImapConnection` or `AgentmailConnection`). Belongs to an **Account**, not to a specific **Venue**.
+
 ## Relationships
 
 - An **Account** has one or more inbox **connections** (per provider).
+- An **Account** has one or more **venues**.
 - **Inbox ingestion** produces or updates **inbox messages** scoped to that **account**.
 - Each **connection** owns at most one active **checkpoint** semantics for its **provider**.
 
@@ -47,3 +54,4 @@ When a booking request’s status is **confirmed**, **rejected**, or **cancelled
 
 - "Sync" was used for both job enqueue and ingestion orchestration — resolved: **inbox ingestion** is the orchestrated fetch+upsert+checkpoint step; jobs remain thin schedulers.
 - Fetch and transport failures during ingestion **bubble** to the job layer so retries and monitoring stay consistent; ingestion does not convert hard failures into silent partial success.
+- **Multi-venue mail routing (product gap):** A shared inbox may serve several **venues** under one **Account**. The product needs an explicit routing story (for example rules on `To:` addresses, folders, or provider metadata) so **booking requests** can reliably represent “this inquiry is for venue X.” Today, **inbox messages** do not record which **connection** produced the row, normalized `to_emails` are stored but not used for routing, and reconcile extraction does not set `venue_id`. See `docs/adr/0002-multi-venue-mail-routing.md`.
