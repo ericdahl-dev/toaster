@@ -12,6 +12,7 @@ export function LoginForm() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -24,7 +25,11 @@ export function LoginForm() {
       const res = await toasterFetch(`${api}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), password }),
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          remember_me: rememberMe,
+        }),
       });
       if (!res.ok) {
         const detail = await res.text().catch(() => '');
@@ -99,6 +104,22 @@ export function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-600 dark:bg-zinc-800"
             />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              id="remember_me"
+              name="remember_me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border-zinc-300 text-zinc-900 focus:ring-zinc-500 dark:border-zinc-600 dark:bg-zinc-800"
+            />
+            <label
+              htmlFor="remember_me"
+              className="text-sm text-zinc-600 dark:text-zinc-400"
+            >
+              Keep me signed in on this device
+            </label>
           </div>
           {error ? (
             <p className="text-sm text-red-600 dark:text-red-400" role="alert">
