@@ -2,13 +2,19 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { browserToasterApiBase } from '@/lib/toaster-api';
+import { toasterFetch } from '@/lib/toaster-fetch';
 
-const MENU_ITEMS = [
+type Item = { href: string; label: string };
+
+const LOGGED_OUT_ITEMS: Item[] = [{ href: '/login', label: 'Log in' }];
+
+const LOGGED_IN_ITEMS: Item[] = [
   { href: '/inbox', label: 'Operator inbox' },
   { href: '/email-accounts', label: 'Email accounts' },
 ];
 
-export function HamburgerMenu() {
+export function HamburgerMenu({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +38,16 @@ export function HamburgerMenu() {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen]);
+
+  const items = isAuthenticated ? LOGGED_IN_ITEMS : LOGGED_OUT_ITEMS;
+
+  function handleSignOut() {
+    setIsOpen(false);
+    const api = browserToasterApiBase();
+    void toasterFetch(`${api}/auth/logout`, { method: 'POST' }).finally(() => {
+      window.location.href = '/login';
+    });
+  }
 
   return (
     <div ref={menuRef} className="relative">
@@ -84,7 +100,7 @@ export function HamburgerMenu() {
           id="hamburger-menu"
           className="absolute right-0 top-11 z-50 min-w-44 rounded-2xl border border-zinc-200 bg-white py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-800"
         >
-          {MENU_ITEMS.map(({ href, label }) => (
+          {items.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
@@ -94,6 +110,21 @@ export function HamburgerMenu() {
               {label}
             </Link>
           ))}
+          {isAuthenticated && (
+            <>
+              <div
+                role="separator"
+                className="my-1 border-t border-zinc-200 dark:border-zinc-700"
+              />
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className="block w-full px-4 py-2 text-left text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-700 dark:hover:text-zinc-100"
+              >
+                Sign out
+              </button>
+            </>
+          )}
         </nav>
       )}
     </div>

@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { HamburgerMenu } from "@/components/shared/hamburger-menu";
+import { serverFetchBackend } from "@/lib/server-toaster-session";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,11 +21,21 @@ export const metadata: Metadata = {
   description: "AI booking assistant for venue inquiries",
 };
 
-export default function RootLayout({
+async function getIsAuthenticated(): Promise<boolean> {
+  try {
+    const res = await serverFetchBackend("/auth/me");
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isAuthenticated = await getIsAuthenticated();
   return (
     <html
       lang="en"
@@ -40,7 +51,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           <div className="fixed top-4 right-4 z-50">
-            <HamburgerMenu />
+            <HamburgerMenu isAuthenticated={isAuthenticated} />
           </div>
           <div className="fixed bottom-4 right-4 z-50">
             <ThemeToggle />
