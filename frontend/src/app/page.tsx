@@ -1,5 +1,3 @@
-import Link from 'next/link';
-
 export default function Home() {
   return (
     <main className="min-h-screen bg-zinc-50 px-6 py-16 text-zinc-950 dark:bg-zinc-900 dark:text-zinc-50">
@@ -34,21 +32,6 @@ export default function Home() {
             </div>
           ))}
         </section>
-
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/inbox"
-            className="inline-flex items-center rounded-full bg-zinc-950 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-          >
-            Open operator inbox
-          </Link>
-          <Link
-            href="/email-accounts"
-            className="inline-flex items-center rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 transition hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-zinc-500 dark:hover:bg-zinc-700"
-          >
-            Add email account
-          </Link>
-        </div>
       </div>
     </main>
   );
