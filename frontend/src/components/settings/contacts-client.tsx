@@ -40,6 +40,12 @@ export function ContactsClient({
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    };
+  }, []);
+
   const load = useCallback(
     async (q?: string) => {
       setListState({ status: 'loading' });
