@@ -36,19 +36,9 @@ module Backend
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
 
-    # Only loads a smaller set of middleware suitable for API only apps.
-    # Middleware like session, flash, cookies can be added back manually.
-    # Skip views, helpers and assets when generating a new resource.
-    config.api_only = true
-
     # Background jobs via GoodJob
     config.active_job.queue_adapter = :good_job
     config.good_job.execution_mode = :async
-
-    # Cookie/session middleware required for GoodJob dashboard and cookie-based auth in API-only app
-    config.middleware.use ActionDispatch::Cookies
-    config.middleware.use ActionDispatch::Session::CookieStore
-    config.middleware.use ActionDispatch::Flash
 
     config.hosts << "toaster-backend.ger3.ericdahl.dev"
   end

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <title><%= content_for(:title) || "Toaster" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="h-full bg-slate-50 text-slate-900 antialiased">
+
+    <% if notice.present? %>
+      <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-md bg-green-50 px-4 py-3 text-sm text-green-800 shadow" role="alert">
+        <%= notice %>
+      </div>
+    <% end %>
+    <% if alert.present? %>
+      <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800 shadow" role="alert">
+        <%= alert %>
+      </div>
+    <% end %>
+
+    <%= yield %>
+
+  </body>
+</html>
