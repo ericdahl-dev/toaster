@@ -8,7 +8,6 @@ require "active_record/railtie"
 # require "active_storage/engine"
 require "action_controller/railtie"
 require "action_mailer/railtie"
-require "sprockets/railtie"
 # require "action_mailbox/engine"
 # require "action_text/engine"
 require "action_view/railtie"
@@ -42,11 +41,11 @@ module Backend
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
-    # Use Solid Queue as the Active Job backend
-    config.active_job.queue_adapter = :solid_queue
-    config.solid_queue.silence_polling = true
+    # Background jobs via GoodJob
+    config.active_job.queue_adapter = :good_job
+    config.good_job.execution_mode = :async
 
-    # Allow Mission Control (HTML engine) to function inside the API-only app
+    # Cookie/session middleware required for GoodJob dashboard and cookie-based auth in API-only app
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore
     config.middleware.use ActionDispatch::Flash

@@ -68,5 +68,7 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   # Use the test adapter so have_enqueued_job / have_been_enqueued matchers work.
+  # Prevent GoodJob from spawning background threads during tests.
   config.active_job.queue_adapter = :test
+  config.good_job.execution_mode = :external
 end

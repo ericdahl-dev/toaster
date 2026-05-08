@@ -10,13 +10,8 @@ gem "puma", ">= 5.0"
 # IMAP support for polling-based inbox sync
 gem "net-imap"
 
-# Database-backed Active Job backend
-gem "solid_queue", "~> 1.4"
-
-# Operational controls for Active Job queues
-gem "mission_control-jobs", "~> 1.1"
-# Asset pipeline required for Mission Control CSS/JS in API-only app
-gem "sprockets-rails"
+# Background jobs with dashboard [https://github.com/bensheldon/good_job]
+gem "good_job"
 # Use Redis adapter to run Action Cable in production
 # gem "redis", ">= 4.0.1"
 
@@ -45,9 +40,6 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
-
-  # Run web + Solid Queue worker together locally (`bin/dev`)
-  gem "foreman", "~> 0.90.0", require: false
 
   gem "simplecov", require: false
   gem "simplecov_json_formatter", require: false

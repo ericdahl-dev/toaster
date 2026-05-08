@@ -40,8 +40,8 @@ Rails.application.routes.draw do
     post "/retry_draft/:id", to: "ops#retry_draft"
   end
 
-  # Mission Control – Jobs web dashboard (HTML)
-  mount MissionControl::Jobs::Engine, at: "/jobs"
+  # GoodJob – Jobs web dashboard (HTML)
+  mount GoodJob::Engine, at: "/jobs"
 
   # Defines the root path route ("/")
   # root "posts#index"

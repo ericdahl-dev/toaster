@@ -8,26 +8,27 @@ class OpsController < ApplicationController
 
   def index
     render json: {
-      queued_jobs: SolidQueue::Job.where(finished_at: nil).count,
-      failed_jobs: SolidQueue::FailedExecution.count,
+      queued_jobs: GoodJob::Job.where(finished_at: nil).count,
+      failed_jobs: GoodJob::Job.where.not(error: nil).where.not(finished_at: nil).count,
       pending_drafts: Draft.pending_review.count,
       approved_drafts: Draft.approved.count
     }
   end
 
   def failed_jobs
-    failures = SolidQueue::FailedExecution
-      .includes(:job)
-      .order(created_at: :desc)
+    failures = GoodJob::Job
+      .where.not(error: nil)
+      .where.not(finished_at: nil)
+      .order(finished_at: :desc)
       .limit(100)
-      .map do |fe|
+      .map do |job|
         {
-          id: fe.id,
-          job_id: fe.job_id,
-          class_name: fe.job.class_name,
-          queue_name: fe.job.queue_name,
-          error: fe.error,
-          failed_at: fe.created_at
+          id: job.id,
+          job_id: job.id,
+          class_name: job.job_class,
+          queue_name: job.queue_name,
+          error: job.error,
+          failed_at: job.finished_at
         }
       end
     render json: {failed_jobs: failures}
@@ -53,9 +54,9 @@ class OpsController < ApplicationController
   end
 
   def retry_failed_job
-    fe = SolidQueue::FailedExecution.find(params[:id])
-    fe.retry
-    render json: {status: "retried", job_id: fe.job_id}
+    job = GoodJob::Job.find(params[:id])
+    job.retry_job
+    render json: {status: "retried", job_id: job.id}
   rescue ActiveRecord::RecordNotFound
     render json: {error: "Failed job not found"}, status: :not_found
   end

@@ -1,3 +1,5 @@
-# Local development: web + Solid Queue (see bin/dev)
+# Local development: web + GoodJob worker (see bin/dev)
+# GoodJob also runs async inside Puma (execution_mode :async) so the worker
+# process is optional in dev — useful when you want the dashboard to show jobs.
 web: ./bin/rails server -b 0.0.0.0 -p ${PORT:-3000}
-worker: ./bin/rails solid_queue:start
+worker: bundle exec good_job start

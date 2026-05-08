@@ -50,6 +50,20 @@ bd close <id>         # Complete work
 <!-- END BEADS INTEGRATION -->
 
 
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues (`github.com/ericdahl-dev/toaster`). See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo: one `CONTEXT.md` + `docs/adr/` at the root, shared across backend and frontend. See `docs/agents/domain.md`.
+
 ## Build & Test
 
 _Add your build and test commands here_

@@ -8,7 +8,7 @@ if Rails.env.production?
   # TOASTER_ADMIN_EMAIL / TOASTER_ADMIN_PASSWORD / TOASTER_ADMIN_NAME — bootstrap admin user (optional)
   account = Account.first_or_create!(name: ENV.fetch("TOASTER_SEED_ACCOUNT_NAME", "Toaster"))
 
-  admin_email = ENV["TOASTER_ADMIN_EMAIL"]
+  admin_email = "admin@toaster.local"
   admin_password = ENV["TOASTER_ADMIN_PASSWORD"]
   if admin_email.present? && admin_password.present?
     user = User.find_or_initialize_by(email: admin_email)
