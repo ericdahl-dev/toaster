@@ -50,6 +50,9 @@ class VenuesController < ApplicationController
   end
 
   def venue_params
-    params.require(:venue).permit(:name)
+    params.require(:venue).permit(
+      :name, :address, :capacity,
+      venue_spaces_attributes: [:id, :name, :min_guests, :capacity_seated, :capacity_reception, :pricing_floor_cents, :_destroy]
+    )
   end
 end

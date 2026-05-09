@@ -59,6 +59,14 @@ RSpec.describe "Venues HTML", type: :request do
         expect(Venue.where(account: account, name: "The Loft")).to exist
       end
 
+      it "saves address and capacity" do
+        post "/venues", params: {venue: {name: "The Loft", address: "123 Main St", capacity: 80}}
+
+        venue = Venue.find_by!(name: "The Loft")
+        expect(venue.address).to eq("123 Main St")
+        expect(venue.capacity).to eq(80)
+      end
+
       it "re-renders with errors on blank name" do
         post "/venues", params: {venue: {name: ""}}
 
@@ -99,6 +107,39 @@ RSpec.describe "Venues HTML", type: :request do
 
         expect(response).to have_http_status(:redirect)
         expect(venue.reload.name).to eq("New Name")
+      end
+
+      it "updates address and capacity" do
+        patch "/venues/#{venue.id}", params: {venue: {address: "999 Oak Ave", capacity: 200}}
+
+        venue.reload
+        expect(venue.address).to eq("999 Oak Ave")
+        expect(venue.capacity).to eq(200)
+      end
+
+      it "creates nested venue spaces" do
+        patch "/venues/#{venue.id}", params: {
+          venue: {
+            venue_spaces_attributes: [
+              {name: "Rooftop", capacity_seated: 40, capacity_reception: 150}
+            ]
+          }
+        }
+
+        expect(response).to have_http_status(:redirect)
+        expect(venue.venue_spaces.reload.size).to eq(1)
+        expect(venue.venue_spaces.first.name).to eq("Rooftop")
+      end
+
+      it "destroys a venue space when _destroy is 1" do
+        space = create(:venue_space, venue: venue, name: "Rooftop")
+        patch "/venues/#{venue.id}", params: {
+          venue: {
+            venue_spaces_attributes: [{id: space.id, _destroy: "1"}]
+          }
+        }
+
+        expect(VenueSpace.find_by(id: space.id)).to be_nil
       end
     end
   end
