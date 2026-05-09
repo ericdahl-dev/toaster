@@ -6,12 +6,12 @@ class WaitlistEntriesController < ApplicationController
   def create
     @entry = WaitlistEntry.find_or_initialize_by(email: entry_params[:email].to_s.strip.downcase)
     new_record = @entry.new_record?
+    @entry.assign_attributes(entry_params) if new_record
 
     if @entry.persisted? || @entry.save
       WaitlistMailer.confirmation(@entry).deliver_later if new_record
       render :success, status: :ok
     else
-      @entry = WaitlistEntry.new(entry_params)
       @entry.valid?
       render :form, status: :unprocessable_entity
     end
@@ -20,6 +20,6 @@ class WaitlistEntriesController < ApplicationController
   private
 
   def entry_params
-    params.require(:waitlist_entry).permit(:email)
+    params.require(:waitlist_entry).permit(:email, :full_name, :company_name)
   end
 end
