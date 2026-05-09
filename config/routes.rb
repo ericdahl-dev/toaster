@@ -38,7 +38,7 @@ Rails.application.routes.draw do
       end
     end
   end
-  resources :mail_connections, only: [:index, :new, :create, :edit] do
+  resources :mail_connections, only: [:index, :new, :create, :edit, :update] do
     resources :inbox_filters, only: [:create, :destroy]
   end
   resources :venues, only: [:index, :new, :create, :edit, :update, :destroy]

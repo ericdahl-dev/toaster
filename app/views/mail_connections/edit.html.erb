@@ -7,6 +7,44 @@
   </div>
 </div>
 
+<% if @connection.errors.any? %>
+  <div class="flash flash-alert" style="position:static;margin-bottom:20px;animation:none">
+    <% @connection.errors.full_messages.each do |msg| %>
+      <div><%= msg %></div>
+    <% end %>
+  </div>
+<% end %>
+
+<div class="section-heading">Connection details</div>
+
+<div style="max-width:480px;margin-bottom:32px">
+  <%= form_with model: @connection, url: mail_connection_path(@connection), method: :patch do |f| %>
+    <div class="form-group">
+      <label class="form-label">Host</label>
+      <%= f.text_field :host, class: "form-input" %>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Port</label>
+      <%= f.number_field :port, class: "form-input" %>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Username (email)</label>
+      <%= f.email_field :username, class: "form-input" %>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password <span class="dim" style="font-weight:400">(leave blank to keep current)</span></label>
+      <%= f.password_field :password, class: "form-input", autocomplete: "new-password" %>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Inbox folder</label>
+      <%= f.text_field :inbox_folder, class: "form-input" %>
+    </div>
+    <div style="margin-top:24px">
+      <button type="submit" class="btn btn-amber">Save changes</button>
+    </div>
+  <% end %>
+</div>
+
 <div class="section-heading">Inbox filters</div>
 
 <% if @connection.inbox_filters.any? %>
