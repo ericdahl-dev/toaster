@@ -39,7 +39,7 @@ Dockerfile  # Production image
 - **Language / Framework:** Ruby 3.3.7, Rails 7.2
 - **Database:** PostgreSQL (Neon in production; use `DATABASE_URL` for pooled connection,
   direct URL for migrations)
-- **Job queue:** GoodJob; job dashboard via Mission Control Jobs at `/jobs`
+- **Job queue:** GoodJob; job dashboard at `/jobs`
 - **Web server:** Puma
 
 ### Conventions
