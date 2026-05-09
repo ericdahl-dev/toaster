@@ -1,6 +1,13 @@
-<div class="flex min-h-screen items-center justify-center">
-  <div class="text-center">
-    <h1 class="text-2xl font-semibold text-slate-900">Toaster</h1>
-    <p class="mt-2 text-slate-500">AI booking assistant</p>
-  </div>
+<div style="display:flex;align-items:center;justify-content:center;min-height:60vh;flex-direction:column;gap:12px;text-align:center">
+  <div style="font-size:40px;opacity:0.15">🍞</div>
+  <p class="dim" style="font-size:11px;letter-spacing:0.08em;text-transform:uppercase">AI booking assistant</p>
+  <% if current_user %>
+    <div style="margin-top:8px">
+      <%= link_to "View requests →", booking_requests_path, class: "btn btn-amber" %>
+    </div>
+  <% else %>
+    <div style="margin-top:8px">
+      <%= link_to "Sign in →", login_path, class: "btn btn-amber" %>
+    </div>
+  <% end %>
 </div>
