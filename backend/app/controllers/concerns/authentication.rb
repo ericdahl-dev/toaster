@@ -52,4 +52,10 @@ module Authentication
 
     render json: {error: "Unauthorized"}, status: :unauthorized
   end
+
+  def require_authenticated_html_user!
+    return if current_user
+
+    redirect_to login_path, alert: "Please sign in."
+  end
 end
