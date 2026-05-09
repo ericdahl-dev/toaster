@@ -13,7 +13,7 @@ if Rails.env.production?
   if admin_email.present? && admin_password.present?
     user = User.find_or_initialize_by(email: admin_email)
     user.account ||= account
-    user.name = ENV.fetch("TOASTER_ADMIN_NAME", admin_email)
+    user.name = ENV["TOASTER_ADMIN_NAME"].presence || admin_email
     if user.new_record?
       user.password = admin_password
       user.password_confirmation = admin_password
