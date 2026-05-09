@@ -42,5 +42,6 @@ module Backend
 
     config.hosts << "toaster-backend.ger3.ericdahl.dev"
     config.hosts << "toaster.ger3.ericdahl.dev"
+    config.hosts << /\A\d+\.toaster\.ger3\.ericdahl\.dev\z/
   end
 end
