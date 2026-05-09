@@ -66,7 +66,7 @@ class OpsController < ApplicationController
     unless draft.approved?
       return render json: {error: "Draft is not in approved state"}, status: :unprocessable_entity
     end
-    SendDraftJob.perform_later(draft.id)
+    PushDraftJob.perform_later(draft.id)
     render json: {status: "enqueued", draft_id: draft.id}
   rescue ActiveRecord::RecordNotFound
     render json: {error: "Draft not found"}, status: :not_found

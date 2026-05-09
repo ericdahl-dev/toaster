@@ -6,7 +6,7 @@ class DraftsController < ApplicationController
 
   def approve
     @draft.update!(status: "approved")
-    SendDraftJob.perform_later(@draft.id)
+    PushDraftJob.perform_later(@draft.id)
     redirect_to booking_request_path(@draft.booking_request), notice: "Draft approved."
   end
 
