@@ -3,6 +3,11 @@ Rails.application.routes.draw do
 
   get "/up", to: "up#show"
 
+  # HTML auth
+  get  "/login",  to: "sessions#new"
+  post "/login",  to: "sessions#create"
+  delete "/logout", to: "sessions#destroy"
+
   post "/auth/login", to: "auth/sessions#create"
   post "/auth/logout", to: "auth/sessions#destroy"
   get "/auth/me", to: "auth/sessions#me"
