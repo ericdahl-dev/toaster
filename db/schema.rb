@@ -10,26 +10,26 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_09_010126) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
-  enable_extension "plpgsql"
+  enable_extension "pg_catalog.plpgsql"
 
   create_table "accounts", force: :cascade do |t|
-    t.string "name", null: false
     t.datetime "created_at", null: false
+    t.string "name", null: false
     t.datetime "updated_at", null: false
   end
 
   create_table "ai_runs", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "booking_request_id"
+    t.datetime "created_at", null: false
+    t.integer "input_tokens"
     t.string "llm_model", null: false
+    t.integer "output_tokens"
     t.text "prompt", null: false
     t.text "response"
-    t.integer "input_tokens"
-    t.integer "output_tokens"
-    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_ai_runs_on_account_id"
     t.index ["booking_request_id"], name: "index_ai_runs_on_booking_request_id"
@@ -37,21 +37,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
 
   create_table "booking_requests", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.bigint "conversation_thread_id", null: false
+    t.integer "budget_cents"
     t.bigint "contact_id", null: false
-    t.bigint "venue_id"
-    t.string "status", default: "pending", null: false
+    t.bigint "conversation_thread_id", null: false
+    t.datetime "created_at", null: false
     t.date "event_date"
     t.date "event_end_date"
-    t.integer "headcount"
-    t.integer "budget_cents"
-    t.text "notes"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.bigint "source_inbox_message_id"
     t.jsonb "extraction_snapshot", default: {}, null: false
+    t.integer "headcount"
     t.jsonb "missing_fields", default: [], null: false
+    t.text "notes"
     t.jsonb "review_reasons", default: [], null: false
+    t.bigint "source_inbox_message_id"
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "venue_id"
     t.index ["account_id"], name: "index_booking_requests_on_account_id"
     t.index ["contact_id"], name: "index_booking_requests_on_contact_id"
     t.index ["conversation_thread_id"], name: "index_booking_requests_on_conversation_thread_id"
@@ -62,10 +62,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
 
   create_table "contacts", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.string "name", null: false
-    t.citext "email"
-    t.string "phone"
     t.datetime "created_at", null: false
+    t.citext "email"
+    t.string "name", null: false
+    t.string "phone"
     t.datetime "updated_at", null: false
     t.index ["account_id", "email"], name: "index_contacts_on_account_id_and_email", unique: true, where: "(email IS NOT NULL)"
     t.index ["account_id"], name: "index_contacts_on_account_id"
@@ -74,9 +74,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
   create_table "conversation_threads", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "contact_id", null: false
+    t.datetime "created_at", null: false
     t.string "provider_thread_id", null: false
     t.string "subject"
-    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id", "provider_thread_id"], name: "idx_on_account_id_provider_thread_id_f9411ec04c", unique: true
     t.index ["account_id"], name: "index_conversation_threads_on_account_id"
@@ -85,14 +85,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
 
   create_table "drafts", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.bigint "booking_request_id", null: false
     t.text "body", null: false
-    t.string "status", default: "pending_review", null: false
+    t.bigint "booking_request_id", null: false
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.datetime "sent_at"
     t.integer "imap_draft_uid"
     t.text "original_body"
+    t.datetime "sent_at"
+    t.string "status", default: "pending_review", null: false
+    t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_drafts_on_account_id"
     t.index ["booking_request_id"], name: "index_drafts_on_booking_request_id"
     t.index ["status"], name: "index_drafts_on_status"
@@ -100,11 +100,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
 
   create_table "event_logs", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.string "event_type", null: false
-    t.string "subject_type"
-    t.bigint "subject_id"
-    t.jsonb "payload", default: {}, null: false
     t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.bigint "subject_id"
+    t.string "subject_type"
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_event_logs_on_account_id"
     t.index ["event_type"], name: "index_event_logs_on_event_type"
@@ -112,79 +112,79 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
   end
 
   create_table "good_job_batches", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.text "description"
-    t.jsonb "serialized_properties"
-    t.text "on_finish"
-    t.text "on_success"
-    t.text "on_discard"
-    t.text "callback_queue_name"
     t.integer "callback_priority"
-    t.datetime "enqueued_at"
+    t.text "callback_queue_name"
+    t.datetime "created_at", null: false
+    t.text "description"
     t.datetime "discarded_at"
+    t.datetime "enqueued_at"
     t.datetime "finished_at"
     t.datetime "jobs_finished_at"
+    t.text "on_discard"
+    t.text "on_finish"
+    t.text "on_success"
+    t.jsonb "serialized_properties"
+    t.datetime "updated_at", null: false
   end
 
   create_table "good_job_executions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.uuid "active_job_id", null: false
-    t.text "job_class"
-    t.text "queue_name"
-    t.jsonb "serialized_params"
-    t.datetime "scheduled_at"
-    t.datetime "finished_at"
-    t.text "error"
-    t.integer "error_event", limit: 2
-    t.text "error_backtrace", array: true
-    t.uuid "process_id"
+    t.datetime "created_at", null: false
     t.interval "duration"
+    t.text "error"
+    t.text "error_backtrace", array: true
+    t.integer "error_event", limit: 2
+    t.datetime "finished_at"
+    t.text "job_class"
+    t.uuid "process_id"
+    t.text "queue_name"
+    t.datetime "scheduled_at"
+    t.jsonb "serialized_params"
+    t.datetime "updated_at", null: false
     t.index ["active_job_id", "created_at"], name: "index_good_job_executions_on_active_job_id_and_created_at"
     t.index ["process_id", "created_at"], name: "index_good_job_executions_on_process_id_and_created_at"
   end
 
   create_table "good_job_processes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.jsonb "state"
     t.integer "lock_type", limit: 2
+    t.jsonb "state"
+    t.datetime "updated_at", null: false
   end
 
   create_table "good_job_settings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.text "key"
+    t.datetime "updated_at", null: false
     t.jsonb "value"
     t.index ["key"], name: "index_good_job_settings_on_key", unique: true
   end
 
   create_table "good_jobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.text "queue_name"
-    t.integer "priority"
-    t.jsonb "serialized_params"
-    t.datetime "scheduled_at"
-    t.datetime "performed_at"
-    t.datetime "finished_at"
-    t.text "error"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.uuid "active_job_id"
-    t.text "concurrency_key"
-    t.text "cron_key"
-    t.uuid "retried_good_job_id"
-    t.datetime "cron_at"
-    t.uuid "batch_id"
     t.uuid "batch_callback_id"
-    t.boolean "is_discrete"
-    t.integer "executions_count"
-    t.text "job_class"
+    t.uuid "batch_id"
+    t.text "concurrency_key"
+    t.datetime "created_at", null: false
+    t.datetime "cron_at"
+    t.text "cron_key"
+    t.text "error"
     t.integer "error_event", limit: 2
+    t.integer "executions_count"
+    t.datetime "finished_at"
+    t.boolean "is_discrete"
+    t.text "job_class"
     t.text "labels", array: true
-    t.uuid "locked_by_id"
-    t.datetime "locked_at"
     t.integer "lock_type", limit: 2
+    t.datetime "locked_at"
+    t.uuid "locked_by_id"
+    t.datetime "performed_at"
+    t.integer "priority"
+    t.text "queue_name"
+    t.uuid "retried_good_job_id"
+    t.datetime "scheduled_at"
+    t.jsonb "serialized_params"
+    t.datetime "updated_at", null: false
     t.index ["active_job_id", "created_at"], name: "index_good_jobs_on_active_job_id_and_created_at"
     t.index ["batch_callback_id"], name: "index_good_jobs_on_batch_callback_id", where: "(batch_callback_id IS NOT NULL)"
     t.index ["batch_id"], name: "index_good_jobs_on_batch_id", where: "(batch_id IS NOT NULL)"
@@ -213,35 +213,35 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
 
   create_table "imap_connections", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.string "host", null: false
-    t.integer "port", default: 993, null: false
-    t.boolean "ssl", default: true, null: false
-    t.string "username", null: false
-    t.text "password"
-    t.string "inbox_folder", default: "INBOX", null: false
-    t.integer "last_synced_uid"
     t.boolean "active", default: true, null: false
     t.datetime "created_at", null: false
+    t.string "host", null: false
+    t.string "inbox_folder", default: "INBOX", null: false
+    t.integer "last_synced_uid"
+    t.text "password"
+    t.integer "port", default: 993, null: false
+    t.boolean "ssl", default: true, null: false
     t.datetime "updated_at", null: false
+    t.string "username", null: false
     t.index ["account_id", "username", "host"], name: "index_imap_connections_on_account_username_host", unique: true
     t.index ["account_id"], name: "index_imap_connections_on_account_id"
   end
 
   create_table "inbox_messages", force: :cascade do |t|
     t.bigint "account_id", null: false
+    t.text "body_html"
+    t.text "body_text"
+    t.datetime "created_at", null: false
+    t.string "direction", default: "inbound", null: false
+    t.string "from_email"
+    t.string "from_name"
     t.string "provider", null: false
     t.string "provider_message_id", null: false
     t.string "provider_thread_id"
-    t.string "direction", default: "inbound", null: false
-    t.string "from_name"
-    t.string "from_email"
-    t.jsonb "to_emails", default: [], null: false
-    t.string "subject"
-    t.text "body_text"
-    t.text "body_html"
-    t.datetime "received_at"
     t.jsonb "raw_payload", default: {}, null: false
-    t.datetime "created_at", null: false
+    t.datetime "received_at"
+    t.string "subject"
+    t.jsonb "to_emails", default: [], null: false
     t.datetime "updated_at", null: false
     t.index ["account_id", "provider", "provider_message_id"], name: "idx_inbox_messages_unique_provider_message", unique: true
     t.index ["account_id", "provider_thread_id"], name: "idx_inbox_messages_on_account_and_thread"
@@ -251,14 +251,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
 
   create_table "messages", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.bigint "conversation_thread_id", null: false
+    t.text "body_html"
+    t.text "body_text"
     t.bigint "booking_request_id"
+    t.bigint "conversation_thread_id", null: false
+    t.datetime "created_at", null: false
     t.string "direction", null: false
     t.string "provider_message_id"
-    t.text "body_text"
-    t.text "body_html"
     t.datetime "sent_at"
-    t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id", "provider_message_id"], name: "index_messages_on_account_id_and_provider_message_id", unique: true, where: "(provider_message_id IS NOT NULL)"
     t.index ["account_id"], name: "index_messages_on_account_id"
@@ -270,10 +270,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
   create_table "tasks", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.bigint "booking_request_id", null: false
-    t.string "title", null: false
-    t.string "status", default: "open", null: false
-    t.datetime "due_at"
     t.datetime "created_at", null: false
+    t.datetime "due_at"
+    t.string "status", default: "open", null: false
+    t.string "title", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_tasks_on_account_id"
     t.index ["booking_request_id"], name: "index_tasks_on_booking_request_id"
@@ -282,22 +282,22 @@ ActiveRecord::Schema[7.2].define(version: 2026_05_09_010126) do
 
   create_table "users", force: :cascade do |t|
     t.bigint "account_id", null: false
+    t.datetime "created_at", null: false
     t.citext "email", null: false
     t.string "name", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.string "password_digest", null: false
     t.string "remember_token_digest"
+    t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_users_on_account_id"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
   create_table "venues", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.string "name", null: false
     t.string "address"
     t.integer "capacity"
     t.datetime "created_at", null: false
+    t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_venues_on_account_id"
   end

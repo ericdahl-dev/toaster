@@ -1,24 +1,47 @@
-<div class="max-w-3xl mx-auto px-4 py-8">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-xl font-semibold text-slate-900">Mail Connections</h1>
-    <%= link_to "Add connection", new_mail_connection_path, class: "text-sm font-medium text-slate-700 border border-slate-300 rounded-md px-3 py-1.5 hover:bg-slate-50" %>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mail Connections</h1>
+    <p class="page-subtitle">IMAP inboxes synced for booking requests</p>
   </div>
-
-  <% if @imap_connections.empty? %>
-    <p class="text-slate-500">No mail connections configured yet.</p>
-  <% else %>
-    <div class="space-y-2">
-      <% @imap_connections.each do |conn| %>
-        <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3">
-          <div>
-            <p class="text-sm font-medium text-slate-900"><%= conn.username %></p>
-            <p class="text-xs text-slate-500"><%= conn.host %>:<%= conn.port %></p>
-          </div>
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full <%= conn.active? ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500' %>">
-            <%= conn.active? ? "active" : "inactive" %>
-          </span>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
+  <%= link_to "+ Add connection", new_mail_connection_path, class: "btn btn-ghost" %>
 </div>
+
+<% if @imap_connections.empty? %>
+  <div class="card">
+    <div class="empty-state">
+      <div class="empty-icon">📬</div>
+      <span>No mail connections configured</span>
+      <span class="dim" style="font-size:11px">Add an IMAP connection to start receiving booking requests</span>
+      <%= link_to "+ Add connection", new_mail_connection_path, class: "btn btn-amber", style: "margin-top:4px" %>
+    </div>
+  </div>
+<% else %>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Account</th>
+          <th>Host</th>
+          <th>Folder</th>
+          <th>Status</th>
+          <th>Last synced</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @imap_connections.each do |conn| %>
+          <tr>
+            <td><span class="hi"><%= conn.username %></span></td>
+            <td class="dim"><%= conn.host %>:<%= conn.port %></td>
+            <td class="dim"><%= conn.inbox_folder %></td>
+            <td>
+              <span class="badge <%= conn.active? ? 'badge-active' : 'badge-inactive' %>">
+                <%= conn.active? ? "active" : "inactive" %>
+              </span>
+            </td>
+            <td class="dim">—</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

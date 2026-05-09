@@ -1,30 +1,63 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
   <head>
     <title><%= content_for(:title) || "Toaster" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
-    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="h-full bg-slate-50 text-slate-900 antialiased">
+  <body>
+    <% if content_for?(:fullpage) %>
+      <%= yield :fullpage %>
+    <% else %>
+      <div class="shell">
+        <header class="topbar">
+          <a href="/" class="topbar-logo">
+            <div class="toast-icon">🍞</div>
+            Toaster
+          </a>
+          <div class="topbar-sep"></div>
+          <% if current_user %>
+            <div class="topbar-user">
+              <span><%= current_user.email %></span>
+              <%= button_to "sign out", logout_path, method: :delete, class: "btn btn-ghost", style: "padding: 3px 9px; font-size: 11px;" %>
+            </div>
+          <% end %>
+        </header>
 
-    <% if notice.present? %>
-      <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-md bg-green-50 px-4 py-3 text-sm text-green-800 shadow" role="alert">
-        <%= notice %>
+        <nav class="sidebar">
+          <% if current_user %>
+            <div class="sidebar-section">Operations</div>
+            <%= link_to booking_requests_path, class: "nav-link #{request.path.start_with?('/booking_requests') ? 'active' : ''}" do %>
+              <span class="icon">📋</span> Requests
+            <% end %>
+            <%= link_to mail_connections_path, class: "nav-link #{request.path.start_with?('/mail_connections') ? 'active' : ''}" do %>
+              <span class="icon">📬</span> Mail
+            <% end %>
+            <div class="sidebar-section" style="margin-top:8px">System</div>
+            <%= link_to "/jobs", class: "nav-link" do %>
+              <span class="icon">⚙️</span> Jobs
+            <% end %>
+            <%= link_to "/ops", class: "nav-link #{request.path.start_with?('/ops') ? 'active' : ''}" do %>
+              <span class="icon">🔭</span> Ops
+            <% end %>
+          <% end %>
+        </nav>
+
+        <main class="main">
+          <% if notice.present? %>
+            <div class="flash flash-notice"><%= notice %></div>
+          <% end %>
+          <% if alert.present? %>
+            <div class="flash flash-alert"><%= alert %></div>
+          <% end %>
+          <%= yield %>
+        </main>
       </div>
     <% end %>
-    <% if alert.present? %>
-      <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800 shadow" role="alert">
-        <%= alert %>
-      </div>
-    <% end %>
-
-    <%= yield %>
-
   </body>
 </html>

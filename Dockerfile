@@ -41,8 +41,8 @@ COPY . .
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 
-# Build Tailwind CSS
-RUN bundle exec rails tailwindcss:build
+# Build Tailwind CSS and precompile assets
+RUN bundle exec rails tailwindcss:build assets:precompile
 
 
 
