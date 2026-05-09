@@ -19,16 +19,16 @@ module Drafts
     end
 
     def call
-      folders = Imap::FolderLocator.call(imap_connection: imap_connection)
-      raise FolderNotFound, "Could not locate Drafts folder on #{imap_connection.host}" unless folders.drafts_folder
-
       raw = build_raw_message
       uid = nil
 
-      with_imap do |imap|
+      Imap::Session.call(imap_connection: imap_connection) do |imap|
+        folders = Imap::FolderLocator.call(imap: imap)
+        raise FolderNotFound, "Could not locate Drafts folder on #{imap_connection.host}" unless folders.drafts_folder
+
         imap.select(folders.drafts_folder)
-        imap.append(folders.drafts_folder, raw, [:Draft], Time.current)
-        uids = imap.uid_search(["HEADER", "Message-ID", message_id])
+        imap.append(folders.drafts_folder, raw, [ :Draft ], Time.current)
+        uids = imap.uid_search([ "HEADER", "Message-ID", message_id ])
         uid = uids.last
       end
 
@@ -71,22 +71,6 @@ module Drafts
       last_subject = booking_request.source_inbox_message&.subject
       return "Re: #{last_subject}" if last_subject.present? && !last_subject.start_with?("Re:")
       last_subject.presence || "Re: your inquiry"
-    end
-
-    def with_imap
-      imap = Net::IMAP.new(
-        imap_connection.host,
-        port: imap_connection.port,
-        ssl: imap_connection.ssl?
-      )
-      imap.login(imap_connection.username, imap_connection.password)
-      yield imap
-    ensure
-      begin
-        imap&.disconnect
-      rescue
-        nil
-      end
     end
   end
 end
