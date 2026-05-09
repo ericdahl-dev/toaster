@@ -49,4 +49,6 @@ Rails.application.routes.draw do
   mount GoodJob::Engine, at: "/jobs"
 
   root "home#index"
+
+  resources :booking_requests, only: [:index, :show]
 end
