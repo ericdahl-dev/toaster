@@ -5,5 +5,10 @@ FactoryBot.define do
     name { "Test User" }
     password { "password123" }
     password_confirmation { "password123" }
+    role { :venue_manager }
+
+    trait :admin do
+      role { :admin }
+    end
   end
 end

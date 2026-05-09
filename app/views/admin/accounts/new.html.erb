@@ -1,0 +1,44 @@
+<div class="page-header">
+  <h1 class="page-title">Create Account</h1>
+  <p class="page-subtitle">Provision a new operator account with an initial user.</p>
+</div>
+
+<% if @account.errors.any? || @user.errors.any? %>
+  <div class="flash flash-alert" style="position:static;margin-bottom:20px;animation:none">
+    <% (@account.errors.full_messages + @user.errors.full_messages).each do |msg| %>
+      <div><%= msg %></div>
+    <% end %>
+  </div>
+<% end %>
+
+<div style="max-width:480px">
+  <%= form_with url: admin_accounts_path, method: :post do |f| %>
+    <fieldset style="border:none;padding:0;margin:0 0 24px">
+      <legend class="form-label" style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;opacity:0.6">Account</legend>
+      <div class="form-group">
+        <label class="form-label">Account name</label>
+        <%= text_field_tag "account[name]", @account.name, class: "form-input", placeholder: "Riverside Venue Group" %>
+      </div>
+    </fieldset>
+
+    <fieldset style="border:none;padding:0;margin:0 0 24px">
+      <legend class="form-label" style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;opacity:0.6">Initial user (venue manager)</legend>
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <%= text_field_tag "user[name]", @user.name, class: "form-input", placeholder: "Jane Smith" %>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <%= email_field_tag "user[email]", @user.email, class: "form-input", placeholder: "jane@example.com" %>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Temporary password</label>
+        <%= password_field_tag "user[password]", nil, class: "form-input", autocomplete: "new-password" %>
+      </div>
+    </fieldset>
+
+    <div style="display:flex;gap:10px">
+      <button type="submit" class="btn btn-amber">Create account</button>
+    </div>
+  <% end %>
+</div>
