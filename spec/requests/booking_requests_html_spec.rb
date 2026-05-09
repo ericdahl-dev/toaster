@@ -9,7 +9,7 @@ RSpec.describe "BookingRequests HTML", type: :request do
 
   describe "GET /booking_requests" do
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "renders the list" do
         get "/booking_requests"
@@ -39,7 +39,7 @@ RSpec.describe "BookingRequests HTML", type: :request do
 
   describe "GET /booking_requests/:id" do
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "renders the detail page" do
         get "/booking_requests/#{booking_request.id}"
@@ -93,7 +93,7 @@ RSpec.describe "BookingRequests HTML", type: :request do
 
   describe "POST /booking_requests/:id/transition" do
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "transitions to an allowed status and redirects" do
         post "/booking_requests/#{booking_request.id}/transition", params: {to: "reviewing"}

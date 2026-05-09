@@ -8,7 +8,7 @@ RSpec.describe "MailConnections HTML", type: :request do
 
   describe "GET /mail_connections" do
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "renders the list" do
         create(:imap_connection, account: account)
@@ -39,7 +39,7 @@ RSpec.describe "MailConnections HTML", type: :request do
 
   describe "GET /mail_connections/new" do
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "renders the new form" do
         get "/mail_connections/new"
@@ -59,7 +59,7 @@ RSpec.describe "MailConnections HTML", type: :request do
 
   describe "POST /mail_connections" do
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "creates an IMAP connection and redirects" do
         post "/mail_connections", params: {
@@ -92,7 +92,7 @@ RSpec.describe "MailConnections HTML", type: :request do
     let!(:imap_connection) { create(:imap_connection, account: account) }
 
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "saves smtp_host and smtp_port" do
         patch "/mail_connections/#{imap_connection.id}", params: {

@@ -1,12 +1,14 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  devise_for :users,
+    path: "",
+    path_names: {sign_in: "login", sign_out: "logout"},
+    controllers: {sessions: "sessions"}
+
+  # Friendly named helpers that mirror the old hand-rolled auth paths
+  direct(:login) { new_user_session_path }
+  direct(:logout) { destroy_user_session_path }
 
   get "/up", to: "up#show"
-
-  # HTML auth
-  get  "/login",  to: "sessions#new"
-  post "/login",  to: "sessions#create"
-  delete "/logout", to: "sessions#destroy"
 
   # Ops/observability endpoints for operators
   scope "/ops" do

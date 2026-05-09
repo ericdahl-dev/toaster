@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module RequestAuthHelpers
-  def sign_in_as(user, password: "password123")
-    post "/auth/login", params: {email: user.email, password: password}, as: :json
-    expect(response).to have_http_status(:ok), -> { "login failed: #{response.body}" }
+  def sign_in_as(user, password: "password123") # rubocop:disable Lint/UnusedMethodArgument
+    sign_in user
   end
 end
 
