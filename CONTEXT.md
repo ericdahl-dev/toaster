@@ -54,12 +54,19 @@ An append-only audit trail of all significant state changes and external interac
 - **Inbox ingestion** produces or updates **inbox messages** scoped to that **account**.
 - Each **connection** owns at most one active **checkpoint** semantics for its **provider**.
 
+**Prospect**:
+A person who has expressed interest in Toaster by submitting their email via the waitlist form, but has not yet been provisioned as a **User** on an **Account**. A prospect has no login, no account, and no access to the application. Prospects are stored as `WaitlistEntry` rows with `email`, `company_name`, and `full_name`. A prospect becomes a **User** (venue manager) only when an **admin** explicitly invites them via `/admin/waitlist/:id/invite`, which creates the **Account** and **User** in a single transaction and marks `invited_at` on the `WaitlistEntry`.
+
 ## Access and identity
 
-- **User** (app user): a person who signs in to Toaster with **Toaster credentials** (email and password). A user belongs to exactly one **Account** and carries a **role**: `admin` or `venue_manager` (default). Admins can create accounts and users; venue managers access booking workflows only. See ADR 0007.
+- **Account**: The company or group that has contracted with Toaster to use the platform. An account owns one or more **venues** and one or more **users** (venue managers). Accounts are provisioned by **admins**. Example: "Hubbard Inn" is an account; its venues ("Main Bar", "Rooftop") belong to it.
+- **Venue manager** (role: `venue_manager`): A **user** who belongs to a customer **account** and logs in to manage that account's booking workflows. This is the primary operator persona — the person actually running the venue day-to-day.
+- **Admin** (role: `admin`): A **user** who manages the Toaster platform itself — provisioning accounts, inviting prospects, and overseeing operations. Admins belong to the internal **"Toaster" account** (seeded in production). Admins are Toaster staff, not venue operators.
+- **Toaster account**: The internal platform account (name: "Toaster") that all admin users belong to. There is exactly one Toaster account per deployment. It is seeded automatically and never appears in customer-facing views.
+- **User**: Any person who signs in to Toaster with email and password. Every user belongs to exactly one **account** and carries one **role** — either `admin` or `venue_manager`. The term "user" alone is ambiguous; prefer **venue manager** or **admin** when the role matters.
 - **Toaster sign-in email** is only for authentication. It is unrelated to the addresses or credentials stored on **connections** (IMAP username/host and so on).
 - API calls that include another account's id while signed in are **not** treated as "missing data"; they are rejected as **forbidden** (HTTP 403) to signal authorization failure clearly.
-- Self-service **sign-up** (creating a new tenant or user without an admin) does not exist — admins provision accounts and users through `/admin/accounts/new` and `/admin/users/new`.
+- Self-service **sign-up** (creating a new tenant or user without an admin) does not exist — admins provision accounts and users through `/admin/accounts/new` and `/admin/users/new`. Token-gated onboarding links (from a waitlist invite) are permitted; anonymous self-signup is not.
 
 ## Example dialogue
 
