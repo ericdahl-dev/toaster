@@ -10,10 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_09_170702) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_09_172432) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
+  enable_extension "vector"
 
   create_table "accounts", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -314,6 +315,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_170702) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  create_table "venue_chunks", force: :cascade do |t|
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.vector "embedding", limit: 3072
+    t.datetime "updated_at", null: false
+    t.bigint "venue_document_id", null: false
+    t.index ["venue_document_id"], name: "index_venue_chunks_on_venue_document_id"
+  end
+
+  create_table "venue_documents", force: :cascade do |t|
+    t.integer "chunk_count"
+    t.datetime "created_at", null: false
+    t.text "error_message"
+    t.string "file_path"
+    t.string "source_filename", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "venue_id", null: false
+    t.index ["venue_id"], name: "index_venue_documents_on_venue_id"
+  end
+
   create_table "venue_spaces", force: :cascade do |t|
     t.integer "capacity_reception"
     t.integer "capacity_seated"
@@ -369,6 +391,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_170702) do
   add_foreign_key "tasks", "accounts"
   add_foreign_key "tasks", "booking_requests"
   add_foreign_key "users", "accounts"
+  add_foreign_key "venue_chunks", "venue_documents"
+  add_foreign_key "venue_documents", "venues"
   add_foreign_key "venue_spaces", "venues"
   add_foreign_key "venues", "accounts"
 end
