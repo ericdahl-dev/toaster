@@ -138,7 +138,7 @@ RSpec.describe BookingRequests::Reconcile do
       it "rolls back the transaction and propagates the error" do
         inbox_message = build_inbox_message
 
-        allow(AgentMailbox::ExtractBookingRequest).to receive(:call).and_raise(StandardError, "extraction failed")
+        allow(BookingRequests::Extract).to receive(:call).and_raise(StandardError, "extraction failed")
 
         expect {
           described_class.call(inbox_message: inbox_message)

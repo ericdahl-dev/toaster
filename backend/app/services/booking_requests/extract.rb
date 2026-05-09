@@ -1,5 +1,5 @@
-module AgentMailbox
-  class ExtractBookingRequest
+module BookingRequests
+  class Extract
     Result = Struct.new(:booking_request, :contact, :conversation_thread, :message, keyword_init: true)
 
     MONTH_NAME_DATE = /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:tember)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\s+\d{1,2}(?:,\s*\d{4})?\b/i

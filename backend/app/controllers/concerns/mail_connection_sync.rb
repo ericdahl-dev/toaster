@@ -5,7 +5,6 @@
 # Including controllers must define (as private methods):
 #   - connections_scope   → account-scoped ActiveRecord relation for the provider's model
 #   - connection_id_key   → Symbol used as the connection-id key in the JSON response
-#                           (e.g. :imap_connection_id or :agentmail_connection_id)
 #
 # Authorization (cross-account guard) is inherited from AccountScopedController.
 # Provider-specific job dispatch is handled by InboxSyncScheduler, which

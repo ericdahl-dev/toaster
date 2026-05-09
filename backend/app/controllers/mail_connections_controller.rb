@@ -5,7 +5,6 @@ class MailConnectionsController < ApplicationController
 
   def index
     @imap_connections = current_user.account.imap_connections.order(:username)
-    @agentmail_connections = current_user.account.agentmail_connections.order(:inbox_id)
   end
 
   def new

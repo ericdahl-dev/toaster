@@ -6,7 +6,7 @@ RSpec.describe InboxMessage, type: :model do
       account = create(:account)
       message = described_class.new(
         account: account,
-        provider: "agent_mailbox",
+        provider: "imap",
         provider_message_id: "msg-123",
         direction: :inbound,
         raw_payload: {"messageId" => "msg-123"}
@@ -20,14 +20,14 @@ RSpec.describe InboxMessage, type: :model do
       create(
         :inbox_message,
         account: account,
-        provider: "agent_mailbox",
+        provider: "imap",
         provider_message_id: "msg-123"
       )
 
       duplicate = build(
         :inbox_message,
         account: account,
-        provider: "agent_mailbox",
+        provider: "imap",
         provider_message_id: "msg-123"
       )
 
@@ -40,14 +40,14 @@ RSpec.describe InboxMessage, type: :model do
       create(
         :inbox_message,
         account: account,
-        provider: "agent_mailbox",
+        provider: "imap",
         provider_message_id: "msg-123"
       )
 
       other_provider = build(
         :inbox_message,
         account: account,
-        provider: "imap",
+        provider: "other_provider",
         provider_message_id: "msg-123"
       )
 

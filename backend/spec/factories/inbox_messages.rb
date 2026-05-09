@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :inbox_message do
     association :account
-    provider { "agent_mailbox" }
+    provider { "imap" }
     sequence(:provider_message_id) { |n| "msg-#{n}" }
     sequence(:provider_thread_id) { |n| "thread-#{n}" }
     direction { "inbound" }

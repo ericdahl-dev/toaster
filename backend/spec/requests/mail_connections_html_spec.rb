@@ -12,7 +12,6 @@ RSpec.describe "MailConnections HTML", type: :request do
 
       it "renders the list" do
         create(:imap_connection, account: account)
-        create(:agentmail_connection, account: account)
 
         get "/mail_connections"
 
