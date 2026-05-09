@@ -31,7 +31,16 @@ A bookable location managed by an **Account**. **Booking requests** may referenc
 **Mail connection**:
 Credentials plus checkpoint state for one mailbox on a **provider** (for example `ImapConnection` or `AgentmailConnection`). Belongs to an **Account**, not to a specific **Venue**.
 
-## Relationships
+**Inbox filter**:
+A keyword→venue mapping scoped to a **mail connection**. When an inbox message arrives on a connection, the ingestion adapter evaluates filters in insertion order (ascending `priority`) and assigns the first matching **venue** to the resulting **booking request**. Filters are case-insensitive substring matches against the message subject. No match leaves `venue_id` nil. Filters belong to the connection, not the venue — one venue may appear in filters on multiple connections.
+
+**Transition**:
+A deliberate operator action that moves a **booking request** through its lifecycle. Valid paths: `pending → reviewing`; `reviewing → confirmed`, `reviewing → rejected`, `reviewing → cancelled`. Transitions are initiated from the booking request detail page via contextual buttons that reflect the current state. Transitions outside these paths are rejected.
+
+**Event log**:
+An append-only audit trail of all significant state changes and external interactions on a **booking request** — including job activity (sync, reconcile, push) and human actions (transitions, draft approve/reject). Rendered read-only in chronological order on the booking request detail page.
+
+
 
 - An **Account** has one or more inbox **connections** (per provider).
 - An **Account** has one or more **venues**.
@@ -54,4 +63,4 @@ Credentials plus checkpoint state for one mailbox on a **provider** (for example
 
 - "Sync" was used for both job enqueue and ingestion orchestration — resolved: **inbox ingestion** is the orchestrated fetch+upsert+checkpoint step; jobs remain thin schedulers.
 - Fetch and transport failures during ingestion **bubble** to the job layer so retries and monitoring stay consistent; ingestion does not convert hard failures into silent partial success.
-- **Multi-venue mail routing (product gap):** A shared inbox may serve several **venues** under one **Account**. The product needs an explicit routing story (for example rules on `To:` addresses, folders, or provider metadata) so **booking requests** can reliably represent “this inquiry is for venue X.” Today, **inbox messages** do not record which **connection** produced the row, normalized `to_emails` are stored but not used for routing, and reconcile extraction does not set `venue_id`. See `docs/adr/0002-multi-venue-mail-routing.md`.
+- **Multi-venue mail routing:** Resolved via **inbox filters**. Each `ImapConnection` carries keyword-based `InboxFilter` rules that match subject lines and assign a `venue_id`, removing the need for `To:` address or folder heuristics. See `docs/adr/0002-multi-venue-mail-routing.md`.
