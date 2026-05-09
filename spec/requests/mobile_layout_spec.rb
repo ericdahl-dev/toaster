@@ -6,9 +6,9 @@ RSpec.describe "Mobile layout", type: :request do
   let(:account) { create(:account) }
   let!(:user) { create(:user, account: account) }
 
-  before { sign_in user }
+  describe "when signed in" do
+    before { sign_in user }
 
-  describe "application layout" do
     it "renders a hamburger button for mobile nav" do
       get "/booking_requests"
 
@@ -26,6 +26,20 @@ RSpec.describe "Mobile layout", type: :request do
       get "/booking_requests"
 
       expect(response.body).to include("sidebar-overlay")
+    end
+  end
+
+  describe "when signed out" do
+    it "does not render a hamburger button" do
+      get "/"
+
+      expect(response.body).not_to include("nav-toggle")
+    end
+
+    it "does not render a sidebar drawer" do
+      get "/"
+
+      expect(response.body).not_to include("sidebar-drawer")
     end
   end
 end
