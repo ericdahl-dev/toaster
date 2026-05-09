@@ -26,7 +26,7 @@ FROM base AS build
 
 # Install packages needed to build gems and assets
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libpq-dev nodejs pkg-config && \
+    apt-get install --no-install-recommends -y build-essential git libpq-dev libyaml-dev nodejs pkg-config && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
