@@ -1,6 +1,6 @@
 /* Application styles */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Syne:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Figtree:wght@400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&display=swap');
 
 :root {
   --bg:       #0e0f0f;
@@ -664,7 +664,7 @@ body {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-weight: 800;
   font-size: 15px;
   color: var(--text-hi);
@@ -733,11 +733,11 @@ body {
 }
 
 .lp-headline {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: clamp(36px, 6vw, 64px);
-  font-weight: 800;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-weight: 900;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
   color: var(--text-hi);
   margin-bottom: 24px;
 }
@@ -842,7 +842,7 @@ body {
 }
 
 .lp-step-num {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 11px;
   font-weight: 700;
   color: var(--amber);
@@ -851,7 +851,7 @@ body {
 }
 
 .lp-step-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: var(--text-hi);
@@ -879,7 +879,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 13px;
   font-weight: 700;
   color: var(--text-hi);
