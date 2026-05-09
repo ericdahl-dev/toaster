@@ -60,6 +60,8 @@ Rails.application.routes.draw do
   resources :mail_connections, only: [:index, :new, :create, :edit, :update] do
     resources :inbox_filters, only: [:create, :destroy]
   end
-  resources :venues, only: [:index, :new, :create, :edit, :update, :destroy]
+  resources :venues, only: [:index, :new, :create, :edit, :update, :destroy] do
+    resources :documents, only: [:create, :destroy], controller: "venue_documents"
+  end
   resources :inbox_threads, only: [:index, :show]
 end

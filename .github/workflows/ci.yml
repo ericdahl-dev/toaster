@@ -41,6 +41,14 @@ jobs:
           ruby-version: 3.3.7
           bundler-cache: true
 
+      - name: Install pgvector
+        run: |
+          cd /tmp
+          git clone --depth 1 https://github.com/pgvector/pgvector.git
+          cd pgvector
+          make
+          sudo make install
+
       - name: Prepare database
         run: bundle exec rails db:prepare
 

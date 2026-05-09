@@ -13,6 +13,15 @@ gem "net-imap"
 # Transactional email via Resend
 gem "resend"
 
+# OpenAI API (embeddings + LLM)
+gem "ruby-openai"
+
+# pgvector via ActiveRecord (nearest-neighbor search)
+gem "neighbor"
+
+# Multipart form encoding for HTTP uploads (UnstructuredClient)
+gem "multipart-post"
+
 # Background jobs with dashboard [https://github.com/bensheldon/good_job]
 gem "good_job"
 # Use Redis adapter to run Action Cable in production

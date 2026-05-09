@@ -118,3 +118,54 @@
 
   <% end %>
 </div>
+
+<%# Knowledge documents — separate form, outside venue form %>
+<div style="max-width:600px;margin-top:40px">
+  <div style="margin-bottom:12px">
+    <span class="page-subtitle" style="font-size:13px;font-weight:600;color:#f0f2f2">Knowledge Documents</span>
+    <p style="font-size:12px;color:#6b7280;margin-top:4px">Upload PDFs or text files describing your venue. The AI will use these to answer booking inquiries.</p>
+  </div>
+
+  <%= form_with url: venue_documents_path(@venue), method: :post, multipart: true do |f| %>
+    <div style="display:flex;gap:10px;align-items:center">
+      <%= f.file_field :file, accept: ".pdf,.txt,.docx", class: "form-input", style: "flex:1;font-size:12px;padding:8px" %>
+      <button type="submit" class="btn btn-amber" style="white-space:nowrap">Upload</button>
+    </div>
+  <% end %>
+
+  <% if @venue.venue_documents.any? %>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+      <% @venue.venue_documents.order(created_at: :desc).each do |doc| %>
+        <%
+          status_color = case doc.status
+          when "ready"       then "#16a34a"
+          when "processing"  then "#d97706"
+          when "failed"      then "#dc2626"
+          else "#6b7280"
+          end
+        %>
+        <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid #252626;border-radius:6px;padding:10px 14px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;color:#f0f2f2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= doc.source_filename %></div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+              <span style="font-size:11px;font-weight:600;color:<%= status_color %>"><%= doc.status.upcase %></span>
+              <% if doc.ready? %>
+                <span style="font-size:11px;color:#6b7280"><%= doc.chunk_count %> chunks</span>
+              <% end %>
+              <% if doc.failed? && doc.error_message.present? %>
+                <span style="font-size:11px;color:#dc2626" title="<%= doc.error_message %>">Error: <%= doc.error_message.truncate(60) %></span>
+              <% end %>
+            </div>
+          </div>
+          <%= button_to venue_document_path(@venue, doc), method: :delete,
+                data: {confirm: "Delete this document and all its chunks?"},
+                style: "background:none;border:none;color:#6b7280;cursor:pointer;font-size:12px;padding:4px 8px;white-space:nowrap" do %>
+            Delete
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <p style="font-size:12px;color:#6b7280;margin-top:12px">No documents uploaded yet.</p>
+  <% end %>
+</div>

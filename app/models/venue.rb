@@ -5,6 +5,7 @@ class Venue < ApplicationRecord
 
   has_many :booking_requests, dependent: :nullify
   has_many :venue_spaces, dependent: :destroy
+  has_many :venue_documents, dependent: :destroy
 
   accepts_nested_attributes_for :venue_spaces,
     allow_destroy: true,
