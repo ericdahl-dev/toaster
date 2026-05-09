@@ -4,21 +4,14 @@
 !.env.example
 
 # Rails runtime/build artifacts
-backend/log/
-backend/tmp/
-backend/.bundle/
-backend/vendor/bundle/
-backend/config/master.key
-backend/app/assets/builds/
+log/
+tmp/
+.bundle/
+vendor/bundle/
+config/master.key
+app/assets/builds/
+coverage/
 # credentials.yml.enc is encrypted; safe to commit. RAILS_MASTER_KEY in deploy must decrypt it.
-
-# Next.js runtime artifacts
-frontend/.next/
-frontend/node_modules/
-frontend/.yarn/unplugged/
-frontend/.yarn/install-state.gz
-/backend/coverage
-/frontend/coverage
 
 # Beads / Dolt files (added by bd init)
 .dolt/

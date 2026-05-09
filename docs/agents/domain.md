@@ -19,8 +19,7 @@ Single-context repo:
 ├── docs/adr/
 │   ├── 0001-post-ingestion-booking-reconcile.md
 │   └── 0002-multi-venue-mail-routing.md
-├── backend/      # Rails 7.2 API-only
-└── frontend/     # Next.js 16.2 operator dashboard
+└── app/          # Rails 7.2 (root-level, moved from backend/ in #135)
 ```
 
 ## Use the glossary's vocabulary
