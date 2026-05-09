@@ -1,0 +1,72 @@
+<%= link_to "← Mail connections", mail_connections_path, class: "back-link" %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title"><%= @connection.username %></h1>
+    <p class="page-subtitle"><%= @connection.host %>:<%= @connection.port %></p>
+  </div>
+</div>
+
+<div class="section-heading">Inbox filters</div>
+
+<% if @connection.inbox_filters.any? %>
+  <div class="card" style="margin-bottom:16px">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Keyword</th>
+          <th>Venue</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @connection.inbox_filters.includes(:venue).each_with_index do |filter, i| %>
+          <tr>
+            <td class="dim"><%= i + 1 %></td>
+            <td><code style="font-size:12px"><%= filter.keyword %></code></td>
+            <td><%= filter.venue.name %></td>
+            <td style="text-align:right">
+              <%= button_to "Remove",
+                    mail_connection_inbox_filter_path(@connection, filter),
+                    method: :delete,
+                    class: "btn btn-danger",
+                    style: "padding:3px 10px;font-size:11px" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card" style="margin-bottom:16px">
+    <div class="empty-state">
+      <span class="dim" style="font-size:12px">No filters — all messages go to the default queue</span>
+    </div>
+  </div>
+<% end %>
+
+<% if @venues.any? %>
+  <div class="section-heading">Add filter</div>
+  <%= form_with url: mail_connection_inbox_filters_path(@connection), method: :post, style: "max-width:480px" do |f| %>
+    <div style="display:flex;gap:8px;align-items:flex-end">
+      <div class="form-group" style="flex:1;margin-bottom:0">
+        <label class="form-label">Keyword (subject contains)</label>
+        <input type="text" name="inbox_filter[keyword]" class="form-input" placeholder="Grand Hall">
+      </div>
+      <div class="form-group" style="flex:1;margin-bottom:0">
+        <label class="form-label">Venue</label>
+        <select name="inbox_filter[venue_id]" class="form-select">
+          <% @venues.each do |venue| %>
+            <option value="<%= venue.id %>"><%= venue.name %></option>
+          <% end %>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-amber" style="margin-bottom:0">Add</button>
+    </div>
+  <% end %>
+<% else %>
+  <div class="flash flash-alert" style="position:static;animation:none">
+    No venues yet — <%= link_to "add a venue", new_venue_path %> before adding filters.
+  </div>
+<% end %>

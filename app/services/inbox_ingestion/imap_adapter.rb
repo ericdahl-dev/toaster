@@ -10,6 +10,10 @@ module InboxIngestion
       @imap_connection.account
     end
 
+    def imap_connection
+      @imap_connection
+    end
+
     def each_normalized_message
       @fetcher.fetch_messages.each do |payload|
         uid = payload.dig(:raw_payload, "uid")&.to_i

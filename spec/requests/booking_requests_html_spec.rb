@@ -66,4 +66,40 @@ RSpec.describe "BookingRequests HTML", type: :request do
       end
     end
   end
+
+  describe "POST /booking_requests/:id/transition" do
+    context "when signed in" do
+      before { post "/login", params: {email: user.email, password: "password123"} }
+
+      it "transitions to an allowed status and redirects" do
+        post "/booking_requests/#{booking_request.id}/transition", params: {to: "reviewing"}
+
+        expect(response).to have_http_status(:redirect)
+        expect(booking_request.reload.status).to eq("reviewing")
+      end
+
+      it "redirects with alert on invalid transition" do
+        booking_request.update!(status: "confirmed")
+        post "/booking_requests/#{booking_request.id}/transition", params: {to: "pending"}
+
+        expect(response).to have_http_status(:redirect)
+        expect(booking_request.reload.status).to eq("confirmed")
+      end
+
+      it "returns 404 for another account's request" do
+        other = create(:booking_request)
+        post "/booking_requests/#{other.id}/transition", params: {to: "reviewing"}
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when signed out" do
+      it "redirects to login" do
+        post "/booking_requests/#{booking_request.id}/transition", params: {to: "reviewing"}
+        expect(response).to have_http_status(:redirect)
+        expect(response.location).to include("/login")
+      end
+    end
+  end
 end

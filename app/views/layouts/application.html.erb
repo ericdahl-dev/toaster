@@ -38,6 +38,9 @@
             <%= link_to mail_connections_path, class: "nav-link #{request.path.start_with?('/mail_connections') ? 'active' : ''}" do %>
               <span class="icon">📬</span> Mail
             <% end %>
+            <%= link_to venues_path, class: "nav-link #{request.path.start_with?('/venues') ? 'active' : ''}" do %>
+              <span class="icon">🏛️</span> Venues
+            <% end %>
             <div class="sidebar-section" style="margin-top:8px">System</div>
             <%= link_to "/jobs", class: "nav-link" do %>
               <span class="icon">⚙️</span> Jobs

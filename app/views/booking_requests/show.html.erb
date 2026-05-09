@@ -45,6 +45,22 @@
   </div>
 </div>
 
+<%
+  allowed = BookingRequests::Transition::ALLOWED_TRANSITIONS[@booking_request.status] || []
+%>
+<% if allowed.any? %>
+  <div class="section-heading">Actions</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <% allowed.each do |target| %>
+      <%= button_to target.humanize,
+            transition_booking_request_path(@booking_request),
+            method: :post,
+            params: {to: target},
+            class: "btn #{target == 'confirmed' ? 'btn-success' : target == 'rejected' || target == 'cancelled' ? 'btn-danger' : 'btn-ghost'}" %>
+    <% end %>
+  </div>
+<% end %>
+
 <% if @booking_request.drafts.any? %>
   <div class="section-heading">Drafts</div>
   <div style="display:flex;flex-direction:column;gap:12px">
@@ -63,5 +79,33 @@
         <% end %>
       </div>
     <% end %>
+  </div>
+<% end %>
+
+<%
+  event_logs = EventLog.where(subject_type: "BookingRequest", subject_id: @booking_request.id)
+                       .order(created_at: :asc)
+%>
+<% if event_logs.any? %>
+  <div class="section-heading">Event log</div>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Event</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% event_logs.each do |log| %>
+          <tr>
+            <td class="dim" style="white-space:nowrap"><%= log.created_at.strftime("%-d %b %Y %H:%M") %></td>
+            <td><code style="font-size:11px"><%= log.event_type %></code></td>
+            <td class="dim" style="font-size:11px"><%= log.payload.to_json %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
   </div>
 <% end %>

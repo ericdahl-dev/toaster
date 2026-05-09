@@ -8,8 +8,8 @@ module BookingRequests
   module PostIngestion
     module_function
 
-    def after_inbox_message_persisted(inbox_message)
-      Reconcile.call(inbox_message: inbox_message)
+    def after_inbox_message_persisted(inbox_message, imap_connection: nil)
+      Reconcile.call(inbox_message: inbox_message, imap_connection: imap_connection)
     end
   end
 end

@@ -2,12 +2,13 @@ module BookingRequests
   class Reconcile
     REVIEW_TASK_TITLE = "Review and qualify booking request"
 
-    def self.call(inbox_message:)
-      new(inbox_message: inbox_message).call
+    def self.call(inbox_message:, imap_connection: nil)
+      new(inbox_message: inbox_message, imap_connection: imap_connection).call
     end
 
-    def initialize(inbox_message:)
+    def initialize(inbox_message:, imap_connection: nil)
       @inbox_message = inbox_message
+      @imap_connection = imap_connection
     end
 
     def call
@@ -17,6 +18,7 @@ module BookingRequests
         result = BookingRequests::Extract.call(inbox_message: inbox_message)
         booking_request = result.booking_request
 
+        assign_venue(booking_request)
         log_reconciliation(booking_request, is_new: is_new)
         create_review_task(booking_request) if booking_request.reviewing?
 
@@ -26,7 +28,17 @@ module BookingRequests
 
     private
 
-    attr_reader :inbox_message
+    attr_reader :inbox_message, :imap_connection
+
+    def assign_venue(booking_request)
+      return if imap_connection.nil?
+      return if booking_request.venue_id.present?
+
+      venue = InboxIngestion::FilterMatcher
+        .new(imap_connection: imap_connection)
+        .match(subject: inbox_message.subject)
+      booking_request.update_column(:venue_id, venue.id) if venue
+    end
 
     def log_reconciliation(booking_request, is_new:)
       EventLog.create!(

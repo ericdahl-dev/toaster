@@ -1,6 +1,8 @@
 class ImapConnection < ApplicationRecord
   belongs_to :account
 
+  has_many :inbox_filters, dependent: :destroy
+
   validates :host, presence: true
   validates :port, presence: true, numericality: {only_integer: true, greater_than: 0}
   validates :username, presence: true
