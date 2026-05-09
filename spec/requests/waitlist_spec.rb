@@ -42,6 +42,22 @@ RSpec.describe "Waitlist", type: :request do
       end
     end
 
+    context "with missing full_name" do
+      it "re-renders form with error" do
+        post waitlist_path, params: {waitlist_entry: {email: "owner@venue.com", full_name: "", company_name: "Venue Co"}}
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include("full_name")
+      end
+    end
+
+    context "with missing company_name" do
+      it "re-renders form with error" do
+        post waitlist_path, params: {waitlist_entry: {email: "owner@venue.com", full_name: "Jane", company_name: ""}}
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.body).to include("company_name")
+      end
+    end
+
     context "with an invalid email" do
       it "re-renders the form with an error" do
         post waitlist_path, params: {waitlist_entry: {email: "notanemail", full_name: "Jane", company_name: "Venue Co"}}

@@ -1,16 +1,32 @@
 <%= turbo_frame_tag "waitlist" do %>
-  <%= form_with url: waitlist_path, model: @entry, html: {class: "lp-waitlist-form"} do |f| %>
-    <div class="lp-waitlist-field">
-      <%= f.email_field :email,
-            value: @entry.email,
-            placeholder: "your@email.com",
-            class: "lp-waitlist-input #{"lp-waitlist-input--error" if @entry.errors[:email].any?}",
-            autocomplete: "email",
-            aria: {label: "Email address"} %>
-      <%= f.submit "Join waitlist", class: "lp-waitlist-btn" %>
+  <%= form_with url: waitlist_path, model: @entry, html: {class: "lp-waitlist-form lp-waitlist-form--lg"} do |f| %>
+    <div class="lp-waitlist-fields">
+      <div class="lp-waitlist-row">
+        <%= f.text_field :full_name,
+              value: @entry.full_name,
+              placeholder: "Your name",
+              class: "lp-waitlist-input lp-waitlist-input--lg #{"lp-waitlist-input--error" if @entry.errors[:full_name].any?}",
+              autocomplete: "name",
+              aria: {label: "Your name"} %>
+        <%= f.text_field :company_name,
+              value: @entry.company_name,
+              placeholder: "Venue or company name",
+              class: "lp-waitlist-input lp-waitlist-input--lg #{"lp-waitlist-input--error" if @entry.errors[:company_name].any?}",
+              autocomplete: "organization",
+              aria: {label: "Venue or company name"} %>
+      </div>
+      <div class="lp-waitlist-field">
+        <%= f.email_field :email,
+              value: @entry.email,
+              placeholder: "your@email.com",
+              class: "lp-waitlist-input lp-waitlist-input--lg #{"lp-waitlist-input--error" if @entry.errors[:email].any?}",
+              autocomplete: "email",
+              aria: {label: "Email address"} %>
+        <%= f.submit "Request access", class: "lp-waitlist-btn lp-waitlist-btn--lg" %>
+      </div>
+      <% (@entry.errors[:full_name] + @entry.errors[:company_name] + @entry.errors[:email]).each do |msg| %>
+        <p class="lp-waitlist-error"><%= msg %></p>
+      <% end %>
     </div>
-    <% if @entry.errors[:email].any? %>
-      <p class="lp-waitlist-error"><%= @entry.errors[:email].first %></p>
-    <% end %>
   <% end %>
 <% end %>

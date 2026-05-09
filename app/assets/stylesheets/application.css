@@ -906,9 +906,53 @@ body {
   gap: 12px;
 }
 
+.lp-waitlist-btn--hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--amber);
+  color: #000;
+  border: none;
+  padding: 11px 28px;
+  border-radius: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.lp-waitlist-btn--hero:hover { background: #d97706; }
+
 /* ── Waitlist form (shared) ── */
 .lp-waitlist-form {
   width: 100%;
+}
+
+.lp-waitlist-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.lp-waitlist-row {
+  display: flex;
+  gap: 8px;
+}
+
+.lp-waitlist-row .lp-waitlist-input {
+  flex: 1;
+  border: 1px solid var(--border-hi);
+  border-radius: 5px;
+}
+
+.lp-waitlist-row .lp-waitlist-input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 2px rgba(245,158,11,0.14);
+  outline: none;
 }
 
 .lp-waitlist-field {
