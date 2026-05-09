@@ -6,14 +6,14 @@ if Rails.env.production?
   # Create the initial account if none exists. Configure via env vars before first deploy.
   # TOASTER_SEED_ACCOUNT_NAME — account display name (default: "Toaster")
   # TOASTER_ADMIN_EMAIL / TOASTER_ADMIN_PASSWORD / TOASTER_ADMIN_NAME — bootstrap admin user (optional)
-  account = Account.first_or_create!(name: ENV.fetch("TOASTER_SEED_ACCOUNT_NAME", "Toaster"))
+  account = Account.first_or_create!(name: ENV["TOASTER_SEED_ACCOUNT_NAME"].presence || "Toaster")
 
   admin_email = "admin@toaster.local"
   admin_password = ENV["TOASTER_ADMIN_PASSWORD"]
   if admin_email.present? && admin_password.present?
     user = User.find_or_initialize_by(email: admin_email)
     user.account ||= account
-    user.name = ENV.fetch("TOASTER_ADMIN_NAME", admin_email)
+    user.name = ENV["TOASTER_ADMIN_NAME"].presence || admin_email
     if user.new_record?
       user.password = admin_password
       user.password_confirmation = admin_password
