@@ -22,7 +22,9 @@ class BookingRequestsController < ApplicationController
   private
 
   def set_booking_request
-    @booking_request = current_user.account.booking_requests.find_by(id: params[:id])
+    @booking_request = current_user.account.booking_requests
+      .includes(:source_inbox_message)
+      .find_by(id: params[:id])
     render plain: "Not Found", status: :not_found unless @booking_request
   end
 end

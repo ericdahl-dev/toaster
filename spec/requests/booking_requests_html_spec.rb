@@ -49,6 +49,30 @@ RSpec.describe "BookingRequests HTML", type: :request do
         expect(response.body).to include(booking_request.status)
       end
 
+      it "shows source email section when source_inbox_message present" do
+        inbox_message = create(:inbox_message, account: account,
+          subject: "Grand Hall booking inquiry",
+          from_name: "Jane Doe",
+          from_email: "jane@example.com",
+          body_text: "Hi, I'd like to book your grand hall.")
+        booking_request.update!(source_inbox_message: inbox_message)
+
+        get "/booking_requests/#{booking_request.id}"
+
+        expect(response.body).to include("Source email")
+        expect(response.body).to include("Grand Hall booking inquiry")
+        expect(response.body).to include("Jane Doe")
+        expect(response.body).to include("jane@example.com")
+      end
+
+      it "omits source email section when source_inbox_message is nil" do
+        booking_request.update!(source_inbox_message: nil)
+
+        get "/booking_requests/#{booking_request.id}"
+
+        expect(response.body).not_to include("Source email")
+      end
+
       it "returns 404 for another account's request" do
         other = create(:booking_request)
         get "/booking_requests/#{other.id}"

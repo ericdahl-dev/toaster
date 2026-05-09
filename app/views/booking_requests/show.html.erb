@@ -45,6 +45,31 @@
   </div>
 </div>
 
+<% if (msg = @booking_request.source_inbox_message) %>
+  <div class="section-heading" style="margin-top:28px">Source email</div>
+  <div class="card" style="margin-bottom:24px">
+    <div style="margin-bottom:12px">
+      <div class="detail-label">Subject</div>
+      <div class="detail-value"><%= msg.subject %></div>
+    </div>
+    <div style="display:flex;gap:24px;margin-bottom:12px">
+      <div>
+        <div class="detail-label">From</div>
+        <div class="detail-value"><%= msg.from_name %> &lt;<%= msg.from_email %>&gt;</div>
+      </div>
+      <div>
+        <div class="detail-label">Received</div>
+        <div class="detail-value dim" style="font-size:12px"><%= msg.received_at&.strftime("%-d %b %Y %H:%M") %></div>
+      </div>
+    </div>
+    <% if msg.body_html.present? %>
+      <iframe srcdoc="<%= h(msg.body_html) %>" sandbox="" style="width:100%;min-height:200px;border:1px solid var(--border);border-radius:4px;background:#fff" title="Email body"></iframe>
+    <% elsif msg.body_text.present? %>
+      <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:var(--text);margin:0"><%= msg.body_text %></pre>
+    <% end %>
+  </div>
+<% end %>
+
 <%
   allowed = BookingRequests::Transition::ALLOWED_TRANSITIONS[@booking_request.status] || []
 %>
