@@ -1,8 +1,8 @@
-<% content_for :title, "Toaster — AI booking assistant for venues" %>
+<% content_for :title, "Toaster — Stop chasing booking inquiries" %>
 <% content_for :head do %>
-  <meta name="description" content="Toaster connects to your inbox, extracts booking requests with AI, and helps you respond faster. Built for venue operators and event spaces.">
-  <meta property="og:title" content="Toaster — AI booking assistant for venues">
-  <meta property="og:description" content="Connect your inbox. Let AI handle the first pass. You stay in control.">
+  <meta name="description" content="Venue operators use Toaster to turn a flood of booking emails into organized requests — with AI-drafted replies ready to approve. Invite-only beta.">
+  <meta property="og:title" content="Toaster — Stop chasing booking inquiries">
+  <meta property="og:description" content="Your inbox is full of booking requests. Toaster reads them, extracts the details, and drafts the reply. You just say yes.">
   <meta property="og:type" content="website">
 <% end %>
 
@@ -24,39 +24,60 @@
     <div class="lp-hero-inner">
       <p class="lp-eyebrow">Invite-only beta</p>
       <h1 class="lp-headline">
-        Your inbox handles<br>
-        booking requests.<br>
-        <span class="lp-headline-accent">Toaster handles the rest.</span>
+        Booking inquiries.<br>
+        <span class="lp-headline-accent">Answered before<br>you open them.</span>
       </h1>
       <p class="lp-sub">
-        Connect your venue's email. Toaster reads every inquiry,
-        extracts the details, and drafts a reply — you just approve.
+        Every inquiry that lands in your venue's inbox gets read, parsed, and
+        replied to — automatically. You review the draft and hit send.
+        No chasing, no copy-pasting, no missed leads.
       </p>
       <div class="lp-cta-row">
-        <%= link_to "Sign in", login_path, class: "btn btn-amber lp-cta-btn" %>
-        <span class="lp-cta-note">Currently invite-only</span>
+        <%= link_to "Sign in to my account", login_path, class: "btn btn-amber lp-cta-btn" %>
+        <span class="lp-cta-note">Invite-only — apply to join the waitlist</span>
+      </div>
+    </div>
+  </section>
+
+  <%# ── Pain ── %>
+  <section class="lp-pain">
+    <div class="lp-pain-inner">
+      <p class="lp-section-label">Sound familiar?</p>
+      <div class="lp-pain-grid">
+        <div class="lp-pain-item">
+          <span class="lp-pain-mark">—</span>
+          <p>Booking emails pile up while you're running the venue</p>
+        </div>
+        <div class="lp-pain-item">
+          <span class="lp-pain-mark">—</span>
+          <p>You copy event dates and headcounts into a spreadsheet by hand</p>
+        </div>
+        <div class="lp-pain-item">
+          <span class="lp-pain-mark">—</span>
+          <p>A lead goes cold because a reply slipped through the cracks</p>
+        </div>
       </div>
     </div>
   </section>
 
   <%# ── How it works ── %>
   <section class="lp-steps">
-    <p class="lp-section-label">How it works</p>
+    <p class="lp-section-label">How Toaster works</p>
     <div class="lp-steps-grid">
       <div class="lp-step">
         <div class="lp-step-num">01</div>
         <h3 class="lp-step-title">Connect your inbox</h3>
-        <p class="lp-step-body">Link your venue's IMAP mailbox in one step. Toaster syncs new messages in the background.</p>
+        <p class="lp-step-body">Link your venue's email in one step. Toaster watches for new inquiries around the clock — nothing slips past.</p>
       </div>
       <div class="lp-step">
         <div class="lp-step-num">02</div>
-        <h3 class="lp-step-title">AI extracts the details</h3>
-        <p class="lp-step-body">Event date, headcount, venue, budget — pulled automatically from each inquiry and filed as a booking request.</p>
+        <h3 class="lp-step-title">AI reads every inquiry</h3>
+        <p class="lp-step-body">Date, headcount, budget, venue — extracted and filed automatically. Every request organized the moment it arrives.</p>
       </div>
       <div class="lp-step">
         <div class="lp-step-num">03</div>
-        <h3 class="lp-step-title">Approve and send</h3>
-        <p class="lp-step-body">Review the AI-drafted reply, make edits if needed, and send. Your words, AI speed.</p>
+        <h3 class="lp-step-title">You approve, it sends</h3>
+        <p class="lp-step-body">Toaster drafts the reply in your voice. Edit if you want, or send as-is. You stay in control of every response.</p>
       </div>
     </div>
   </section>
@@ -67,7 +88,7 @@
       <div class="lp-nav-icon lp-footer-icon">🍞</div>
       <span>Toaster</span>
     </div>
-    <p class="lp-footer-copy">AI booking assistant for venues &mdash; invite-only beta</p>
+    <p class="lp-footer-copy">AI booking assistant for venue operators &mdash; invite-only beta</p>
   </footer>
 
 </div>

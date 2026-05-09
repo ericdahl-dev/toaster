@@ -773,6 +773,41 @@ body {
   letter-spacing: 0.04em;
 }
 
+/* ── Pain section ── */
+.lp-pain {
+  border-top: 1px solid var(--border);
+  padding: 56px 40px;
+  background: rgba(255,255,255,0.01);
+}
+
+.lp-pain-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.lp-pain-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.lp-pain-item {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.lp-pain-mark {
+  color: var(--amber);
+  font-weight: 700;
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
 /* ── Steps ── */
 .lp-steps {
   border-top: 1px solid var(--border);

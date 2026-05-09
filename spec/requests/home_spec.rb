@@ -7,7 +7,7 @@ RSpec.describe "Home", type: :request do
         get "/"
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include("AI booking assistant for venues")
+        expect(response.body).to include("booking inquiries")
       end
 
       it "includes SEO meta description" do
