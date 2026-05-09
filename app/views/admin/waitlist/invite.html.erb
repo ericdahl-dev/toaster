@@ -1,0 +1,45 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Invite Prospect</h1>
+    <p class="page-subtitle">This will create an Account and Venue Manager, then send a password-setup link to <%= @entry.email %>.</p>
+  </div>
+</div>
+
+<%= link_to "← Back to waitlist", admin_waitlist_index_path, class: "back-link" %>
+
+<% if @account&.errors&.any? || @user&.errors&.any? %>
+  <div class="flash flash-alert" style="position:static;margin-bottom:20px;animation:none">
+    <% ((@account&.errors&.full_messages || []) + (@user&.errors&.full_messages || [])).each do |msg| %>
+      <div><%= msg %></div>
+    <% end %>
+  </div>
+<% end %>
+
+<div style="max-width:480px">
+  <%= form_with url: invite_admin_waitlist_path(@entry), method: :post do |f| %>
+    <fieldset style="border:none;padding:0;margin:0 0 24px">
+      <legend class="form-label" style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;opacity:0.6">Account</legend>
+      <div class="form-group">
+        <label class="form-label">Account name</label>
+        <%= text_field_tag "account[name]", @account.name, class: "form-input", placeholder: "Venue Co" %>
+      </div>
+    </fieldset>
+
+    <fieldset style="border:none;padding:0;margin:0 0 24px">
+      <legend class="form-label" style="font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;opacity:0.6">Venue manager</legend>
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <%= text_field_tag "user[name]", @user.name, class: "form-input", placeholder: "Jane Operator" %>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <%= email_field_tag "user[email]", @user.email, class: "form-input", placeholder: "jane@example.com" %>
+      </div>
+    </fieldset>
+
+    <div style="display:flex;gap:10px">
+      <button type="submit" class="btn btn-amber">Send invite</button>
+      <%= link_to "Cancel", admin_waitlist_index_path, class: "btn btn-ghost" %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,10 @@
+🍞 Toaster — Your account is ready, <%= @entry.full_name.split.first %>.
+========================================
+
+You're in. Set your password to access your Toaster dashboard:
+
+<%= @reset_url %>
+
+Account: <%= @user.account.name %>
+
+This link expires in 6 hours. If you didn't expect this email, you can ignore it.
