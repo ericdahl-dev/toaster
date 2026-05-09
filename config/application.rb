@@ -52,6 +52,12 @@ module Toaster
         class: "ReconcileAllDraftsJob",
         set: { queue: :mailers },
         description: "Check sent folder for dispatched drafts"
+      },
+      expire_waitlist_invites: {
+        cron: "0 * * * *",
+        class: "ExpireWaitlistInvitesJob",
+        set: {queue: :default},
+        description: "Flip invited WaitlistEntries to expired after Devise reset window"
       }
     }
 
