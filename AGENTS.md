@@ -16,35 +16,31 @@ Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `
 
 ### Domain docs
 
-Single-context repo: one `CONTEXT.md` + `docs/adr/` at the root, shared across backend and frontend. See `docs/agents/domain.md`.
+Single-context repo: one `CONTEXT.md` + `docs/adr/` at the root. See `docs/agents/domain.md`.
 
 ## Build & Test
 
 ```bash
-# Backend
-cd backend && rvm use . && bundle exec rspec
-
-# Frontend
-cd frontend && yarn test
+rvm use . && bundle exec rspec
 ```
 
 ## Learned User Preferences
 
-- In the backend directory, use RVM to match the pinned Ruby (`rvm use .` from `backend/` or rely on project `.ruby-version`) before `bundle`, `rspec`, or other gem commands so native extensions match the active interpreter.
-- Prefer local test coverage only (backend SimpleCov, frontend Vitest via `yarn test`); do not add Codecov or other remote coverage upload unless asked.
-- Keep backend `parallel_rspec` usage local-only unless explicitly asked; CI should continue to run serial `bundle exec rspec`.
+- Use RVM to match the pinned Ruby (`rvm use .` from repo root) before `bundle`, `rspec`, or other gem commands so native extensions match the active interpreter.
+- Prefer local test coverage only (SimpleCov); do not add Codecov or other remote coverage upload unless asked.
+- Keep `parallel_rspec` usage local-only unless explicitly asked; CI should continue to run serial `bundle exec rspec`.
 - Prefer self-documenting code: clear naming and structure first; use comments for non-obvious rationale (domain rules, invariants, security or performance tradeoffs), not to narrate obvious lines.
 
 ## Learned Workspace Facts
 
-- Monorepo: Rails API under `backend/`, frontend under `frontend/`. Frontend-specific Next.js agent rules live in `frontend/AGENTS.md`.
+- Rails app lives at the repo root (moved from `backend/` in #135).
 - Local dev serves the UI and API on different origins; the API uses `rack-cors` and `CORS_ORIGINS` (comma-separated) when defaults are not enough.
 - Browser session cookies for the Rails app must be set and sent on the Next.js UI origin: use the same-origin `/api/backend` proxy for credential-bearing browser `fetch` calls. Pointing `NEXT_PUBLIC_TOASTER_API_BASE_URL` at another host (e.g. `http://127.0.0.1:3001`) sets cookies for that host while the page runs on `localhost` (or the reverse)—those hosts do not share a cookie jar, so `/auth/me` can return 401 after a "successful" login.
 - After login, avoid relying on `router.replace` + `router.refresh()` alone for the next authenticated render; the RSC pass can run before `Set-Cookie` is visible to `cookies()`. Prefer a full-page navigation (or verify `/auth/me` before redirect) so the session cookie is present on the following request.
 - The frontend defaults to account id `1` via env; development seeds create that account when missing—run `bin/rails db:seed` in development if IMAP or account-scoped API calls 404 with "account not found."
 - Human login (email/password for the app session) is separate from IMAP and AgentMail connection credentials; an account may have multiple configured mail connections.
-- On macOS, forked workers (e.g. Solid Queue) connecting to Postgres can hit a libpq GSS/Kerberos path that segfaults in the child; the backend sets `PGGSSENCMODE=disable` when unset (`config/initializers/0_pg_gssenc_fork_safety.rb`).
-- In `backend/config/queue.yml`, worker `queues` must be a YAML array (e.g. `[default, webhooks, ai, mailers]`). A single comma-separated string is treated as one literal queue name, so jobs enqueued to real queues like `webhooks` are never claimed.
+- On macOS, forked workers (e.g. Solid Queue) connecting to Postgres can hit a libpq GSS/Kerberos path that segfaults in the child; sets `PGGSSENCMODE=disable` when unset (`config/initializers/0_pg_gssenc_fork_safety.rb`).
+- In `config/queue.yml`, worker `queues` must be a YAML array (e.g. `[default, webhooks, ai, mailers]`). A single comma-separated string is treated as one literal queue name, so jobs enqueued to real queues like `webhooks` are never claimed.
 - For Solid Queue in local development on macOS, Puma can run the queue inline without forked workers: `plugin :solid_queue` and `solid_queue_mode :async` in `config/puma.rb` (development only). Alternatively, `SOLID_QUEUE_SUPERVISOR_MODE=async` for `./bin/rails solid_queue:start`.
 - Mission Control (`/jobs`) needs CSS/JS served through an asset pipeline; this API-only app uses `sprockets-rails` plus `app/assets/config/manifest.js` (and asset dirs) so engine assets resolve under `/assets/...` instead of 404ing.
 - Ops JSON APIs use `OPS_AUTH_TOKEN` with the `X-Ops-Token` request header. Mission Control uses HTTP basic auth outside `development`/`test` via `MISSION_CONTROL_USERNAME` / `MISSION_CONTROL_PASSWORD`.
