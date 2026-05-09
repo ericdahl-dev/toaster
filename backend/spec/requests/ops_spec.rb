@@ -63,12 +63,12 @@ RSpec.describe "Ops endpoints", type: :request do
   end
 
   describe "POST /ops/retry_draft/:id" do
-    it "enqueues SendDraftJob for an approved draft" do
+    it "enqueues PushDraftJob for an approved draft" do
       draft = create(:draft, status: :approved)
 
       expect {
         post "/ops/retry_draft/#{draft.id}", headers: {"X-Ops-Token" => "secret-token"}
-      }.to have_enqueued_job(SendDraftJob).with(draft.id)
+      }.to have_enqueued_job(PushDraftJob).with(draft.id)
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["status"]).to eq("enqueued")
