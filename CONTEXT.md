@@ -1,6 +1,6 @@
 # Toaster (backend inbox)
 
-Toaster ingests email from connected inboxes, persists normalized rows for downstream booking workflows, and keeps each connection’s incremental fetch position accurate.
+Toaster ingests email from connected inboxes, persists normalized rows for downstream booking workflows, and keeps each connection's incremental fetch position accurate.
 
 ## Language
 
@@ -8,10 +8,10 @@ Toaster ingests email from connected inboxes, persists normalized rows for downs
 A single persisted message row for one account, identified by provider plus provider-assigned message id.
 
 **Inbox ingestion**:
-The process of fetching new messages from a connected inbox, upserting inbox messages, and advancing that connection’s checkpoint. The shared orchestrator is `InboxIngestion::Sync`; each provider supplies an **ingestion adapter** for fetch and checkpoint semantics.
+The process of fetching new messages from a connected inbox, upserting inbox messages, and advancing that connection's checkpoint. The shared orchestrator is `InboxIngestion::Sync`; each provider supplies an **ingestion adapter** for fetch and checkpoint semantics.
 
 **Provider**:
-The system that holds the mailbox (for example IMAP or AgentMailbox). Each provider has its own wire protocol and checkpoint shape.
+The system that holds the mailbox (currently IMAP only; see ADR 0006). Each provider has its own wire protocol and checkpoint shape.
 
 **Checkpoint**:
 Where incremental ingestion resumes for a connection. Meaning is provider-specific (for example UID versus wall-clock time); the ingestion orchestrator does not assume a single storage shape. After each ingestion run, the orchestrator always asks the adapter to commit checkpoints **even when no messages arrived**; whether that updates storage is adapter-specific (for example wall-clock cursors may advance on empty runs; UID cursors may not).
@@ -23,13 +23,19 @@ The provider-owned object that implements fetch and checkpoint read/write for on
 A persisted row derived from an **inbox message** for venue/event intake; extraction fills structured fields and a status. Orchestrated by **reconcile** after each inbox message upsert (see `docs/adr/0001-post-ingestion-booking-reconcile.md`).
 
 **Extraction lock**:
-When a booking request’s status is **confirmed**, **rejected**, or **cancelled**, further **inbox ingestion** does not re-run extraction on that message—human workflow outcomes stay authoritative until someone changes status again via **transition**.
+When a booking request's status is **confirmed**, **rejected**, or **cancelled**, further **inbox ingestion** does not re-run extraction on that message—human workflow outcomes stay authoritative until someone changes status again via **transition**.
 
 **Venue**:
 A bookable location managed by an **Account**. **Booking requests** may reference a venue (`venue_id` optional). Venues are not tied to a single mail **connection** in the schema today.
 
+**Venue space**:
+A named bookable area within a **Venue** (e.g. "East Room", "Rooftop", "Full Buyout"). Stores structured capacity and pricing data used by the AI pipeline for fit routing: `capacity_seated`, `capacity_reception`, `min_guests`, `pricing_floor_cents`. One venue has many spaces. Space names are operator-defined free text — no standard set enforced.
+
+**Venue knowledge**:
+Two-layer model. Layer 1 (structured): `VenueSpace` DB fields for headcount fit and pricing floor checks — queryable, used by AI decisioning. Layer 2 (unstructured): the full event guide (pricing matrices, bar tiers, package inclusions, policies) embedded into a per-venue PGVector store via Unstructured.io. The AI uses RAG against Layer 2 for detailed question answering and quote drafting.
+
 **Mail connection**:
-Credentials plus checkpoint state for one mailbox on a **provider** (for example `ImapConnection` or `AgentmailConnection`). Belongs to an **Account**, not to a specific **Venue**.
+Credentials plus checkpoint state for one mailbox on a **provider** (currently IMAP only via `ImapConnection`; AgentMail was removed in May 2026 — see ADR 0006). Belongs to an **Account**, not to a specific **Venue**.
 
 **Inbox filter**:
 A keyword→venue mapping scoped to a **mail connection**. When an inbox message arrives on a connection, the ingestion adapter evaluates filters in insertion order (ascending `priority`) and assigns the first matching **venue** to the resulting **booking request**. Filters are case-insensitive substring matches against the message subject. No match leaves `venue_id` nil. Filters belong to the connection, not the venue — one venue may appear in filters on multiple connections.
@@ -44,20 +50,21 @@ An append-only audit trail of all significant state changes and external interac
 
 - An **Account** has one or more inbox **connections** (per provider).
 - An **Account** has one or more **venues**.
+- Each **venue** has zero or more **venue spaces**.
 - **Inbox ingestion** produces or updates **inbox messages** scoped to that **account**.
 - Each **connection** owns at most one active **checkpoint** semantics for its **provider**.
 
 ## Access and identity
 
-- **User** (app user): a person who signs in to Toaster with **Toaster credentials** (email and password). A user belongs to exactly one **Account** for now; session-backed APIs resolve the tenant from that membership.
-- **Toaster sign-in email** is only for authentication. It is unrelated to the addresses or credentials stored on **connections** (IMAP username/host, AgentMailbox inbox identifiers, and so on).
-- API calls that include another account’s id while signed in are **not** treated as “missing data”; they are rejected as **forbidden** (HTTP 403) to signal authorization failure clearly.
-- Self-service **sign-up** (creating a new tenant or user without an operator) is a separate product slice from **sign-in**; until that exists, users are provisioned through normal operator/setup flows.
+- **User** (app user): a person who signs in to Toaster with **Toaster credentials** (email and password). A user belongs to exactly one **Account** and carries a **role**: `admin` or `venue_manager` (default). Admins can create accounts and users; venue managers access booking workflows only. See ADR 0007.
+- **Toaster sign-in email** is only for authentication. It is unrelated to the addresses or credentials stored on **connections** (IMAP username/host and so on).
+- API calls that include another account's id while signed in are **not** treated as "missing data"; they are rejected as **forbidden** (HTTP 403) to signal authorization failure clearly.
+- Self-service **sign-up** (creating a new tenant or user without an admin) does not exist — admins provision accounts and users through `/admin/accounts/new` and `/admin/users/new`.
 
 ## Example dialogue
 
 > **Dev:** "After we unify ingestion, does every provider use the same checkpoint column?"
-> **Domain expert:** "No. IMAP thinks in server UIDs; AgentMailbox thinks in API `after` time. The shared path only cares that the adapter advances the right cursor for that provider."
+> **Domain expert:** "No. IMAP thinks in server UIDs. The shared path only cares that the adapter advances the right cursor for that provider."
 
 ## Flagged ambiguities
 

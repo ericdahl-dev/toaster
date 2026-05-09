@@ -4,7 +4,7 @@ Toaster's operator dashboard is used by venue staff managing inbound booking req
 
 The chosen aesthetic is dark industrial: near-black surfaces (`#0e0f0f`), monospaced typography throughout (DM Mono), amber accent (`#f59e0b`) derived from the product name, and a two-column shell (topbar + sidebar + main) that prioritises information density over visual softness. The login page uses a full-page layout with a subtle amber radial glow. Status indicators use coloured dot badges (amber=pending, green=confirmed/active, blue=reviewing, red=rejected/cancelled).
 
-The Syne typeface is used exclusively for headings and the logo wordmark to provide contrast against the monospaced data layer without introducing a third font family.
+The Figtree typeface is used for headings and the logo wordmark to provide contrast against the monospaced data layer without introducing a third font family. (Syne was used initially and replaced by Figtree in May 2026 to consolidate the display typeface across the operator dashboard and the landing page — Figtree at weight 900 was already in use for the landing page hero.)
 
 This direction was chosen because:
 - Venue operators scan data constantly — monospaced tables align columns and make differences between rows instantly legible.
@@ -16,7 +16,7 @@ This direction was chosen because:
 
 - **Light Tailwind defaults (previous)** — fast to build, but generic slate-on-white with no clear identity. Dropped when the Next.js frontend was removed and the Rails views became the primary UI.
 - **Light theme with custom identity** — possible but harder to achieve high density and legibility with the same type choices.
-- **Dark industrial with DM Mono + Syne + amber (chosen)** — distinctive, density-friendly, on-brand, and easy to extend consistently.
+- **Dark industrial with DM Mono + Figtree + amber (chosen)** — distinctive, density-friendly, on-brand, and easy to extend consistently. Figtree replaced Syne in May 2026 to consolidate display typefaces.
 
 ## Constraints this decision imposes
 
