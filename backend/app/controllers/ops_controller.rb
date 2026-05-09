@@ -2,7 +2,7 @@ class OpsController < ApplicationController
   # Queue/system observability endpoints for operators.
   # All responses are scoped to the last 24 hours unless otherwise noted.
   skip_forgery_protection
-  before_action :require_ops_auth!
+  include Ops::RequireToken
 
   LOOKBACK = 24.hours
 
@@ -70,17 +70,5 @@ class OpsController < ApplicationController
     render json: {status: "enqueued", draft_id: draft.id}
   rescue ActiveRecord::RecordNotFound
     render json: {error: "Draft not found"}, status: :not_found
-  end
-
-  private
-
-  def require_ops_auth!
-    token = ENV["OPS_AUTH_TOKEN"].presence
-    return render json: {error: "Unauthorized"}, status: :unauthorized unless token
-
-    provided = request.headers["X-Ops-Token"]
-    return if ActiveSupport::SecurityUtils.secure_compare(provided.to_s, token)
-
-    render json: {error: "Unauthorized"}, status: :unauthorized
   end
 end
