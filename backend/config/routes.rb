@@ -51,4 +51,5 @@ Rails.application.routes.draw do
   root "home#index"
 
   resources :booking_requests, only: [:index, :show]
+  resources :mail_connections, only: [:index, :new, :create]
 end
