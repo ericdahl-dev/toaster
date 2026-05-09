@@ -42,8 +42,8 @@ rvm use . && bundle exec rspec
 - On macOS, forked workers (e.g. Solid Queue) connecting to Postgres can hit a libpq GSS/Kerberos path that segfaults in the child; sets `PGGSSENCMODE=disable` when unset (`config/initializers/0_pg_gssenc_fork_safety.rb`).
 - In `config/queue.yml`, worker `queues` must be a YAML array (e.g. `[default, webhooks, ai, mailers]`). A single comma-separated string is treated as one literal queue name, so jobs enqueued to real queues like `webhooks` are never claimed.
 - For Solid Queue in local development on macOS, Puma can run the queue inline without forked workers: `plugin :solid_queue` and `solid_queue_mode :async` in `config/puma.rb` (development only). Alternatively, `SOLID_QUEUE_SUPERVISOR_MODE=async` for `./bin/rails solid_queue:start`.
-- Mission Control (`/jobs`) needs CSS/JS served through an asset pipeline; this API-only app uses `sprockets-rails` plus `app/assets/config/manifest.js` (and asset dirs) so engine assets resolve under `/assets/...` instead of 404ing.
-- Ops JSON APIs use `OPS_AUTH_TOKEN` with the `X-Ops-Token` request header. Mission Control uses HTTP basic auth outside `development`/`test` via `MISSION_CONTROL_USERNAME` / `MISSION_CONTROL_PASSWORD`.
+- The GoodJob dashboard is mounted at `/jobs`.
+- Ops JSON APIs use `OPS_AUTH_TOKEN` with the `X-Ops-Token` request header.
 - Product/homepage copy describes Toaster as an email booking assistant (not Gmail-only); Gmail-specific backend routes may still exist until a deliberate deprecation pass.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:ca08a54f -->
