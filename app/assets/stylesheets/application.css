@@ -481,6 +481,11 @@ body {
 .hi  { color: var(--text-hi); }
 .dim { color: var(--muted); }
 
+/* ── Shell without sidebar (logged-out) ── */
+.shell--no-sidebar {
+  grid-template-columns: 1fr;
+}
+
 /* ── Mobile nav toggle ── */
 .nav-toggle {
   display: none;

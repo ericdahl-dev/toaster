@@ -14,7 +14,7 @@
     <% if content_for?(:fullpage) %>
       <%= yield :fullpage %>
     <% else %>
-      <div class="shell" data-controller="mobile-nav">
+      <div class="shell <%= 'shell--no-sidebar' unless current_user %>" data-controller="mobile-nav">
         <header class="topbar">
           <% if current_user %>
             <button class="nav-toggle" data-action="mobile-nav#toggle" aria-label="Toggle navigation">
