@@ -632,3 +632,258 @@ body {
     left: 12px;
   }
 }
+
+/* ══════════════════════════════════════
+   Landing page
+   ══════════════════════════════════════ */
+
+.lp {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Nav ── */
+.lp-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(14,15,15,0.85);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.lp-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--text-hi);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.lp-nav-icon {
+  width: 26px;
+  height: 26px;
+  background: var(--amber);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.lp-nav-signin {
+  font-size: 11px;
+  padding: 4px 14px;
+}
+
+/* ── Hero ── */
+.lp-hero {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 40px 80px;
+  overflow: hidden;
+}
+
+.lp-hero-glow {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse 60% 55% at 50% 30%, rgba(245,158,11,0.10) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.lp-hero-inner {
+  max-width: 700px;
+  text-align: center;
+  position: relative;
+}
+
+.lp-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--amber);
+  border: 1px solid var(--amber-dim);
+  background: var(--amber-bg);
+  padding: 3px 12px;
+  border-radius: 20px;
+  margin-bottom: 32px;
+}
+
+.lp-headline {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--text-hi);
+  margin-bottom: 24px;
+}
+
+.lp-headline-accent {
+  color: var(--amber);
+}
+
+.lp-sub {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--muted);
+  max-width: 500px;
+  margin: 0 auto 40px;
+}
+
+.lp-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.lp-cta-btn {
+  padding: 12px 32px;
+  font-size: 13px;
+}
+
+.lp-cta-note {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+/* ── Steps ── */
+.lp-steps {
+  border-top: 1px solid var(--border);
+  padding: 72px 40px;
+  max-width: 960px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.lp-section-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.lp-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lp-step {
+  background: var(--surface);
+  padding: 32px 28px;
+}
+
+.lp-step-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+.lp-step-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+}
+
+.lp-step-body {
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+
+/* ── Footer ── */
+.lp-footer {
+  border-top: 1px solid var(--border);
+  padding: 28px 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.lp-footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-hi);
+  letter-spacing: -0.01em;
+}
+
+.lp-footer-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 10px;
+}
+
+.lp-footer-copy {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── Landing responsive ── */
+@media (max-width: 768px) {
+  .lp-nav {
+    padding: 0 20px;
+  }
+
+  .lp-hero {
+    padding: 60px 24px 48px;
+  }
+
+  .lp-steps {
+    padding: 48px 24px;
+  }
+
+  .lp-steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lp-footer {
+    padding: 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
