@@ -3,9 +3,13 @@
 class IngestVenueDocumentJob < ApplicationJob
   queue_as :default
 
+  class ConfigurationError < StandardError; end
+
   def perform(venue_document_id)
     doc = VenueDocument.find(venue_document_id)
     doc.processing!
+
+    raise ConfigurationError, "OPENAI_API_KEY is not configured" if openai_api_key.blank?
 
     text = UnstructuredClient.extract(doc.file_path)
     chunks = TextChunker.call(text)
@@ -14,9 +18,11 @@ class IngestVenueDocumentJob < ApplicationJob
     doc.venue_chunks.delete_all
 
     chunks.each do |chunk_text|
-      embedding = client.embeddings(
+      response = client.embeddings(
         parameters: {model: "text-embedding-3-large", input: chunk_text}
-      ).dig("data", 0, "embedding")
+      )
+      embedding = response.dig("data", 0, "embedding")
+      raise "OpenAI returned no embedding (check OPENAI_API_KEY and model access)" if embedding.nil?
 
       doc.venue_chunks.create!(content: chunk_text, embedding: embedding)
     end
@@ -25,5 +31,11 @@ class IngestVenueDocumentJob < ApplicationJob
   rescue => e
     doc&.update!(status: :failed, error_message: e.message)
     raise
+  end
+
+  private
+
+  def openai_api_key
+    Rails.application.credentials.dig(:openai, :api_key) || ENV.fetch("OPENAI_API_KEY", nil)
   end
 end

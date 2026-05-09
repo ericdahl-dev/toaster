@@ -13,6 +13,7 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
   let(:openai_client) { instance_double(OpenAI::Client) }
 
   before do
+    stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
     allow(OpenAI::Client).to receive(:new).and_return(openai_client)
     allow(openai_client).to receive(:embeddings).and_return(openai_response)
     allow(UnstructuredClient).to receive(:extract).and_return(fixture_text)
@@ -101,6 +102,35 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
         expect {
           described_class.perform_now(0)
         }.to raise_error(ActiveRecord::RecordNotFound)
+      end
+    end
+
+    context "when OPENAI_API_KEY is not set" do
+      before { stub_const("ENV", ENV.to_h.except("OPENAI_API_KEY")) }
+
+      it "transitions doc to failed with a clear message" do
+        expect {
+          described_class.perform_now(doc.id)
+        }.to raise_error(IngestVenueDocumentJob::ConfigurationError, /OPENAI_API_KEY/)
+
+        expect(doc.reload.status).to eq("failed")
+        expect(doc.reload.error_message).to include("OPENAI_API_KEY")
+      end
+    end
+
+    context "when UNSTRUCTURED_API_KEY is not set" do
+      before do
+        allow(UnstructuredClient).to receive(:extract).and_call_original
+        stub_const("ENV", ENV.to_h.except("UNSTRUCTURED_API_KEY"))
+      end
+
+      it "transitions doc to failed with a clear message" do
+        expect {
+          described_class.perform_now(doc.id)
+        }.to raise_error(UnstructuredClient::ConfigurationError, /UNSTRUCTURED_API_KEY/)
+
+        expect(doc.reload.status).to eq("failed")
+        expect(doc.reload.error_message).to include("UNSTRUCTURED_API_KEY")
       end
     end
   end
