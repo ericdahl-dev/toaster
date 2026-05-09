@@ -39,4 +39,19 @@ RSpec.describe User, type: :model do
       expect(user.account).to be_a(Account)
     end
   end
+
+  describe "roles" do
+    it "defaults to venue_manager" do
+      user = create(:user)
+      expect(user.role).to eq("venue_manager")
+      expect(user).to be_venue_manager
+      expect(user).not_to be_admin
+    end
+
+    it "can be set to admin" do
+      user = create(:user, role: :admin)
+      expect(user).to be_admin
+      expect(user).not_to be_venue_manager
+    end
+  end
 end

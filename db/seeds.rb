@@ -14,6 +14,7 @@ if Rails.env.production?
     user = User.find_or_initialize_by(email: admin_email)
     user.account ||= account
     user.name = ENV["TOASTER_ADMIN_NAME"].presence || admin_email
+    user.role = :admin
     if user.new_record?
       user.password = admin_password
       user.password_confirmation = admin_password
@@ -35,6 +36,7 @@ if Rails.env.development?
   user = User.find_or_initialize_by(email: "dev@toaster.local")
   user.account = account
   user.name = "Local dev user"
+  user.role = :admin
   user.password = dev_password
   user.password_confirmation = dev_password
   user.save!

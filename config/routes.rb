@@ -24,8 +24,17 @@ Rails.application.routes.draw do
     post "/retry_draft/:id", to: "ops#retry_draft"
   end
 
-  # GoodJob – Jobs web dashboard (HTML)
-  mount GoodJob::Engine, at: "/jobs"
+  # GoodJob – Jobs web dashboard (HTML) — admin only
+  authenticate :user, ->(u) { u.admin? } do
+    mount GoodJob::Engine, at: "/jobs"
+  end
+  # Non-admin authenticated users hitting /jobs get redirected rather than 404
+  get "/jobs", to: redirect("/"), constraints: ->(req) { req.env["warden"]&.authenticated? }
+
+  namespace :admin do
+    resources :accounts, only: [:new, :create]
+    resources :users, only: [:new, :create]
+  end
 
   root "home#index"
 
