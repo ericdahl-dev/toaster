@@ -13,7 +13,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16
+        image: pgvector/pgvector:pg16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -40,9 +40,6 @@ jobs:
         with:
           ruby-version: 3.3.7
           bundler-cache: true
-
-      - name: Install pgvector
-        run: sudo apt-get install -y postgresql-16-pgvector
 
       - name: Prepare database
         run: bundle exec rails db:prepare
