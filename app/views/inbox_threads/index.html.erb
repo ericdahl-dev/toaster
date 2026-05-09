@@ -1,0 +1,55 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Inbox Threads</h1>
+    <p class="page-subtitle dim"><%= @threads.size %> thread<%= @threads.size == 1 ? "" : "s" %></p>
+  </div>
+</div>
+
+<% if @threads.any? %>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Subject</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th>Updated</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @threads.each do |thread| %>
+          <%
+            primary_booking = thread.booking_requests
+              .find { |br| %w[pending reviewing].include?(br.status) } ||
+              thread.booking_requests.max_by(&:created_at)
+          %>
+          <tr>
+            <td><%= thread.subject.presence || "(no subject)" %></td>
+            <td>
+              <div><%= thread.contact.name %></div>
+              <div class="dim" style="font-size:11px"><%= thread.contact.email %></div>
+            </td>
+            <td>
+              <% if primary_booking %>
+                <span class="badge badge-<%= primary_booking.status %>"><%= primary_booking.status %></span>
+              <% else %>
+                <span class="dim">—</span>
+              <% end %>
+            </td>
+            <td class="dim" style="font-size:11px;white-space:nowrap"><%= thread.updated_at.strftime("%-d %b %Y") %></td>
+            <td style="text-align:right">
+              <%= link_to "View", inbox_thread_path(thread), class: "btn btn-ghost", style: "padding:3px 10px;font-size:11px" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card">
+    <div class="empty-state">
+      <span class="dim">No inbox threads yet.</span>
+    </div>
+  </div>
+<% end %>

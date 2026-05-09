@@ -1,0 +1,54 @@
+<%= link_to "← Inbox Threads", inbox_threads_path, class: "back-link" %>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title"><%= @thread.subject.presence || "(no subject)" %></h1>
+    <p class="page-subtitle"><%= @thread.contact.name %> &lt;<%= @thread.contact.email %>&gt;</p>
+  </div>
+</div>
+
+<% primary_booking = @thread.booking_requests
+    .find { |br| %w[pending reviewing].include?(br.status) } ||
+    @thread.booking_requests.max_by(&:created_at) %>
+
+<% if primary_booking %>
+  <div style="margin-bottom:24px">
+    <span class="dim" style="font-size:12px">Booking request: </span>
+    <%= link_to primary_booking.contact.name, booking_request_path(primary_booking),
+          style: "color:var(--amber);font-size:13px" %>
+    <span class="badge badge-<%= primary_booking.status %>" style="margin-left:8px"><%= primary_booking.status %></span>
+  </div>
+<% end %>
+
+<% inbox_messages = @thread.booking_requests
+    .filter_map(&:source_inbox_message)
+    .sort_by { |m| m.received_at || m.created_at } %>
+
+<% if inbox_messages.any? %>
+  <div class="section-heading">Messages</div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <% inbox_messages.each do |msg| %>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <div>
+            <strong style="font-size:13px"><%= msg.from_name.presence || msg.from_email %></strong>
+            <% if msg.from_name.present? %>
+              <span class="dim" style="font-size:11px">&lt;<%= msg.from_email %>&gt;</span>
+            <% end %>
+          </div>
+          <span class="dim" style="font-size:11px;white-space:nowrap"><%= msg.received_at&.strftime("%-d %b %Y %H:%M") %></span>
+        </div>
+        <div class="detail-label" style="margin-bottom:6px"><%= msg.subject %></div>
+        <% if msg.body_html.present? %>
+          <iframe srcdoc="<%= h(msg.body_html) %>" sandbox="" style="width:100%;min-height:150px;border:1px solid var(--border);border-radius:4px;background:#fff" title="Email body"></iframe>
+        <% elsif msg.body_text.present? %>
+          <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:var(--text);margin:0"><%= msg.body_text %></pre>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="card">
+    <div class="empty-state"><span class="dim">No messages in this thread.</span></div>
+  </div>
+<% end %>

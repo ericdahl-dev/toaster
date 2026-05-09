@@ -41,6 +41,9 @@
             <%= link_to venues_path, class: "nav-link #{request.path.start_with?('/venues') ? 'active' : ''}" do %>
               <span class="icon">🏛️</span> Venues
             <% end %>
+            <%= link_to inbox_threads_path, class: "nav-link #{request.path.start_with?('/inbox_threads') ? 'active' : ''}" do %>
+              <span class="icon">💬</span> Threads
+            <% end %>
             <div class="sidebar-section" style="margin-top:8px">System</div>
             <%= link_to "/jobs", class: "nav-link" do %>
               <span class="icon">⚙️</span> Jobs
