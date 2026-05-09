@@ -6,11 +6,11 @@ Accepted (2026-05-04)
 
 ## Context
 
-Inbox sync (`InboxIngestion::Sync`) persists `InboxMessage` rows from IMAP and Agent Mailbox. `BookingRequests::Reconcile` runs extraction (`AgentMailbox::ExtractBookingRequest`), event logging, and review tasks. `BookingRequests::Transition` encodes allowed manual/API status changes.
+Inbox sync (`InboxIngestion::Sync`) persists `InboxMessage` rows from IMAP. `BookingRequests::Reconcile` runs extraction, event logging, and review tasks. `BookingRequests::Transition` encodes allowed manual/API status changes.
 
 ## Decision
 
-1. **Integrated:** After each successful upsert in `InboxIngestion::Sync`, call `BookingRequests::PostIngestion.after_inbox_message_persisted`, which delegates to `BookingRequests::Reconcile`. All ingestion adapters share this path (`SyncImapJob`, `SyncAgentMailboxJob`).
+1. **Integrated:** After each successful upsert in `InboxIngestion::Sync`, call `BookingRequests::PostIngestion.after_inbox_message_persisted`, which delegates to `BookingRequests::Reconcile`. All ingestion adapters share this path (`SyncImapJob`).
 
 2. **Transition is out of scope for ingestion:** `BookingRequests::Transition` is only for explicit workflow (e.g. ops/API confirming or rejecting a request). It is not invoked automatically when mail lands.
 
