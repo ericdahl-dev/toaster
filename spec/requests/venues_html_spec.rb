@@ -121,6 +121,17 @@ RSpec.describe "Venues HTML", type: :request do
         delete "/venues/#{other.id}"
         expect(response).to have_http_status(:not_found)
       end
+
+      it "redirects with alert when booking requests exist" do
+        create(:booking_request, account: account, venue: venue)
+
+        delete "/venues/#{venue.id}"
+
+        expect(response).to have_http_status(:redirect)
+        follow_redirect!
+        expect(response.body).to include("booking requests")
+        expect(Venue.find_by(id: venue.id)).not_to be_nil
+      end
     end
   end
 end

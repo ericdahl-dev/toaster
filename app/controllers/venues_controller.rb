@@ -33,6 +33,11 @@ class VenuesController < ApplicationController
   end
 
   def destroy
+    if @venue.booking_requests.exists?
+      redirect_to venues_path, alert: "Cannot delete #{@venue.name} — it has booking requests. Reassign them first."
+      return
+    end
+
     @venue.destroy!
     redirect_to venues_path, notice: "Venue deleted."
   end
