@@ -39,6 +39,21 @@ module Toaster
     # Background jobs via GoodJob
     config.active_job.queue_adapter = :good_job
     config.good_job.execution_mode = :async
+    config.good_job.enable_cron = true
+    config.good_job.cron = {
+      sync_all_imap_connections: {
+        cron: "*/5 * * * *",
+        class: "SyncAllImapConnectionsJob",
+        set: { queue: :webhooks },
+        description: "Poll all active IMAP inboxes for new messages"
+      },
+      reconcile_all_drafts: {
+        cron: "*/5 * * * *",
+        class: "ReconcileAllDraftsJob",
+        set: { queue: :mailers },
+        description: "Check sent folder for dispatched drafts"
+      }
+    }
 
     config.hosts << "toaster-backend.ger3.ericdahl.dev"
     config.hosts << "toaster.ger3.ericdahl.dev"
