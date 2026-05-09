@@ -42,4 +42,5 @@ Rails.application.routes.draw do
     resources :inbox_filters, only: [:create, :destroy]
   end
   resources :venues, only: [:index, :new, :create, :edit, :update, :destroy]
+  resources :inbox_threads, only: [:index, :show]
 end
