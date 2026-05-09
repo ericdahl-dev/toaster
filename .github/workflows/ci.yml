@@ -43,6 +43,7 @@ jobs:
 
       - name: Install pgvector
         run: |
+          sudo apt-get install -y postgresql-server-dev-16
           cd /tmp
           git clone --depth 1 https://github.com/pgvector/pgvector.git
           cd pgvector
