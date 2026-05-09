@@ -8,29 +8,6 @@ Rails.application.routes.draw do
   post "/login",  to: "sessions#create"
   delete "/logout", to: "sessions#destroy"
 
-  post "/auth/login", to: "auth/sessions#create"
-  post "/auth/logout", to: "auth/sessions#destroy"
-  get "/auth/me", to: "auth/sessions#me"
-
-  resources :accounts, only: [] do
-    resources :venues, only: [ :index, :show, :create, :update, :destroy ]
-    resources :contacts, only: [ :index, :show, :create, :update, :destroy ]
-    resources :users, only: [ :index, :show, :create, :update, :destroy ]
-
-    namespace :agent_mailbox do
-      resources :connections, only: [ :index, :show, :create, :update, :destroy ] do
-        resource :sync, only: :create, controller: :connection_syncs
-      end
-      resource :sync, only: :create, controller: :syncs
-    end
-
-    namespace :imap do
-      resources :connections, only: [ :index, :show, :create, :update, :destroy ] do
-        resource :sync, only: :create, controller: :syncs
-      end
-    end
-  end
-
   # Ops/observability endpoints for operators
   scope "/ops" do
     get "/", to: "ops#index"
