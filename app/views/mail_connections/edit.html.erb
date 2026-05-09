@@ -39,6 +39,14 @@
       <label class="form-label">Inbox folder</label>
       <%= f.text_field :inbox_folder, class: "form-input" %>
     </div>
+    <div class="form-group">
+      <label class="form-label">SMTP host <span style="color:var(--muted);text-transform:none;letter-spacing:0;font-size:10px">— leave blank to auto-derive from IMAP host</span></label>
+      <%= f.text_field :smtp_host, class: "form-input", placeholder: "smtp.example.com" %>
+    </div>
+    <div class="form-group">
+      <label class="form-label">SMTP port <span style="color:var(--muted);text-transform:none;letter-spacing:0;font-size:10px">— leave blank for 587 (STARTTLS); use 465 for SSL</span></label>
+      <%= f.number_field :smtp_port, class: "form-input", placeholder: "587" %>
+    </div>
     <div style="margin-top:24px">
       <button type="submit" class="btn btn-amber">Save changes</button>
     </div>

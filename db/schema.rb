@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_09_052936) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_09_054759) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -220,6 +220,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_052936) do
     t.integer "last_synced_uid"
     t.text "password"
     t.integer "port", default: 993, null: false
+    t.string "smtp_host"
+    t.integer "smtp_port"
     t.boolean "ssl", default: true, null: false
     t.datetime "updated_at", null: false
     t.string "username", null: false

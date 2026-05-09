@@ -21,11 +21,17 @@ RSpec.describe "Draft approval UI", type: :request do
   end
 
   describe "POST /booking_requests/:booking_request_id/drafts/:id/approve" do
-    it "transitions draft to approved and redirects" do
-      post "/booking_requests/#{booking_request.id}/drafts/#{draft.id}/approve"
+    it "enqueues SendDraftJob and redirects" do
+      expect {
+        post "/booking_requests/#{booking_request.id}/drafts/#{draft.id}/approve"
+      }.to have_enqueued_job(SendDraftJob).with(draft.id)
 
       expect(response).to have_http_status(:redirect)
-      expect(draft.reload.status).to eq("approved")
+    end
+
+    it "keeps draft in pending_review (job does the sending)" do
+      post "/booking_requests/#{booking_request.id}/drafts/#{draft.id}/approve"
+      expect(draft.reload.status).to eq("pending_review")
     end
 
     it "returns 404 for another account's draft" do

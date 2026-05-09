@@ -52,7 +52,7 @@ class MailConnectionsController < ApplicationController
   end
 
   def imap_update_params
-    permitted = params.require(:mail_connection).permit(:host, :port, :username, :password, :inbox_folder, :ssl)
+    permitted = params.require(:mail_connection).permit(:host, :port, :username, :password, :inbox_folder, :ssl, :smtp_host, :smtp_port)
     permitted[:password].blank? ? permitted.except(:password) : permitted
   end
 end

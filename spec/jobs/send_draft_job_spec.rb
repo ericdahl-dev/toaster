@@ -1,0 +1,60 @@
+# frozen_string_literal: true
+
+require "rails_helper"
+
+RSpec.describe SendDraftJob do
+  let(:account) { create(:account) }
+  let(:imap_connection) { create(:imap_connection, account: account, active: true) }
+  let(:booking_request) { create(:booking_request, account: account, status: "reviewing") }
+  let(:draft) { create(:draft, account: account, booking_request: booking_request, status: "pending_review") }
+
+  before do
+    imap_connection
+    allow(Drafts::SmtpSender).to receive(:call)
+  end
+
+  describe "#perform" do
+    it "calls SmtpSender with draft and imap_connection" do
+      expect(Drafts::SmtpSender).to receive(:call).with(draft: draft, imap_connection: imap_connection)
+      described_class.new.perform(draft.id)
+    end
+
+    context "when no active IMAP connection" do
+      before { imap_connection.update!(active: false) }
+
+      it "does not call SmtpSender" do
+        expect(Drafts::SmtpSender).not_to receive(:call)
+        described_class.new.perform(draft.id)
+      end
+    end
+
+    context "when draft is not pending_review" do
+      before { draft.update!(status: "sent") }
+
+      it "does not call SmtpSender" do
+        expect(Drafts::SmtpSender).not_to receive(:call)
+        described_class.new.perform(draft.id)
+      end
+    end
+
+    it "creates an outbound Message" do
+      expect { described_class.new.perform(draft.id) }.to change(Message, :count).by(1)
+    end
+
+    it "sets Message direction to outbound" do
+      described_class.new.perform(draft.id)
+      expect(Message.last.direction).to eq("outbound")
+    end
+
+    it "transitions reviewing BookingRequest to confirmed" do
+      described_class.new.perform(draft.id)
+      expect(booking_request.reload.status).to eq("confirmed")
+    end
+
+    it "does not confirm BookingRequest already in other status" do
+      booking_request.update!(status: "pending")
+      described_class.new.perform(draft.id)
+      expect(booking_request.reload.status).to eq("pending")
+    end
+  end
+end

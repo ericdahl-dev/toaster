@@ -9,5 +9,7 @@ FactoryBot.define do
     inbox_folder { "INBOX" }
     last_synced_uid { nil }
     active { true }
+    smtp_host { nil }
+    smtp_port { nil }
   end
 end
