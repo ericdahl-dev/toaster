@@ -1,6 +1,6 @@
 /* Application styles */
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Figtree:wght@400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Figtree:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   --bg:       #0e0f0f;
@@ -56,7 +56,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-weight: 800;
   font-size: 15px;
   color: var(--text-hi);
@@ -154,7 +154,7 @@ body {
 }
 
 .page-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 20px;
   font-weight: 700;
   color: var(--text-hi);
@@ -462,7 +462,7 @@ body {
 }
 
 .login-logo-text {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Figtree', sans-serif;
   font-size: 20px;
   font-weight: 800;
   color: var(--text-hi);
