@@ -1,0 +1,17 @@
+{
+  "name": "Toaster",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "onCreateCommand": "sudo apt-get update && sudo apt-get install -y libpq-dev build-essential",
+  "postCreateCommand": "bundle install && bundle exec rails db:prepare && bundle exec rails tailwindcss:build",
+  "remoteEnv": {
+    "RAILS_ENV": "test",
+    "DATABASE_URL": "postgres://postgres:postgres@db:5432/toaster_test",
+    "SECRET_KEY_BASE_DUMMY": "1",
+    "PGGSSENCMODE": "disable"
+  }
+}

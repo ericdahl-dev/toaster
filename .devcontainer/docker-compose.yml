@@ -1,0 +1,27 @@
+services:
+  app:
+    image: ruby:3.3.7
+    volumes:
+      - ..:/workspace:cached
+    working_dir: /workspace
+    command: sleep infinity
+    environment:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@db:5432/toaster_test
+      SECRET_KEY_BASE_DUMMY: "1"
+      PGGSSENCMODE: disable
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: toaster_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
