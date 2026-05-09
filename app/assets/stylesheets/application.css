@@ -480,3 +480,150 @@ body {
 /* ── Utility ── */
 .hi  { color: var(--text-hi); }
 .dim { color: var(--muted); }
+
+/* ── Mobile nav toggle ── */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-right: 4px;
+}
+
+.nav-toggle-bar {
+  display: block;
+  width: 100%;
+  height: 1.5px;
+  background: var(--text);
+  border-radius: 1px;
+  transition: opacity 0.15s, transform 0.2s;
+}
+
+/* ── Sidebar drawer / overlay ── */
+.sidebar-close-row {
+  display: none;
+  justify-content: flex-end;
+  padding: 8px 12px 4px;
+}
+
+.sidebar-close-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: color 0.15s;
+}
+
+.sidebar-close-btn:hover { color: var(--text); }
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.sidebar-overlay--visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ── Scrollable table wrapper ── */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Mobile breakpoint ── */
+@media (max-width: 768px) {
+  .shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: 48px 1fr;
+  }
+
+  .nav-toggle {
+    display: flex;
+  }
+
+  .sidebar-close-row {
+    display: flex;
+  }
+
+  .sidebar-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    z-index: 50;
+    transform: translateX(-100%);
+    transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-y: auto;
+  }
+
+  .sidebar-drawer--open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    pointer-events: none;
+  }
+
+  .main {
+    padding: 16px;
+    grid-column: 1;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .topbar-email {
+    display: none;
+  }
+
+  .card {
+    overflow-x: auto;
+  }
+
+  .data-table {
+    min-width: 520px;
+  }
+
+  .detail-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .draft-card-actions {
+    flex-direction: column;
+  }
+
+  .draft-card-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .flash {
+    top: 54px;
+    right: 12px;
+    left: 12px;
+  }
+}

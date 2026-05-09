@@ -14,8 +14,13 @@
     <% if content_for?(:fullpage) %>
       <%= yield :fullpage %>
     <% else %>
-      <div class="shell">
+      <div class="shell" data-controller="mobile-nav">
         <header class="topbar">
+          <button class="nav-toggle" data-action="mobile-nav#toggle" aria-label="Toggle navigation">
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+            <span class="nav-toggle-bar"></span>
+          </button>
           <a href="/" class="topbar-logo">
             <div class="toast-icon">🍞</div>
             Toaster
@@ -23,32 +28,37 @@
           <div class="topbar-sep"></div>
           <% if current_user %>
             <div class="topbar-user">
-              <span><%= current_user.email %></span>
+              <span class="topbar-email"><%= current_user.email %></span>
               <%= button_to "sign out", logout_path, method: :delete, class: "btn btn-ghost", style: "padding: 3px 9px; font-size: 11px;" %>
             </div>
           <% end %>
         </header>
 
-        <nav class="sidebar">
+        <div class="sidebar-overlay" data-action="click->mobile-nav#close" data-mobile-nav-target="overlay"></div>
+
+        <nav class="sidebar sidebar-drawer" data-mobile-nav-target="drawer">
+          <div class="sidebar-close-row">
+            <button class="sidebar-close-btn" data-action="mobile-nav#close" aria-label="Close navigation">✕</button>
+          </div>
           <% if current_user %>
             <div class="sidebar-section">Operations</div>
-            <%= link_to booking_requests_path, class: "nav-link #{request.path.start_with?('/booking_requests') ? 'active' : ''}" do %>
+            <%= link_to booking_requests_path, class: "nav-link #{request.path.start_with?('/booking_requests') ? 'active' : ''}", data: {action: "mobile-nav#close"} do %>
               <span class="icon">📋</span> Requests
             <% end %>
-            <%= link_to mail_connections_path, class: "nav-link #{request.path.start_with?('/mail_connections') ? 'active' : ''}" do %>
+            <%= link_to mail_connections_path, class: "nav-link #{request.path.start_with?('/mail_connections') ? 'active' : ''}", data: {action: "mobile-nav#close"} do %>
               <span class="icon">📬</span> Mail
             <% end %>
-            <%= link_to venues_path, class: "nav-link #{request.path.start_with?('/venues') ? 'active' : ''}" do %>
+            <%= link_to venues_path, class: "nav-link #{request.path.start_with?('/venues') ? 'active' : ''}", data: {action: "mobile-nav#close"} do %>
               <span class="icon">🏛️</span> Venues
             <% end %>
-            <%= link_to inbox_threads_path, class: "nav-link #{request.path.start_with?('/inbox_threads') ? 'active' : ''}" do %>
+            <%= link_to inbox_threads_path, class: "nav-link #{request.path.start_with?('/inbox_threads') ? 'active' : ''}", data: {action: "mobile-nav#close"} do %>
               <span class="icon">💬</span> Threads
             <% end %>
             <div class="sidebar-section" style="margin-top:8px">System</div>
-            <%= link_to "/jobs", class: "nav-link" do %>
+            <%= link_to "/jobs", class: "nav-link", data: {action: "mobile-nav#close"} do %>
               <span class="icon">⚙️</span> Jobs
             <% end %>
-            <%= link_to "/ops", class: "nav-link #{request.path.start_with?('/ops') ? 'active' : ''}" do %>
+            <%= link_to "/ops", class: "nav-link #{request.path.start_with?('/ops') ? 'active' : ''}", data: {action: "mobile-nav#close"} do %>
               <span class="icon">🔭</span> Ops
             <% end %>
           <% end %>
