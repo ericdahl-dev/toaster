@@ -15,6 +15,12 @@ RSpec.describe "Waitlist", type: :request do
         expect(response.body).to include("You're on the list")
       end
 
+      it "enqueues a confirmation email" do
+        expect {
+          post waitlist_path, params: {waitlist_entry: {email: "owner@venue.com"}}
+        }.to have_enqueued_mail(WaitlistMailer, :confirmation)
+      end
+
       it "is idempotent — duplicate email does not error" do
         create(:waitlist_entry, email: "owner@venue.com")
         expect {
@@ -23,6 +29,13 @@ RSpec.describe "Waitlist", type: :request do
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("You're on the list")
+      end
+
+      it "does not enqueue a confirmation email for a duplicate signup" do
+        create(:waitlist_entry, email: "owner@venue.com")
+        expect {
+          post waitlist_path, params: {waitlist_entry: {email: "owner@venue.com"}}
+        }.not_to have_enqueued_mail(WaitlistMailer, :confirmation)
       end
     end
 
@@ -35,3 +48,4 @@ RSpec.describe "Waitlist", type: :request do
     end
   end
 end
+

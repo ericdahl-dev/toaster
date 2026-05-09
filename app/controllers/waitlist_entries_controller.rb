@@ -5,8 +5,10 @@ class WaitlistEntriesController < ApplicationController
 
   def create
     @entry = WaitlistEntry.find_or_initialize_by(email: entry_params[:email].to_s.strip.downcase)
+    new_record = @entry.new_record?
 
     if @entry.persisted? || @entry.save
+      WaitlistMailer.confirmation(@entry).deliver_later if new_record
       render :success, status: :ok
     else
       @entry = WaitlistEntry.new(entry_params)
