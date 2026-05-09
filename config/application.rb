@@ -39,6 +39,8 @@ module Toaster
     # Background jobs via GoodJob
     config.active_job.queue_adapter = :good_job
     config.good_job.execution_mode = :async
+    config.good_job.enable_cron = true
+    config.good_job.cron = YAML.load_file(Rails.root.join("config/recurring.yml"))
 
     config.hosts << "toaster-backend.ger3.ericdahl.dev"
     config.hosts << "toaster.ger3.ericdahl.dev"
