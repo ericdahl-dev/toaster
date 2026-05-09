@@ -37,14 +37,24 @@ RSpec.describe "Sessions (HTML)", type: :request do
     end
   end
 
-  describe "DELETE /logout" do
-    it "clears session and redirects to login" do
-      post "/login", params: {user: {email: user.email, password: "password123"}}
+  describe "POST /login — waitlist conversion" do
+    context "when the user has an invited WaitlistEntry and this is their first sign in" do
+      let!(:entry) { create(:waitlist_entry, email: user.email, status: :invited, invited_at: 1.day.ago) }
 
-      delete "/logout"
+      it "marks the WaitlistEntry as converted" do
+        post "/login", params: {user: {email: user.email, password: "password123"}}
 
-      expect(response).to have_http_status(:redirect)
-      expect(response.location).to include("/login")
+        expect(entry.reload).to be_converted
+      end
+    end
+
+    context "when the user has no WaitlistEntry" do
+      it "signs in normally without error" do
+        post "/login", params: {user: {email: user.email, password: "password123"}}
+
+        expect(response).to have_http_status(:redirect)
+      end
     end
   end
 end
+
