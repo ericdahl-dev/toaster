@@ -1,0 +1,59 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Waitlist</h1>
+    <p class="page-subtitle">Prospects awaiting access — <%= @entries.count %> total</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Company</th>
+          <th>Email</th>
+          <th>Status</th>
+          <th>Joined</th>
+          <th>Invited</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if @entries.empty? %>
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="empty-icon">📋</div>
+                <p>No waitlist entries yet.</p>
+              </div>
+            </td>
+          </tr>
+        <% else %>
+          <% @entries.each do |entry| %>
+            <tr>
+              <td><%= entry.full_name %></td>
+              <td><%= entry.company_name %></td>
+              <td><%= entry.email %></td>
+              <td>
+                <span class="badge badge-<%= entry.status %>">
+                  <%= entry.status %>
+                </span>
+              </td>
+              <td class="dim"><%= entry.created_at.strftime("%b %d, %Y") %></td>
+              <td class="dim"><%= entry.invited_at&.strftime("%b %d, %Y") || "—" %></td>
+              <td>
+                <% unless entry.converted? %>
+                  <%= link_to entry.expired? ? "Re-invite" : "Invite",
+                        invite_admin_waitlist_path(entry),
+                        class: "btn btn-amber",
+                        style: "padding: 4px 12px; font-size: 11px;" %>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

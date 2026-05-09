@@ -34,6 +34,12 @@ Rails.application.routes.draw do
   namespace :admin do
     resources :accounts, only: [:new, :create]
     resources :users, only: [:new, :create]
+    resources :waitlist, only: [:index] do
+      member do
+        get :invite
+        post :invite
+      end
+    end
   end
 
   root "home#index"
