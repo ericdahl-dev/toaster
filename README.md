@@ -73,8 +73,6 @@ Copy `.env.example` to `.env` and fill in values before starting:
 | `JOB_CONCURRENCY` | Optional | `1` | Number of GoodJob worker threads. |
 | `PGGSSENCMODE` | macOS | `disable` | Prevents libpq GSS segfault in forked workers (set automatically on macOS). |
 | `RAILS_MASTER_KEY` | Prod | — | Decrypts `config/credentials.yml.enc`. |
-| `MISSION_CONTROL_USERNAME` | Prod | — | HTTP basic auth username for the `/jobs` dashboard. |
-| `MISSION_CONTROL_PASSWORD` | Prod | — | HTTP basic auth password for the `/jobs` dashboard. |
 
 ---
 
@@ -135,8 +133,7 @@ The CI suite runs automatically on every push and pull request via GitHub Action
 
 GoodJob's web UI is mounted at `/jobs`.
 
-- **Development:** no authentication required.
-- **Production:** HTTP basic auth via `MISSION_CONTROL_USERNAME` / `MISSION_CONTROL_PASSWORD`.
+- Access control for `/jobs` should match the rest of your Rails app deployment.
 
 ---
 
@@ -158,10 +155,10 @@ libpq's GSS probe is unsafe in fork children on macOS. Set `PGGSSENCMODE=disable
 `.env` (already included in `.env.example`). The app sets this automatically when the variable
 is unset, but setting it explicitly avoids surprises.
 
-**`/jobs` dashboard returns 404 or missing assets**
+**`/jobs` dashboard returns 404**
 
-Mission Control needs `sprockets-rails` and the `app/assets/` tree to serve its CSS/JS. These
-are included in the repo — if assets are missing, run `bundle exec rails assets:precompile`.
+Confirm that the app booted with the GoodJob gem installed and that `/jobs` is mounted in
+`config/routes.rb`.
 
 **Database connection refused**
 
