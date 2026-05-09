@@ -36,19 +36,7 @@
         <%= link_to "Sign in to my account", login_path, class: "btn btn-ghost lp-cta-btn" %>
       </div>
       <div class="lp-hero-waitlist">
-        <%= turbo_frame_tag "waitlist" do %>
-          <%= form_with url: waitlist_path, html: {class: "lp-waitlist-form"} do |f| %>
-            <div class="lp-waitlist-field">
-              <%= f.email_field :email,
-                    name: "waitlist_entry[email]",
-                    placeholder: "your@email.com",
-                    class: "lp-waitlist-input",
-                    autocomplete: "email",
-                    aria: {label: "Email address"} %>
-              <%= f.submit "Join waitlist", class: "lp-waitlist-btn" %>
-            </div>
-          <% end %>
-        <% end %>
+        <a href="#waitlist" class="lp-waitlist-btn lp-waitlist-btn--hero">Request early access &darr;</a>
         <p class="lp-cta-note">Invite-only beta &mdash; no spam, ever.</p>
       </div>
     </div>
@@ -98,7 +86,7 @@
   </section>
 
   <%# ── Waitlist section ── %>
-  <section class="lp-waitlist-section">
+  <section class="lp-waitlist-section" id="waitlist">
     <div class="lp-waitlist-section-inner">
       <div class="lp-waitlist-section-glow" aria-hidden="true"></div>
       <p class="lp-section-label">Early access</p>
@@ -108,18 +96,34 @@
       </h2>
       <p class="lp-waitlist-section-sub">
         Toaster is invite-only while we work closely with early operators.
-        Drop your email and we'll reach out when your spot opens up.
+        Tell us a little about yourself and we'll be in touch when your spot opens up.
       </p>
-      <%= turbo_frame_tag "waitlist-section" do %>
+      <%= turbo_frame_tag "waitlist" do %>
         <%= form_with url: waitlist_path, html: {class: "lp-waitlist-form lp-waitlist-form--lg"} do |f| %>
-          <div class="lp-waitlist-field">
-            <%= f.email_field :email,
-                  name: "waitlist_entry[email]",
-                  placeholder: "your@email.com",
-                  class: "lp-waitlist-input lp-waitlist-input--lg",
-                  autocomplete: "email",
-                  aria: {label: "Email address"} %>
-            <%= f.submit "Request access", class: "lp-waitlist-btn lp-waitlist-btn--lg" %>
+          <div class="lp-waitlist-fields">
+            <div class="lp-waitlist-row">
+              <%= f.text_field :full_name,
+                    name: "waitlist_entry[full_name]",
+                    placeholder: "Your name",
+                    class: "lp-waitlist-input lp-waitlist-input--lg",
+                    autocomplete: "name",
+                    aria: {label: "Your name"} %>
+              <%= f.text_field :company_name,
+                    name: "waitlist_entry[company_name]",
+                    placeholder: "Venue or company name",
+                    class: "lp-waitlist-input lp-waitlist-input--lg",
+                    autocomplete: "organization",
+                    aria: {label: "Venue or company name"} %>
+            </div>
+            <div class="lp-waitlist-field">
+              <%= f.email_field :email,
+                    name: "waitlist_entry[email]",
+                    placeholder: "your@email.com",
+                    class: "lp-waitlist-input lp-waitlist-input--lg",
+                    autocomplete: "email",
+                    aria: {label: "Email address"} %>
+              <%= f.submit "Request access", class: "lp-waitlist-btn lp-waitlist-btn--lg" %>
+            </div>
           </div>
         <% end %>
       <% end %>
