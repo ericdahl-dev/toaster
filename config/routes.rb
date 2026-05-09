@@ -38,6 +38,8 @@ Rails.application.routes.draw do
 
   root "home#index"
 
+  post "/waitlist", to: "waitlist_entries#create", as: :waitlist
+
   resources :booking_requests, only: [:index, :show] do
     member do
       post :transition

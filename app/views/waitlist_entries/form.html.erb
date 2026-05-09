@@ -1,0 +1,16 @@
+<%= turbo_frame_tag "waitlist" do %>
+  <%= form_with url: waitlist_path, model: @entry, html: {class: "lp-waitlist-form"} do |f| %>
+    <div class="lp-waitlist-field">
+      <%= f.email_field :email,
+            value: @entry.email,
+            placeholder: "your@email.com",
+            class: "lp-waitlist-input #{"lp-waitlist-input--error" if @entry.errors[:email].any?}",
+            autocomplete: "email",
+            aria: {label: "Email address"} %>
+      <%= f.submit "Join waitlist", class: "lp-waitlist-btn" %>
+    </div>
+    <% if @entry.errors[:email].any? %>
+      <p class="lp-waitlist-error"><%= @entry.errors[:email].first %></p>
+    <% end %>
+  <% end %>
+<% end %>

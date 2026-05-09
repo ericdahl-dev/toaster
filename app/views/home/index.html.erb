@@ -33,8 +33,23 @@
         No chasing, no copy-pasting, no missed leads.
       </p>
       <div class="lp-cta-row">
-        <%= link_to "Sign in to my account", login_path, class: "btn btn-amber lp-cta-btn" %>
-        <span class="lp-cta-note">Invite-only — apply to join the waitlist</span>
+        <%= link_to "Sign in to my account", login_path, class: "btn btn-ghost lp-cta-btn" %>
+      </div>
+      <div class="lp-hero-waitlist">
+        <%= turbo_frame_tag "waitlist" do %>
+          <%= form_with url: waitlist_path, html: {class: "lp-waitlist-form"} do |f| %>
+            <div class="lp-waitlist-field">
+              <%= f.email_field :email,
+                    name: "waitlist_entry[email]",
+                    placeholder: "your@email.com",
+                    class: "lp-waitlist-input",
+                    autocomplete: "email",
+                    aria: {label: "Email address"} %>
+              <%= f.submit "Join waitlist", class: "lp-waitlist-btn" %>
+            </div>
+          <% end %>
+        <% end %>
+        <p class="lp-cta-note">Invite-only beta &mdash; no spam, ever.</p>
       </div>
     </div>
   </section>
@@ -79,6 +94,36 @@
         <h3 class="lp-step-title">You approve, it sends</h3>
         <p class="lp-step-body">Toaster drafts the reply in your voice. Edit if you want, or send as-is. You stay in control of every response.</p>
       </div>
+    </div>
+  </section>
+
+  <%# ── Waitlist section ── %>
+  <section class="lp-waitlist-section">
+    <div class="lp-waitlist-section-inner">
+      <div class="lp-waitlist-section-glow" aria-hidden="true"></div>
+      <p class="lp-section-label">Early access</p>
+      <h2 class="lp-waitlist-section-heading">
+        Be first in the door.<br>
+        <span class="lp-headline-accent">Your inbox can't wait.</span>
+      </h2>
+      <p class="lp-waitlist-section-sub">
+        Toaster is invite-only while we work closely with early operators.
+        Drop your email and we'll reach out when your spot opens up.
+      </p>
+      <%= turbo_frame_tag "waitlist-section" do %>
+        <%= form_with url: waitlist_path, html: {class: "lp-waitlist-form lp-waitlist-form--lg"} do |f| %>
+          <div class="lp-waitlist-field">
+            <%= f.email_field :email,
+                  name: "waitlist_entry[email]",
+                  placeholder: "your@email.com",
+                  class: "lp-waitlist-input lp-waitlist-input--lg",
+                  autocomplete: "email",
+                  aria: {label: "Email address"} %>
+            <%= f.submit "Request access", class: "lp-waitlist-btn lp-waitlist-btn--lg" %>
+          </div>
+        <% end %>
+      <% end %>
+      <p class="lp-waitlist-section-note">No spam. No credit card. Just a heads-up when you're in.</p>
     </div>
   </section>
 

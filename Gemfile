@@ -10,6 +10,9 @@ gem "puma", ">= 5.0"
 # IMAP support for polling-based inbox sync
 gem "net-imap"
 
+# Transactional email via Resend
+gem "resend"
+
 # Background jobs with dashboard [https://github.com/bensheldon/good_job]
 gem "good_job"
 # Use Redis adapter to run Action Cable in production
