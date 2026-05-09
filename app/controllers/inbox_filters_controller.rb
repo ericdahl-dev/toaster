@@ -27,7 +27,7 @@ class InboxFiltersController < ApplicationController
   private
 
   def set_connection
-    @connection = current_user.account.imap_connections.find_by(id: params[:mail_connection_id])
+    @connection = current_account.imap_connections.find_by(id: params[:mail_connection_id])
     render plain: "Not Found", status: :not_found unless @connection
   end
 end

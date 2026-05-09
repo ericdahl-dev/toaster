@@ -2,18 +2,18 @@
 
 class VenuesController < ApplicationController
   before_action :require_authenticated_html_user!
-  before_action :set_venue, only: [:edit, :update, :destroy]
+  before_action :set_venue, only: [ :edit, :update, :destroy ]
 
   def index
-    @venues = current_user.account.venues.order(:name)
+    @venues = current_account.venues.order(:name)
   end
 
   def new
-    @venue = current_user.account.venues.build
+    @venue = current_account.venues.build
   end
 
   def create
-    @venue = current_user.account.venues.build(venue_params)
+    @venue = current_account.venues.build(venue_params)
     if @venue.save
       redirect_to venues_path, notice: "Venue created."
     else
@@ -40,7 +40,7 @@ class VenuesController < ApplicationController
   private
 
   def set_venue
-    @venue = current_user.account.venues.find_by(id: params[:id])
+    @venue = current_account.venues.find_by(id: params[:id])
     render plain: "Not Found", status: :not_found unless @venue
   end
 

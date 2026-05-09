@@ -17,7 +17,7 @@ class DraftsController < ApplicationController
   private
 
   def set_draft
-    booking_request = current_user.account.booking_requests.find_by(id: params[:booking_request_id])
+    booking_request = current_account.booking_requests.find_by(id: params[:booking_request_id])
     @draft = booking_request&.drafts&.find_by(id: params[:id])
     render plain: "Not Found", status: :not_found unless @draft
   end

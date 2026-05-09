@@ -2,10 +2,10 @@
 
 class BookingRequestsController < ApplicationController
   before_action :require_authenticated_html_user!
-  before_action :set_booking_request, only: [:show, :transition]
+  before_action :set_booking_request, only: [ :show, :transition ]
 
   def index
-    @booking_requests = current_user.account.booking_requests.order(created_at: :desc)
+    @booking_requests = current_account.booking_requests.order(created_at: :desc)
   end
 
   def show
@@ -22,7 +22,7 @@ class BookingRequestsController < ApplicationController
   private
 
   def set_booking_request
-    @booking_request = current_user.account.booking_requests
+    @booking_request = current_account.booking_requests
       .includes(:source_inbox_message)
       .find_by(id: params[:id])
     render plain: "Not Found", status: :not_found unless @booking_request

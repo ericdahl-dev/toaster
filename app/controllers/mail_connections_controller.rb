@@ -2,10 +2,10 @@
 
 class MailConnectionsController < ApplicationController
   before_action :require_authenticated_html_user!
-  before_action :set_connection, only: [:edit, :update]
+  before_action :set_connection, only: [ :edit, :update ]
 
   def index
-    @imap_connections = current_user.account.imap_connections.order(:username)
+    @imap_connections = current_account.imap_connections.order(:username)
   end
 
   def new
@@ -15,7 +15,7 @@ class MailConnectionsController < ApplicationController
     type = params.dig(:mail_connection, :type)
 
     if type == "imap"
-      @connection = current_user.account.imap_connections.build(imap_params)
+      @connection = current_account.imap_connections.build(imap_params)
       if @connection.save
         redirect_to mail_connections_path, notice: "Mail connection added."
       else
@@ -28,14 +28,14 @@ class MailConnectionsController < ApplicationController
   end
 
   def edit
-    @venues = current_user.account.venues.order(:name)
+    @venues = current_account.venues.order(:name)
   end
 
   def update
     if @connection.update(imap_update_params)
       redirect_to edit_mail_connection_path(@connection), notice: "Connection updated."
     else
-      @venues = current_user.account.venues.order(:name)
+      @venues = current_account.venues.order(:name)
       render :edit, status: :unprocessable_content
     end
   end
@@ -43,7 +43,7 @@ class MailConnectionsController < ApplicationController
   private
 
   def set_connection
-    @connection = current_user.account.imap_connections.find_by(id: params[:id])
+    @connection = current_account.imap_connections.find_by(id: params[:id])
     render plain: "Not Found", status: :not_found unless @connection
   end
 

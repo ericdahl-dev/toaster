@@ -4,7 +4,8 @@ class SessionsController < Devise::SessionsController
   layout "application"
 
   def new
-    redirect_to root_path, notice: "Already signed in." if current_user
+    return redirect_to(root_path, notice: "Already signed in.") if current_user
+
     super
   end
 
