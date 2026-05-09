@@ -41,5 +41,6 @@ module Backend
     config.good_job.execution_mode = :async
 
     config.hosts << "toaster-backend.ger3.ericdahl.dev"
+    config.hosts << "toaster.ger3.ericdahl.dev"
   end
 end
