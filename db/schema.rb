@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_09_010126) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_09_052936) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -227,6 +227,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_010126) do
     t.index ["account_id"], name: "index_imap_connections_on_account_id"
   end
 
+  create_table "inbox_filters", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "imap_connection_id", null: false
+    t.string "keyword", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "venue_id", null: false
+    t.index ["imap_connection_id"], name: "index_inbox_filters_on_imap_connection_id"
+    t.index ["venue_id"], name: "index_inbox_filters_on_venue_id"
+  end
+
   create_table "inbox_messages", force: :cascade do |t|
     t.bigint "account_id", null: false
     t.text "body_html"
@@ -316,6 +327,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_010126) do
   add_foreign_key "drafts", "booking_requests"
   add_foreign_key "event_logs", "accounts"
   add_foreign_key "imap_connections", "accounts"
+  add_foreign_key "inbox_filters", "imap_connections"
+  add_foreign_key "inbox_filters", "venues"
   add_foreign_key "inbox_messages", "accounts"
   add_foreign_key "messages", "accounts"
   add_foreign_key "messages", "booking_requests"

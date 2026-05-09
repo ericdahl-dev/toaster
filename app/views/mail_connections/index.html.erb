@@ -25,6 +25,7 @@
           <th>Folder</th>
           <th>Status</th>
           <th>Last synced</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -39,6 +40,9 @@
               </span>
             </td>
             <td class="dim">—</td>
+            <td style="text-align:right">
+              <%= link_to "Edit", edit_mail_connection_path(conn), class: "btn btn-ghost", style: "padding:3px 10px;font-size:11px" %>
+            </td>
           </tr>
         <% end %>
       </tbody>

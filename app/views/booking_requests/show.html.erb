@@ -45,6 +45,30 @@
   </div>
 </div>
 
+<%
+  allowed = BookingRequests::Transition::ALLOWED_TRANSITIONS[@booking_request.status] || []
+%>
+<% if allowed.any? %>
+  <div class="section-heading" style="margin-top:28px">Actions</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px">
+    <% allowed.each do |target| %>
+      <%
+        btn_class = case target
+          when "confirmed" then "btn-success"
+          when "rejected", "cancelled" then "btn-danger"
+          else "btn-ghost"
+        end
+      %>
+      <%= button_to target.humanize,
+            transition_booking_request_path(@booking_request),
+            method: :post,
+            params: {to: target},
+            class: "btn #{btn_class}",
+            data: {"turbo-confirm": ["rejected", "cancelled"].include?(target) ? "Mark as #{target}?" : nil}.compact %>
+    <% end %>
+  </div>
+<% end %>
+
 <% if @booking_request.drafts.any? %>
   <div class="section-heading">Drafts</div>
   <div style="display:flex;flex-direction:column;gap:12px">
@@ -63,5 +87,37 @@
         <% end %>
       </div>
     <% end %>
+  </div>
+<% end %>
+
+<%
+  event_logs = EventLog.where(subject_type: "BookingRequest", subject_id: @booking_request.id)
+                       .order(created_at: :asc)
+%>
+<% if event_logs.any? %>
+  <div class="section-heading">Event log</div>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Event</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% event_logs.each do |log| %>
+          <tr>
+            <td class="dim" style="white-space:nowrap"><%= log.created_at.strftime("%-d %b %Y %H:%M") %></td>
+            <td><code style="font-size:11px"><%= log.event_type %></code></td>
+            <td class="dim" style="font-size:11px">
+              <% log.payload.each do |k, v| %>
+                <span style="color:var(--muted)"><%= k %>:</span> <span style="color:var(--text)"><%= v %></span>&nbsp;
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
   </div>
 <% end %>

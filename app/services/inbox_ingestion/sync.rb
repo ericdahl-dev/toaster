@@ -18,7 +18,8 @@ module InboxIngestion
 
       adapter.each_normalized_message do |attrs|
         inbox_message, created = upsert(attrs)
-        BookingRequests::PostIngestion.after_inbox_message_persisted(inbox_message)
+        imap_connection = adapter.respond_to?(:imap_connection) ? adapter.imap_connection : nil
+        BookingRequests::PostIngestion.after_inbox_message_persisted(inbox_message, imap_connection: imap_connection)
         messages << inbox_message
         if created
           created_count += 1

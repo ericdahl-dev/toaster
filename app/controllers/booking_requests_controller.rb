@@ -2,13 +2,21 @@
 
 class BookingRequestsController < ApplicationController
   before_action :require_authenticated_html_user!
-  before_action :set_booking_request, only: :show
+  before_action :set_booking_request, only: [:show, :transition]
 
   def index
     @booking_requests = current_user.account.booking_requests.order(created_at: :desc)
   end
 
   def show
+  end
+
+  def transition
+    to = params[:to].to_s
+    BookingRequests::Transition.call(booking_request: @booking_request, to: to)
+    redirect_to booking_request_path(@booking_request), notice: "Status updated to #{to}."
+  rescue BookingRequests::Transition::InvalidTransition => e
+    redirect_to booking_request_path(@booking_request), alert: e.message
   end
 
   private

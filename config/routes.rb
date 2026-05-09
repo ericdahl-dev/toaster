@@ -28,6 +28,9 @@ Rails.application.routes.draw do
   root "home#index"
 
   resources :booking_requests, only: [:index, :show] do
+    member do
+      post :transition
+    end
     resources :drafts, only: [] do
       member do
         post :approve
@@ -35,5 +38,8 @@ Rails.application.routes.draw do
       end
     end
   end
-  resources :mail_connections, only: [:index, :new, :create]
+  resources :mail_connections, only: [:index, :new, :create, :edit, :update] do
+    resources :inbox_filters, only: [:create, :destroy]
+  end
+  resources :venues, only: [:index, :new, :create, :edit, :update, :destroy]
 end

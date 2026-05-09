@@ -1,0 +1,41 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Venues</h1>
+    <p class="page-subtitle"><%= @venues.size %> total</p>
+  </div>
+  <%= link_to "Add venue", new_venue_path, class: "btn btn-amber" %>
+</div>
+
+<% if @venues.empty? %>
+  <div class="card">
+    <div class="empty-state">
+      <div class="empty-icon">🏛️</div>
+      <span>No venues yet</span>
+      <span class="dim" style="font-size:11px">Add a venue to enable inbox filter routing</span>
+    </div>
+  </div>
+<% else %>
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @venues.each do |venue| %>
+          <tr>
+            <td><span class="hi"><%= venue.name %></span></td>
+            <td style="text-align:right;white-space:nowrap">
+              <%= link_to "Edit", edit_venue_path(venue), class: "btn btn-ghost", style: "padding:3px 10px;font-size:11px" %>
+              <%= button_to "Delete", venue_path(venue), method: :delete,
+                    class: "btn btn-danger", style: "padding:3px 10px;font-size:11px",
+                    data: {"turbo-confirm": "Delete #{venue.name}?"} %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
