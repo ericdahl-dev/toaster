@@ -8,7 +8,7 @@ RSpec.describe "Venues HTML", type: :request do
 
   describe "GET /venues" do
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "renders the list" do
         create(:venue, account: account, name: "Grand Hall")
@@ -38,7 +38,7 @@ RSpec.describe "Venues HTML", type: :request do
 
   describe "GET /venues/new" do
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "renders the form" do
         get "/venues/new"
@@ -50,7 +50,7 @@ RSpec.describe "Venues HTML", type: :request do
 
   describe "POST /venues" do
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "creates a venue and redirects" do
         post "/venues", params: {venue: {name: "The Loft"}}
@@ -72,7 +72,7 @@ RSpec.describe "Venues HTML", type: :request do
     let!(:venue) { create(:venue, account: account) }
 
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "renders the edit form" do
         get "/venues/#{venue.id}/edit"
@@ -92,7 +92,7 @@ RSpec.describe "Venues HTML", type: :request do
     let!(:venue) { create(:venue, account: account, name: "Old Name") }
 
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "updates the venue and redirects" do
         patch "/venues/#{venue.id}", params: {venue: {name: "New Name"}}
@@ -107,7 +107,7 @@ RSpec.describe "Venues HTML", type: :request do
     let!(:venue) { create(:venue, account: account) }
 
     context "when signed in" do
-      before { post "/login", params: {email: user.email, password: "password123"} }
+      before { sign_in user }
 
       it "deletes the venue and redirects" do
         delete "/venues/#{venue.id}"

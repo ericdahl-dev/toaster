@@ -1,26 +1,20 @@
 # frozen_string_literal: true
 
-class SessionsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :destroy
+class SessionsController < Devise::SessionsController
+  layout "application"
 
   def new
-    redirect_to root_path if current_user
+    redirect_to root_path, notice: "Already signed in." if current_user
+    super
   end
 
-  def create
-    user = User.find_by(email: params[:email].to_s.strip.downcase)
-    if user&.authenticate(params[:password].to_s)
-      reset_session
-      session[:user_id] = user.id
-      redirect_to root_path, notice: "Signed in."
-    else
-      flash.now[:alert] = "Invalid email or password"
-      render :new, status: :unprocessable_content
-    end
+  protected
+
+  def after_sign_in_path_for(_resource)
+    root_path
   end
 
-  def destroy
-    reset_session
-    redirect_to login_path, notice: "Signed out."
+  def after_sign_out_path_for(_resource_or_scope)
+    login_path
   end
 end

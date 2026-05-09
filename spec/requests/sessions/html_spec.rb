@@ -19,7 +19,7 @@ RSpec.describe "Sessions (HTML)", type: :request do
   describe "POST /login" do
     context "with valid credentials" do
       it "sets session and redirects" do
-        post "/login", params: {email: user.email, password: "password123"}
+        post "/login", params: {user: {email: user.email, password: "password123"}}
 
         expect(response).to have_http_status(:redirect)
         follow_redirect!
@@ -29,17 +29,17 @@ RSpec.describe "Sessions (HTML)", type: :request do
 
     context "with invalid credentials" do
       it "re-renders the form with an error" do
-        post "/login", params: {email: user.email, password: "wrong"}
+        post "/login", params: {user: {email: user.email, password: "wrong"}}
 
         expect(response).to have_http_status(:unprocessable_content)
-        expect(response.body).to include("Invalid email or password")
+        expect(response.body).to match(/invalid email or password/i)
       end
     end
   end
 
   describe "DELETE /logout" do
     it "clears session and redirects to login" do
-      post "/login", params: {email: user.email, password: "password123"}
+      post "/login", params: {user: {email: user.email, password: "password123"}}
 
       delete "/logout"
 

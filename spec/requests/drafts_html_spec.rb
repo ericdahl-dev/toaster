@@ -8,7 +8,7 @@ RSpec.describe "Draft approval UI", type: :request do
   let!(:booking_request) { create(:booking_request, account: account) }
   let!(:draft) { create(:draft, account: account, booking_request: booking_request, status: "pending_review") }
 
-  before { post "/login", params: {email: user.email, password: "password123"} }
+  before { sign_in user }
 
   describe "GET /booking_requests/:id" do
     it "shows pending drafts on the detail page" do

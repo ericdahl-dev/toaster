@@ -7,7 +7,7 @@ RSpec.describe "InboxThreads HTML", type: :request do
   let!(:user) { create(:user, account: account) }
   let!(:thread) { create(:conversation_thread, account: account, subject: "Grand Hall inquiry") }
 
-  before { post "/login", params: {email: user.email, password: "password123"} }
+  before { sign_in user }
 
   describe "GET /inbox_threads" do
     it "renders the list" do
