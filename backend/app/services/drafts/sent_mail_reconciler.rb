@@ -65,7 +65,7 @@ module Drafts
     def find_sent_body(sent_folder)
       sent_body = nil
 
-      with_imap do |imap|
+      Imap::Session.call(imap_connection: imap_connection) do |imap|
         imap.select(sent_folder)
         uids = search_sent_uids(imap)
         next if uids.empty?
@@ -107,7 +107,7 @@ module Drafts
       return false unless draft.imap_draft_uid.present? && drafts_folder.present?
 
       exists = false
-      with_imap do |imap|
+      Imap::Session.call(imap_connection: imap_connection) do |imap|
         imap.select(drafts_folder)
         result = begin
           imap.uid_fetch([draft.imap_draft_uid], "FLAGS")
@@ -171,22 +171,6 @@ module Drafts
         part ? part.body.decoded.force_encoding("UTF-8").scrub : nil
       elsif mail.content_type&.include?("text/plain")
         mail.body.decoded.force_encoding("UTF-8").scrub
-      end
-    end
-
-    def with_imap
-      imap = Net::IMAP.new(
-        imap_connection.host,
-        port: imap_connection.port,
-        ssl: imap_connection.ssl?
-      )
-      imap.login(imap_connection.username, imap_connection.password)
-      yield imap
-    ensure
-      begin
-        imap&.disconnect
-      rescue
-        nil
       end
     end
   end

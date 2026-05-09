@@ -16,7 +16,7 @@ module Imap
 
       messages = []
 
-      with_imap do |imap|
+      Imap::Session.call(imap_connection: imap_connection) do |imap|
         imap.select(imap_connection.inbox_folder)
 
         uids = search_uids(imap)
@@ -34,22 +34,6 @@ module Imap
     private
 
     attr_reader :imap_connection
-
-    def with_imap
-      imap = Net::IMAP.new(
-        imap_connection.host,
-        port: imap_connection.port,
-        ssl: imap_connection.ssl?
-      )
-      imap.login(imap_connection.username, imap_connection.password)
-      yield imap
-    ensure
-      begin
-        imap&.disconnect
-      rescue
-        nil
-      end
-    end
 
     def search_uids(imap)
       if imap_connection.last_synced_uid.present?
