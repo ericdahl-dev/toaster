@@ -87,4 +87,29 @@ RSpec.describe "MailConnections HTML", type: :request do
       end
     end
   end
+
+  describe "PATCH /mail_connections/:id (SMTP fields)" do
+    let!(:imap_connection) { create(:imap_connection, account: account) }
+
+    context "when signed in" do
+      before { post "/login", params: {email: user.email, password: "password123"} }
+
+      it "saves smtp_host and smtp_port" do
+        patch "/mail_connections/#{imap_connection.id}", params: {
+          mail_connection: {smtp_host: "smtp.custom.com", smtp_port: "465"}
+        }
+
+        expect(response).to have_http_status(:redirect)
+        imap_connection.reload
+        expect(imap_connection.smtp_host).to eq("smtp.custom.com")
+        expect(imap_connection.smtp_port).to eq(465)
+      end
+
+      it "renders smtp fields in edit form" do
+        get "/mail_connections/#{imap_connection.id}/edit"
+        expect(response.body).to include("smtp_host")
+        expect(response.body).to include("smtp_port")
+      end
+    end
+  end
 end

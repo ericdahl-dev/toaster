@@ -5,9 +5,8 @@ class DraftsController < ApplicationController
   before_action :set_draft
 
   def approve
-    @draft.update!(status: "approved")
-    PushDraftJob.perform_later(@draft.id)
-    redirect_to booking_request_path(@draft.booking_request), notice: "Draft approved."
+    SendDraftJob.perform_later(@draft.id)
+    redirect_to booking_request_path(@draft.booking_request), notice: "Draft approved — sending now."
   end
 
   def reject
