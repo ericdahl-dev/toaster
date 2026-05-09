@@ -4,33 +4,16 @@
     <%= link_to "Add connection", new_mail_connection_path, class: "text-sm font-medium text-slate-700 border border-slate-300 rounded-md px-3 py-1.5 hover:bg-slate-50" %>
   </div>
 
-  <% if @imap_connections.empty? && @agentmail_connections.empty? %>
+  <% if @imap_connections.empty? %>
     <p class="text-slate-500">No mail connections configured yet.</p>
-  <% end %>
-
-  <% if @imap_connections.any? %>
-    <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">IMAP</h2>
-    <div class="space-y-2 mb-6">
+  <% else %>
+    <div class="space-y-2">
       <% @imap_connections.each do |conn| %>
         <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3">
           <div>
             <p class="text-sm font-medium text-slate-900"><%= conn.username %></p>
             <p class="text-xs text-slate-500"><%= conn.host %>:<%= conn.port %></p>
           </div>
-          <span class="text-xs font-medium px-2 py-0.5 rounded-full <%= conn.active? ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500' %>">
-            <%= conn.active? ? "active" : "inactive" %>
-          </span>
-        </div>
-      <% end %>
-    </div>
-  <% end %>
-
-  <% if @agentmail_connections.any? %>
-    <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">AgentMail</h2>
-    <div class="space-y-2">
-      <% @agentmail_connections.each do |conn| %>
-        <div class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-3">
-          <p class="text-sm font-medium text-slate-900"><%= conn.inbox_id %></p>
           <span class="text-xs font-medium px-2 py-0.5 rounded-full <%= conn.active? ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-500' %>">
             <%= conn.active? ? "active" : "inactive" %>
           </span>

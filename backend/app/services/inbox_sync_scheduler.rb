@@ -9,8 +9,6 @@ module InboxSyncScheduler
     case connection
     when ImapConnection
       SyncImapJob.perform_later(connection.id)
-    when AgentmailConnection
-      SyncAgentMailboxJob.perform_later(connection.id)
     else
       raise ArgumentError, "InboxSyncScheduler does not support #{connection.class.name}"
     end

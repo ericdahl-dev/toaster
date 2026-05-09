@@ -1,7 +1,6 @@
 class Account < ApplicationRecord
   has_many :users, dependent: :destroy
   has_many :imap_connections, dependent: :destroy
-  has_many :agentmail_connections, dependent: :destroy
   has_many :contacts, dependent: :destroy
   has_many :venues, dependent: :destroy
   has_many :conversation_threads, dependent: :destroy

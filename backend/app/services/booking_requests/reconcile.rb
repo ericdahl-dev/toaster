@@ -14,7 +14,7 @@ module BookingRequests
       ActiveRecord::Base.transaction do
         is_new = !BookingRequest.exists?(source_inbox_message: inbox_message)
 
-        result = AgentMailbox::ExtractBookingRequest.call(inbox_message: inbox_message)
+        result = BookingRequests::Extract.call(inbox_message: inbox_message)
         booking_request = result.booking_request
 
         log_reconciliation(booking_request, is_new: is_new)

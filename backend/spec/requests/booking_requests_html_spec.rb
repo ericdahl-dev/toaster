@@ -23,7 +23,7 @@ RSpec.describe "BookingRequests HTML", type: :request do
         other = create(:booking_request)
         get "/booking_requests"
 
-        expect(response.body).not_to include(other.id.to_s)
+        expect(response.body).not_to include(other.contact.email)
       end
     end
 
