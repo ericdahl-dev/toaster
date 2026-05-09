@@ -1,0 +1,69 @@
+# frozen_string_literal: true
+
+require "rails_helper"
+
+RSpec.describe "BookingRequests HTML", type: :request do
+  let(:account) { create(:account) }
+  let!(:user) { create(:user, account: account) }
+  let!(:booking_request) { create(:booking_request, account: account) }
+
+  describe "GET /booking_requests" do
+    context "when signed in" do
+      before { post "/login", params: {email: user.email, password: "password123"} }
+
+      it "renders the list" do
+        get "/booking_requests"
+
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to match(%r{text/html})
+        expect(response.body).to include("Booking Requests")
+      end
+
+      it "does not show requests from other accounts" do
+        other = create(:booking_request)
+        get "/booking_requests"
+
+        expect(response.body).not_to include(other.id.to_s)
+      end
+    end
+
+    context "when signed out" do
+      it "redirects to login" do
+        get "/booking_requests"
+
+        expect(response).to have_http_status(:redirect)
+        expect(response.location).to include("/login")
+      end
+    end
+  end
+
+  describe "GET /booking_requests/:id" do
+    context "when signed in" do
+      before { post "/login", params: {email: user.email, password: "password123"} }
+
+      it "renders the detail page" do
+        get "/booking_requests/#{booking_request.id}"
+
+        expect(response).to have_http_status(:ok)
+        expect(response.content_type).to match(%r{text/html})
+        expect(response.body).to include(booking_request.status)
+      end
+
+      it "returns 404 for another account's request" do
+        other = create(:booking_request)
+        get "/booking_requests/#{other.id}"
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when signed out" do
+      it "redirects to login" do
+        get "/booking_requests/#{booking_request.id}"
+
+        expect(response).to have_http_status(:redirect)
+        expect(response.location).to include("/login")
+      end
+    end
+  end
+end

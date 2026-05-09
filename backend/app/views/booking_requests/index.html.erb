@@ -1,0 +1,27 @@
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <h1 class="text-xl font-semibold text-slate-900 mb-6">Booking Requests</h1>
+
+  <% if @booking_requests.empty? %>
+    <p class="text-slate-500">No booking requests yet.</p>
+  <% else %>
+    <div class="space-y-3">
+      <% @booking_requests.each do |br| %>
+        <%= link_to booking_request_path(br), class: "block rounded-lg border border-slate-200 bg-white px-5 py-4 hover:border-slate-400 transition-colors" do %>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-slate-900"><%= br.contact.name %></p>
+              <p class="text-xs text-slate-500 mt-0.5"><%= br.event_date&.strftime("%b %-d, %Y") %></p>
+            </div>
+            <span class="text-xs font-medium px-2.5 py-1 rounded-full
+              <%= br.pending? ? 'bg-yellow-50 text-yellow-800' :
+                  br.confirmed? ? 'bg-green-50 text-green-800' :
+                  br.rejected? || br.cancelled? ? 'bg-red-50 text-red-800' :
+                  'bg-slate-100 text-slate-700' %>">
+              <%= br.status %>
+            </span>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

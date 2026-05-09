@@ -1,0 +1,66 @@
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <%= link_to "← All requests", booking_requests_path, class: "text-sm text-slate-500 hover:text-slate-900" %>
+
+  <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6">
+    <div class="flex items-start justify-between">
+      <div>
+        <h1 class="text-xl font-semibold text-slate-900"><%= @booking_request.contact.name %></h1>
+        <p class="text-sm text-slate-500 mt-0.5"><%= @booking_request.contact.email %></p>
+      </div>
+      <span class="text-sm font-medium px-3 py-1 rounded-full
+        <%= @booking_request.pending? ? 'bg-yellow-50 text-yellow-800' :
+            @booking_request.confirmed? ? 'bg-green-50 text-green-800' :
+            @booking_request.rejected? || @booking_request.cancelled? ? 'bg-red-50 text-red-800' :
+            'bg-slate-100 text-slate-700' %>">
+        <%= @booking_request.status %>
+      </span>
+    </div>
+
+    <dl class="mt-6 grid grid-cols-2 gap-4 text-sm">
+      <% if @booking_request.event_date %>
+        <div>
+          <dt class="text-slate-500">Event date</dt>
+          <dd class="font-medium text-slate-900 mt-0.5"><%= @booking_request.event_date.strftime("%b %-d, %Y") %></dd>
+        </div>
+      <% end %>
+      <% if @booking_request.event_end_date %>
+        <div>
+          <dt class="text-slate-500">End date</dt>
+          <dd class="font-medium text-slate-900 mt-0.5"><%= @booking_request.event_end_date.strftime("%b %-d, %Y") %></dd>
+        </div>
+      <% end %>
+      <% if @booking_request.headcount %>
+        <div>
+          <dt class="text-slate-500">Headcount</dt>
+          <dd class="font-medium text-slate-900 mt-0.5"><%= @booking_request.headcount %></dd>
+        </div>
+      <% end %>
+      <% if @booking_request.budget_cents %>
+        <div>
+          <dt class="text-slate-500">Budget</dt>
+          <dd class="font-medium text-slate-900 mt-0.5">$<%= (@booking_request.budget_cents / 100.0).round(2) %></dd>
+        </div>
+      <% end %>
+      <% if @booking_request.venue %>
+        <div>
+          <dt class="text-slate-500">Venue</dt>
+          <dd class="font-medium text-slate-900 mt-0.5"><%= @booking_request.venue.name %></dd>
+        </div>
+      <% end %>
+    </dl>
+
+    <% if @booking_request.drafts.any? %>
+      <div class="mt-8 border-t border-slate-100 pt-6">
+        <h2 class="text-sm font-semibold text-slate-700 mb-3">Drafts</h2>
+        <div class="space-y-3">
+          <% @booking_request.drafts.order(created_at: :desc).each do |draft| %>
+            <div class="rounded-lg border border-slate-200 p-4 text-sm">
+              <p class="text-slate-700 whitespace-pre-wrap"><%= draft.body %></p>
+              <p class="text-xs text-slate-400 mt-2"><%= draft.status %></p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
