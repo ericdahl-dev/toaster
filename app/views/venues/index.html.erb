@@ -31,7 +31,7 @@
               <%= link_to "Edit", edit_venue_path(venue), class: "btn btn-ghost", style: "padding:3px 10px;font-size:11px" %>
               <%= button_to "Delete", venue_path(venue), method: :delete,
                     class: "btn btn-danger", style: "padding:3px 10px;font-size:11px",
-                    data: {confirm: "Delete #{venue.name}?"} %>
+                    data: {"turbo-confirm": "Delete #{venue.name}?"} %>
             </td>
           </tr>
         <% end %>

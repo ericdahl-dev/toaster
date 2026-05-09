@@ -15,7 +15,7 @@
   </div>
 <% end %>
 
-<div class="section-heading">Connection details</div>
+<div class="section-heading" style="margin-top:0">Connection details</div>
 
 <div style="max-width:480px;margin-bottom:32px">
   <%= form_with model: @connection, url: mail_connection_path(@connection), method: :patch do |f| %>
@@ -32,7 +32,7 @@
       <%= f.email_field :username, class: "form-input" %>
     </div>
     <div class="form-group">
-      <label class="form-label">Password <span class="dim" style="font-weight:400">(leave blank to keep current)</span></label>
+      <label class="form-label">Password <span style="color:var(--muted);text-transform:none;letter-spacing:0;font-size:10px">— leave blank to keep current</span></label>
       <%= f.password_field :password, class: "form-input", autocomplete: "new-password" %>
     </div>
     <div class="form-group">
