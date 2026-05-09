@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Your Toaster account is ready</title>
+  </head>
+  <body style="margin:0;padding:0;background:#0e0f0f;font-family:'Courier New',Courier,monospace;color:#d4d6d6;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0e0f0f;padding:40px 20px;">
+      <tr>
+        <td align="center">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+
+            <%# Logo %>
+            <tr>
+              <td style="padding-bottom:32px;">
+                <table cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td style="background:#f59e0b;border-radius:6px;width:28px;height:28px;text-align:center;vertical-align:middle;font-size:14px;line-height:28px;">🍞</td>
+                    <td style="padding-left:10px;font-size:15px;font-weight:bold;color:#f0f2f2;letter-spacing:-0.02em;">Toaster</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <%# Headline %>
+            <tr>
+              <td style="padding-bottom:16px;">
+                <p style="margin:0;font-size:22px;font-weight:900;color:#f0f2f2;line-height:1.2;letter-spacing:-0.03em;">
+                  Your account is ready, <%= @entry.full_name.split.first %>.
+                </p>
+              </td>
+            </tr>
+
+            <%# Body %>
+            <tr>
+              <td style="padding-bottom:32px;">
+                <p style="margin:0 0 16px;font-size:13px;line-height:1.75;color:#d4d6d6;">
+                  You're in. Click the button below to set your password and access your Toaster dashboard.
+                </p>
+                <p style="margin:0;font-size:12px;color:#4a4d4d;">
+                  Account: <%= @user.account.name %>
+                </p>
+              </td>
+            </tr>
+
+            <%# CTA %>
+            <tr>
+              <td style="padding-bottom:36px;">
+                <a href="<%= @reset_url %>"
+                   style="display:inline-block;background:#f59e0b;color:#000;font-family:'Courier New',Courier,monospace;font-size:12px;font-weight:bold;padding:12px 28px;border-radius:5px;text-decoration:none;">
+                  Set your password &rarr;
+                </a>
+              </td>
+            </tr>
+
+            <%# Footer %>
+            <tr>
+              <td style="padding-top:28px;border-top:1px solid #252626;">
+                <p style="margin:0;font-size:11px;color:#4a4d4d;line-height:1.6;">
+                  This link expires in 6 hours. If you didn't expect this email, you can ignore it.<br>
+                  Or paste this URL: <%= @reset_url %>
+                </p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
