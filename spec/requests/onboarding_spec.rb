@@ -95,4 +95,27 @@ RSpec.describe "Onboarding", type: :request do
       expect(response).to redirect_to(booking_requests_path)
     end
   end
+
+  describe "password reset redirect (invited user)" do
+    let(:raw_token) do
+      raw, hashed = Devise.token_generator.generate(User, :reset_password_token)
+      user.update_columns(reset_password_token: hashed, reset_password_sent_at: Time.current)
+      raw
+    end
+
+    context "new user resets password for the first time" do
+      it "redirects to onboarding after password reset" do
+        put "/password",
+          params: {
+            user: {
+              reset_password_token: raw_token,
+              password: "newpassword123",
+              password_confirmation: "newpassword123"
+            }
+          }
+
+        expect(response).to redirect_to(onboarding_path)
+      end
+    end
+  end
 end
