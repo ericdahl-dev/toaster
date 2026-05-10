@@ -592,6 +592,7 @@ body {
     grid-template-columns: 1fr;
     grid-template-rows: 48px 1fr;
     height: 100vh;
+    height: 100dvh;
     overflow: hidden;
   }
 
