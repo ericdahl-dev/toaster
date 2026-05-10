@@ -45,4 +45,22 @@ RSpec.configure do |config|
   config.include Devise::Test::IntegrationHelpers, type: :request
 
   config.filter_rails_from_backtrace!
+
+  config.before(:each) do
+    if ENV["OPENAI_API_KEY"].blank?
+      stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key-global-stub"))
+      allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai)
+        .and_return({"booking_request" => true})
+      allow_any_instance_of(BookingRequests::LlmExtractor).to receive(:call_openai)
+        .and_return({
+          "event_date" => nil,
+          "headcount" => nil,
+          "budget" => nil,
+          "start_time" => nil,
+          "celebration_type" => nil,
+          "confidence" => 0.5,
+          "notes" => nil
+        })
+    end
+  end
 end
