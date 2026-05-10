@@ -13,12 +13,12 @@ class OnboardingController < ApplicationController
   end
 
   def complete
-    current_user.account.update_column(:onboarded_at, Time.current)
+    current_user.account.complete_onboarding!
     redirect_to booking_requests_path
   end
 
   def skip
-    current_user.account.update_column(:onboarded_at, Time.current)
+    current_user.account.complete_onboarding!
     redirect_to booking_requests_path
   end
 end
