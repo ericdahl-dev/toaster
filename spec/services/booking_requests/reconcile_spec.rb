@@ -87,10 +87,23 @@ RSpec.describe BookingRequests::Reconcile do
         }.to change(BookingRequest, :count).by(1)
       end
 
-      it "returns the persisted booking request" do
+      it "returns a Result with the persisted booking request" do
         result = described_class.call(inbox_message: build_inbox_message)
-        expect(result).to be_a(BookingRequest)
-        expect(result).to be_persisted
+        expect(result).to be_a(BookingRequests::Reconcile::Result)
+        expect(result.booking_request).to be_a(BookingRequest)
+        expect(result.booking_request).to be_persisted
+      end
+
+      it "returns draft_created: true when a draft was created" do
+        result = described_class.call(inbox_message: build_inbox_message)
+        expect(result.draft_created).to be(true)
+      end
+
+      it "returns draft_created: false on re-reconciliation" do
+        inbox_message = build_inbox_message
+        described_class.call(inbox_message: inbox_message)
+        result = described_class.call(inbox_message: inbox_message)
+        expect(result.draft_created).to be(false)
       end
 
       it "records a booking_request.created EventLog entry" do

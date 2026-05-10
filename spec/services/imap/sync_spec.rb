@@ -1,6 +1,10 @@
 require "rails_helper"
 
 RSpec.describe "IMAP inbox ingestion" do
+  before do
+    allow(BookingRequests::Reconcile).to receive(:call).and_return(nil)
+  end
+
   def ingest(imap_connection:, fetcher:)
     InboxIngestion::Sync.call(
       adapter: InboxIngestion::ImapAdapter.new(imap_connection: imap_connection, fetcher: fetcher)
