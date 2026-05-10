@@ -27,27 +27,29 @@ module Drafts
     end
 
     def call
-      folders = Imap::FolderLocator.call(imap_connection: imap_connection)
-      return Result.new(outcome: :not_found) unless folders.sent_folder
+      Imap::Session.call(imap_connection: imap_connection) do |imap|
+        folders = Imap::FolderLocator.call(imap: imap)
+        return Result.new(outcome: :not_found) unless folders.sent_folder
 
-      sent_body = find_sent_body(folders.sent_folder)
+        sent_body = find_sent_body(imap, folders.sent_folder)
 
-      unless sent_body
-        draft_still_exists = imap_draft_uid_exists?(folders.drafts_folder)
-        if draft_still_exists
-          return Result.new(outcome: :pending, sent_body: nil, similarity: nil)
-        else
-          draft.update!(status: :rejected)
-          return Result.new(outcome: :rejected, sent_body: nil, similarity: nil)
+        unless sent_body
+          draft_still_exists = imap_draft_uid_exists?(imap, folders.drafts_folder)
+          if draft_still_exists
+            return Result.new(outcome: :pending, sent_body: nil, similarity: nil)
+          else
+            draft.update!(status: :rejected)
+            return Result.new(outcome: :rejected, sent_body: nil, similarity: nil)
+          end
         end
+
+        similarity = body_similarity(draft.original_body.to_s, sent_body)
+        outcome = classify(similarity)
+
+        draft.update!(status: outcome, sent_at: Time.current)
+
+        Result.new(outcome: outcome, sent_body: sent_body, similarity: similarity)
       end
-
-      similarity = body_similarity(draft.original_body.to_s, sent_body)
-      outcome = classify(similarity)
-
-      draft.update!(status: outcome, sent_at: Time.current)
-
-      Result.new(outcome: outcome, sent_body: sent_body, similarity: similarity)
     end
 
     private
@@ -62,23 +64,21 @@ module Drafts
       @conversation_thread ||= booking_request.conversation_thread
     end
 
-    def find_sent_body(sent_folder)
+    def find_sent_body(imap, sent_folder)
       sent_body = nil
 
-      Imap::Session.call(imap_connection: imap_connection) do |imap|
-        imap.select(sent_folder)
-        uids = search_sent_uids(imap)
-        next if uids.empty?
+      imap.select(sent_folder)
+      uids = search_sent_uids(imap)
+      return nil if uids.empty?
 
-        imap.uid_fetch(uids, %w[UID RFC822]).each do |msg|
-          raw = msg.attr["RFC822"]
-          next if raw.blank?
-          mail = Mail.new(raw)
-          body = extract_text(mail).to_s.strip
-          next if body.empty?
-          sent_body = body
-          break
-        end
+      imap.uid_fetch(uids, %w[UID RFC822]).each do |msg|
+        raw = msg.attr["RFC822"]
+        next if raw.blank?
+        mail = Mail.new(raw)
+        body = extract_text(mail).to_s.strip
+        next if body.empty?
+        sent_body = body
+        break
       end
 
       sent_body
@@ -103,20 +103,16 @@ module Drafts
       (by_references + by_in_reply).uniq
     end
 
-    def imap_draft_uid_exists?(drafts_folder)
+    def imap_draft_uid_exists?(imap, drafts_folder)
       return false unless draft.imap_draft_uid.present? && drafts_folder.present?
 
-      exists = false
-      Imap::Session.call(imap_connection: imap_connection) do |imap|
-        imap.select(drafts_folder)
-        result = begin
-          imap.uid_fetch([draft.imap_draft_uid], "FLAGS")
-        rescue
-          nil
-        end
-        exists = result.present?
+      imap.select(drafts_folder)
+      result = begin
+        imap.uid_fetch([draft.imap_draft_uid], "FLAGS")
+      rescue
+        nil
       end
-      exists
+      result.present?
     end
 
     def classify(similarity)
