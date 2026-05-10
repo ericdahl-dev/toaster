@@ -35,6 +35,13 @@ module BookingRequests
         payload: {from: from, to: to}.merge(metadata)
       )
 
+      distinct_id = metadata[:distinct_id] || "account_#{booking_request.account_id}"
+      Telemetry.capture(
+        distinct_id: distinct_id,
+        event: "booking_request_status_changed",
+        properties: {from: from, to: to, booking_request_id: booking_request.id, account_id: booking_request.account_id}
+      )
+
       booking_request
     end
 

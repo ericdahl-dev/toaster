@@ -6,11 +6,25 @@ class DraftsController < ApplicationController
 
   def approve
     SendDraftJob.perform_later(@draft.id)
+
+    Telemetry.capture(
+      distinct_id: current_user.posthog_distinct_id,
+      event: "draft_approved",
+      properties: {draft_id: @draft.id, booking_request_id: @draft.booking_request_id}
+    )
+
     redirect_to booking_request_path(@draft.booking_request), notice: "Draft approved — sending now."
   end
 
   def reject
     @draft.update!(status: "rejected")
+
+    Telemetry.capture(
+      distinct_id: current_user.posthog_distinct_id,
+      event: "draft_rejected",
+      properties: {draft_id: @draft.id, booking_request_id: @draft.booking_request_id}
+    )
+
     redirect_to booking_request_path(@draft.booking_request), notice: "Draft rejected."
   end
 

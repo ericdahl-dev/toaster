@@ -23,8 +23,16 @@ class VenueDocumentsController < ApplicationController
     )
 
     IngestVenueDocumentJob.perform_later(doc.id)
+
+    Telemetry.capture(
+      distinct_id: current_user.posthog_distinct_id,
+      event: "venue_document_uploaded",
+      properties: {venue_id: @venue.id, filename: file.original_filename}
+    )
+
     redirect_to edit_venue_path(@venue), notice: "Document uploaded — ingestion started."
   rescue => e
+    Telemetry.capture_exception(e, current_user.posthog_distinct_id)
     render plain: e.message, status: :unprocessable_content
   end
 

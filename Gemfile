@@ -82,3 +82,6 @@ gem "standard", ">= 1.35.1", groups: %i[development test]
 gem "guard-rspec", "~> 4.7", groups: [:development, :test]
 
 gem "parallel_tests", "~> 5.7", groups: [:development, :test]
+
+gem "posthog-ruby", "~> 3.8"
+gem "posthog-rails", "~> 3.8"
