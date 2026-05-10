@@ -3,6 +3,16 @@
 require "rails_helper"
 
 RSpec.describe "Mobile layout", type: :request do
+  describe "mobile viewport sizing styles" do
+    it "serves css with dynamic viewport height for app shells" do
+      get "/assets/application.css"
+
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include(".shell")
+      expect(response.body).to include("min-height: 100dvh;")
+    end
+  end
+
   let(:account) { create(:account) }
   let!(:user) { create(:user, account: account) }
 

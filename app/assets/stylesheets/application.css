@@ -39,6 +39,7 @@ body {
   grid-template-columns: 220px 1fr;
   grid-template-rows: 48px 1fr;
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* ── Topbar ── */
@@ -463,6 +464,7 @@ body {
 /* ── Login ── */
 .login-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -669,6 +671,7 @@ body {
 
 .lp {
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--text);
   display: flex;
