@@ -8,7 +8,7 @@ class Admin::WaitlistController < Admin::BaseController
   end
 
   def invite
-    if request.get?
+    if request.get? || request.head?
       @account = Account.new(name: @entry.company_name)
       @user = User.new(name: @entry.full_name, email: @entry.email)
     else
