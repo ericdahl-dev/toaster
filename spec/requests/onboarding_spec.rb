@@ -100,6 +100,22 @@ RSpec.describe "Onboarding", type: :request do
       get "/onboarding/venue"
       expect(response.body).to match(/class="[^"]*auth-link[^"]*"/)
     end
+
+    it "submits venue and redirects to mail connection step" do
+      sign_in user
+      post "/venues", params: { venue: { name: "The Grand Hall" }, onboarding: true }
+
+      expect(response).to redirect_to(onboarding_mail_connection_path)
+      expect(user.account.venues.find_by(name: "The Grand Hall")).not_to be_nil
+    end
+
+    it "re-renders onboarding venue form on validation failure" do
+      sign_in user
+      post "/venues", params: { venue: { name: "" }, onboarding: true }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include("login-box")
+    end
   end
 
   describe "GET /onboarding/mail_connection" do
