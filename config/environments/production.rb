@@ -69,8 +69,16 @@ Rails.application.configure do
   # caching is enabled.
   config.action_mailer.perform_caching = false
 
-  # Deliver via Resend
-  config.action_mailer.delivery_method = :resend
+  # Deliver via Forward Email (SMTP)
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: "smtp.forwardemail.net",
+    port: 587,
+    user_name: ENV.fetch("FORWARD_EMAIL_USERNAME"),
+    password: ENV.fetch("FORWARD_EMAIL_PASSWORD"),
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = {host: ENV.fetch("APP_HOST", "toaster.app")}
 
