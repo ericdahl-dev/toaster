@@ -34,6 +34,7 @@ rvm use . && bundle exec rspec
 ## Learned Workspace Facts
 
 - Rails app lives at the repo root (moved from `backend/` in #135).
+- Authentication is **Devise** (`devise_for :users`). Custom Devise views are in `app/views/users/`. The migration `add_password_digest_and_unique_email_to_users` is a historical artifact from a brief pre-Devise period — it does **not** mean the app uses `has_secure_password` or hand-rolled auth.
 - Local dev serves the UI and API on different origins; the API uses `rack-cors` and `CORS_ORIGINS` (comma-separated) when defaults are not enough.
 - Browser session cookies for the Rails app must be set and sent on the Next.js UI origin: use the same-origin `/api/backend` proxy for credential-bearing browser `fetch` calls. Pointing `NEXT_PUBLIC_TOASTER_API_BASE_URL` at another host (e.g. `http://127.0.0.1:3001`) sets cookies for that host while the page runs on `localhost` (or the reverse)—those hosts do not share a cookie jar, so `/auth/me` can return 401 after a "successful" login.
 - After login, avoid relying on `router.replace` + `router.refresh()` alone for the next authenticated render; the RSC pass can run before `Set-Cookie` is visible to `cookies()`. Prefer a full-page navigation (or verify `/auth/me` before redirect) so the session cookie is present on the following request.

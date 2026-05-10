@@ -56,6 +56,7 @@ An append-only audit trail of all significant state changes and external interac
 
 ## Access and identity
 
+- **Authentication**: Toaster uses **Devise** (`devise_for :users`). Custom Devise views live in `app/views/users/`. The `sessions_controller.rb` is a thin Devise subclass. There is **no hand-rolled auth** — do not use `has_secure_password` or custom session logic.
 - **User** (app user): a person who signs in to Toaster with **Toaster credentials** (email and password). A user belongs to exactly one **Account** and carries a **role**: `admin` or `venue_manager` (default). Admins can create accounts and users; venue managers access booking workflows only. See ADR 0007.
 - **Toaster sign-in email** is only for authentication. It is unrelated to the addresses or credentials stored on **connections** (IMAP username/host and so on).
 - API calls that include another account's id while signed in are **not** treated as "missing data"; they are rejected as **forbidden** (HTTP 403) to signal authorization failure clearly.
