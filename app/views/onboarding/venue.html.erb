@@ -1,0 +1,7 @@
+<h1>Add a Venue</h1>
+<%= form_with url: venues_path, method: :post do |f| %>
+  <%= f.text_field :name, placeholder: "Venue name", required: true %>
+  <%= f.hidden_field :onboarding, value: true %>
+  <%= f.submit "Continue" %>
+<% end %>
+<%= link_to "Skip setup", onboarding_skip_path, data: {turbo_method: :post} %>

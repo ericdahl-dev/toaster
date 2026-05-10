@@ -13,4 +13,13 @@ class Account < ApplicationRecord
   has_many :ai_runs, dependent: :destroy
 
   validates :name, presence: true
+
+  def onboarded?
+    return true if onboarded_at?
+    if venues.exists? && imap_connections.exists?
+      update_column(:onboarded_at, Time.current)
+      return true
+    end
+    false
+  end
 end
