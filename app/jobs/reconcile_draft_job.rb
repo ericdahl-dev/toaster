@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ReconcileDraftJob < ApplicationJob
   queue_as :mailers
 
@@ -16,8 +18,11 @@ class ReconcileDraftJob < ApplicationJob
     result = Drafts::SentMailReconciler.call(draft: draft, imap_connection: imap_connection)
 
     if SENT_OUTCOMES.include?(result.outcome)
-      create_outbound_message(draft, result)
-      confirm_booking_request(draft.booking_request)
+      Drafts::CompleteSend.call(
+        draft: draft,
+        sent_body: result.sent_body,
+        actor: "reconcile_draft_job"
+      )
     end
 
     log_job_event(
@@ -26,20 +31,5 @@ class ReconcileDraftJob < ApplicationJob
       outcome: result.outcome,
       similarity: result.similarity
     )
-  end
-
-  private
-
-  def create_outbound_message(draft, result)
-    attrs = Drafts::MailBuilder.new(draft: draft).build_outbound_message_attrs(
-      body_text: result.sent_body,
-      sent_at: draft.sent_at || Time.current
-    )
-    Message.create!(attrs)
-  end
-
-  def confirm_booking_request(booking_request)
-    return unless booking_request.reviewing?
-    BookingRequests::Transition.call(booking_request: booking_request, to: "confirmed", metadata: {actor: "reconcile_draft_job"})
   end
 end

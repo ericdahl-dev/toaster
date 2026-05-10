@@ -2,9 +2,11 @@
 
 class OpsController < ApplicationController
   skip_forgery_protection
+  include Ops::RequireToken
+  include Ops::RequireAdmin
 
-  before_action :require_ops_auth!, only: [:failed_jobs, :retry_failed_job, :retry_draft]
-  before_action :require_ops_admin!, only: [:index]
+  skip_before_action :require_ops_auth!, only: [:index]
+  skip_before_action :require_ops_admin!, only: [:failed_jobs, :retry_failed_job, :retry_draft]
 
   def index
     @queued_jobs = GoodJob::Job.where(finished_at: nil).count
@@ -55,24 +57,5 @@ class OpsController < ApplicationController
     render json: {status: "enqueued", draft_id: draft.id}
   rescue ActiveRecord::RecordNotFound
     render json: {error: "Draft not found"}, status: :not_found
-  end
-
-  private
-
-  def require_ops_auth!
-    token = ENV["OPS_AUTH_TOKEN"].presence
-    return render json: {error: "Unauthorized"}, status: :unauthorized unless token
-
-    provided = request.headers["X-Ops-Token"]
-    return if ActiveSupport::SecurityUtils.secure_compare(provided.to_s, token)
-
-    render json: {error: "Unauthorized"}, status: :unauthorized
-  end
-
-  def require_ops_admin!
-    authenticate_user!
-    return if current_user&.admin?
-
-    redirect_to root_path, status: :see_other
   end
 end

@@ -6,16 +6,9 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
   let(:fake_embedding) { Array.new(3072, 0.1) }
   let(:fixture_text) { "This is a sample venue document with some content about the space." }
 
-  let(:openai_response) do
-    {"data" => [{"embedding" => fake_embedding}]}
-  end
-
-  let(:openai_client) { instance_double(OpenAI::Client) }
-
   before do
     stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
-    allow(OpenAI::Client).to receive(:new).and_return(openai_client)
-    allow(openai_client).to receive(:embeddings).and_return(openai_response)
+    allow(VenueEmbedder).to receive(:embed).and_return(fake_embedding)
     allow(UnstructuredClient).to receive(:extract).and_return(fixture_text)
   end
 
@@ -55,10 +48,10 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
       expect(UnstructuredClient).to have_received(:extract).with(doc.file_path)
     end
 
-    it "requests embeddings from OpenAI for each chunk" do
+    it "requests embeddings for each chunk" do
       described_class.perform_now(doc.id)
 
-      expect(openai_client).to have_received(:embeddings).at_least(:once)
+      expect(VenueEmbedder).to have_received(:embed).at_least(:once)
     end
 
     context "when UnstructuredClient raises" do
@@ -83,9 +76,9 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
       end
     end
 
-    context "when OpenAI raises" do
+    context "when VenueEmbedder raises" do
       before do
-        allow(openai_client).to receive(:embeddings).and_raise(RuntimeError, "OpenAI error")
+        allow(VenueEmbedder).to receive(:embed).and_raise(RuntimeError, "OpenAI error")
       end
 
       it "transitions the doc to failed and re-raises" do

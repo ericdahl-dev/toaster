@@ -3,7 +3,6 @@
 module BookingRequests
   class VenueRagRetriever
     TOP_K = 5
-    EMBEDDING_MODEL = "text-embedding-3-large"
 
     def self.call(venue:, query:)
       new(venue:, query:).call
@@ -23,7 +22,7 @@ module BookingRequests
 
       return [] unless chunks.exists?
 
-      query_embedding = embed(query)
+      query_embedding = VenueEmbedder.embed(query)
       return [] if query_embedding.nil?
 
       VenueChunk
@@ -37,11 +36,5 @@ module BookingRequests
     private
 
     attr_reader :venue, :query
-
-    def embed(text)
-      client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
-      response = client.embeddings(parameters: {model: EMBEDDING_MODEL, input: text})
-      response.dig("data", 0, "embedding")
-    end
   end
 end
