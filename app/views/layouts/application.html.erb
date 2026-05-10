@@ -84,6 +84,11 @@
                 <span class="icon">📝</span> Prospects
               <% end %>
             <% end %>
+            <% if current_user.admin? %>
+              <div class="sidebar-revision">
+                <%= APP_REVISION.split(" ").first %>
+              </div>
+            <% end %>
           </nav>
         <% end %>
 
