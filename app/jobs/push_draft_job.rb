@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PushDraftJob < ApplicationJob
   queue_as :mailers
 
