@@ -45,31 +45,6 @@
   </div>
 </div>
 
-<% if (msg = @booking_request.source_inbox_message) %>
-  <div class="section-heading" style="margin-top:28px">Source email</div>
-  <div class="card" style="margin-bottom:24px">
-    <div style="margin-bottom:12px">
-      <div class="detail-label">Subject</div>
-      <div class="detail-value"><%= msg.subject %></div>
-    </div>
-    <div style="display:flex;gap:24px;margin-bottom:12px">
-      <div>
-        <div class="detail-label">From</div>
-        <div class="detail-value"><%= msg.from_name %> &lt;<%= msg.from_email %>&gt;</div>
-      </div>
-      <div>
-        <div class="detail-label">Received</div>
-        <div class="detail-value dim" style="font-size:12px"><%= msg.received_at&.strftime("%-d %b %Y %H:%M") %></div>
-      </div>
-    </div>
-    <% if msg.body_html.present? %>
-      <iframe srcdoc="<%= h(msg.body_html) %>" sandbox="" style="width:100%;min-height:200px;border:1px solid var(--border);border-radius:4px;background:#fff" title="Email body"></iframe>
-    <% elsif msg.body_text.present? %>
-      <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:var(--text);margin:0"><%= msg.body_text %></pre>
-    <% end %>
-  </div>
-<% end %>
-
 <%
   allowed = BookingRequests::Transition::ALLOWED_TRANSITIONS[@booking_request.status] || []
 %>
@@ -94,24 +69,113 @@
   </div>
 <% end %>
 
-<% if @booking_request.drafts.any? %>
-  <div class="section-heading">Drafts</div>
-  <div style="display:flex;flex-direction:column;gap:12px">
-    <% @booking_request.drafts.order(created_at: :desc).each do |draft| %>
-      <div class="draft-card">
-        <div class="draft-card-header">
-          <span class="badge badge-<%= draft.status %>"><%= draft.status.humanize %></span>
-          <span class="dim" style="font-size:11px"><%= draft.created_at.strftime("%-d %b %Y %H:%M") %></span>
-        </div>
-        <div class="draft-card-body"><%= draft.body %></div>
-        <% if draft.pending_review? %>
-          <div class="draft-card-actions">
-            <%= button_to "✓ Approve", approve_booking_request_draft_path(@booking_request, draft), method: :post, class: "btn btn-success" %>
-            <%= button_to "✕ Reject",  reject_booking_request_draft_path(@booking_request, draft),  method: :post, class: "btn btn-danger" %>
+<%
+  # Build a unified chronological thread from messages + sent/approved/modified drafts + pending drafts
+  thread_items = []
+
+  # Source inbox message as the first inbound item (if not already in messages)
+  if (src = @booking_request.source_inbox_message)
+    thread_items << {
+      type: :inbound_email,
+      timestamp: src.received_at || @booking_request.created_at,
+      subject: src.subject,
+      from_name: src.from_name,
+      from_email: src.from_email,
+      body_html: src.body_html,
+      body_text: src.body_text
+    }
+  end
+
+  # Additional inbound messages (skip source message duplicate)
+  source_provider_id = @booking_request.source_inbox_message&.provider_message_id
+  @booking_request.messages.where(direction: "inbound").order(sent_at: :asc).each do |msg|
+    # Skip if it matches the source inbox message already added
+    next if source_provider_id.present? && msg.provider_message_id.present? &&
+            msg.provider_message_id.end_with?(source_provider_id.to_s)
+    thread_items << {
+      type: :inbound_message,
+      timestamp: msg.sent_at || msg.created_at,
+      body_text: msg.body_text,
+      body_html: msg.body_html
+    }
+  end
+
+  # Sent/approved/modified drafts as outbound items
+  @booking_request.drafts.where(status: %w[approved modified sent]).order(created_at: :asc).each do |draft|
+    thread_items << {
+      type: :outbound_draft,
+      timestamp: draft.created_at,
+      body: draft.body,
+      status: draft.status
+    }
+  end
+
+  # Pending drafts shown at the end
+  pending_drafts = @booking_request.drafts.where(status: "pending_review").order(created_at: :desc)
+
+  thread_items.sort_by! { |item| item[:timestamp] || Time.at(0) }
+%>
+
+<% if thread_items.any? || pending_drafts.any? %>
+  <div class="section-heading" style="margin-top:28px">Conversation</div>
+  <div class="thread-timeline">
+
+    <% thread_items.each do |item| %>
+      <% if item[:type] == :inbound_email || item[:type] == :inbound_message %>
+        <div class="thread-bubble thread-bubble--inbound">
+          <div class="thread-bubble-meta">
+            <% if item[:from_name].present? %>
+              <span class="thread-sender"><%= item[:from_name] %></span>
+              <span class="dim" style="font-size:11px">&lt;<%= item[:from_email] %>&gt;</span>
+            <% else %>
+              <span class="thread-sender"><%= @booking_request.contact.name %></span>
+            <% end %>
+            <span class="thread-timestamp dim"><%= item[:timestamp]&.strftime("%-d %b %Y %H:%M") %></span>
           </div>
-        <% end %>
+          <% if item[:subject].present? %>
+            <div class="thread-subject dim" style="font-size:11px;margin-bottom:8px">
+              Subject: <span style="color:var(--text)"><%= item[:subject] %></span>
+            </div>
+          <% end %>
+          <div class="thread-bubble-body">
+            <% if item[:body_html].present? %>
+              <iframe srcdoc="<%= h(item[:body_html]) %>" sandbox="" style="width:100%;min-height:120px;border:none;background:#fff;border-radius:3px" title="Email body"></iframe>
+            <% else %>
+              <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:var(--text);margin:0"><%= item[:body_text] %></pre>
+            <% end %>
+          </div>
+        </div>
+      <% elsif item[:type] == :outbound_draft %>
+        <div class="thread-bubble thread-bubble--outbound">
+          <div class="thread-bubble-meta">
+            <span class="thread-sender" style="color:var(--blue)">Venue</span>
+            <span class="badge badge-<%= item[:status] %>" style="font-size:10px;padding:1px 6px"><%= item[:status].humanize %></span>
+            <span class="thread-timestamp dim"><%= item[:timestamp]&.strftime("%-d %b %Y %H:%M") %></span>
+          </div>
+          <div class="thread-bubble-body">
+            <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:var(--text-hi);margin:0"><%= item[:body] %></pre>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+
+    <% pending_drafts.each do |draft| %>
+      <div class="thread-bubble thread-bubble--pending">
+        <div class="thread-bubble-meta">
+          <span class="thread-sender" style="color:var(--amber)">AI Draft</span>
+          <span class="badge badge-pending" style="font-size:10px;padding:1px 6px">Pending review</span>
+          <span class="thread-timestamp dim"><%= draft.created_at.strftime("%-d %b %Y %H:%M") %></span>
+        </div>
+        <div class="thread-bubble-body" style="margin-bottom:12px">
+          <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:var(--text-hi);margin:0"><%= draft.body %></pre>
+        </div>
+        <div class="draft-card-actions">
+          <%= button_to "✓ Approve", approve_booking_request_draft_path(@booking_request, draft), method: :post, class: "btn btn-success" %>
+          <%= button_to "✕ Reject",  reject_booking_request_draft_path(@booking_request, draft),  method: :post, class: "btn btn-danger" %>
+        </div>
       </div>
     <% end %>
+
   </div>
 <% end %>
 

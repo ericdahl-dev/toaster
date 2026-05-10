@@ -71,14 +71,32 @@ module BookingRequests
       return false if booking_request.drafts.exists?
 
       venue_chunks = venue.present? ? VenueRagRetriever.call(venue: venue, query: "#{inbox_message.subject} #{inbox_message.body_text}") : []
+      thread_history = build_thread_history(booking_request)
 
       body = DraftWriter.new(account: booking_request.account, booking_request:, venue_chunks:).call(
         subject: inbox_message.subject,
-        body_text: EmailBody::Strip.call(inbox_message.body_text)
+        body_text: EmailBody::Strip.call(inbox_message.body_text),
+        thread_history:
       )
 
       Draft.create!(account: booking_request.account, booking_request:, body:, status: :pending_review)
       true
+    end
+
+    def build_thread_history(booking_request)
+      inbound_turns = booking_request.messages.where(direction: :inbound).map do |msg|
+        { role: "user", content: msg.body_text.to_s, timestamp: msg.sent_at }
+      end
+
+      outbound_turns = booking_request.drafts
+        .where(status: %w[approved modified sent])
+        .map do |draft|
+          { role: "assistant", content: draft.body.to_s, timestamp: draft.created_at }
+        end
+
+      (inbound_turns + outbound_turns)
+        .sort_by { |t| t[:timestamp] || Time.at(0) }
+        .map { |t| { role: t[:role], content: t[:content] } }
     end
   end
 end

@@ -24,6 +24,15 @@ module BookingRequests
       @venue_chunks = venue_chunks
     end
 
+    def call(subject:, body_text:, thread_history: [])
+      if thread_history.any?
+        @pending_messages = build_thread_messages(subject:, body_text:, thread_history:)
+      end
+      super(subject:, body_text:)
+    ensure
+      @pending_messages = nil
+    end
+
     def parse_result(raw)
       raw["body"].to_s.strip
     end
@@ -31,6 +40,32 @@ module BookingRequests
     private
 
     attr_reader :venue_chunks
+
+    def build_thread_messages(subject:, body_text:, thread_history:)
+      final_user_content = build_prompt(subject:, body_text:)
+      [
+        { role: "system", content: self.class::SYSTEM_PROMPT },
+        *thread_history,
+        { role: "user", content: final_user_content }
+      ]
+    end
+
+    def call_openai(prompt)
+      messages = @pending_messages || [
+        { role: "system", content: self.class::SYSTEM_PROMPT },
+        { role: "user", content: prompt }
+      ]
+
+      response = client.chat(
+        parameters: {
+          model: self.class::MODEL,
+          response_format: { type: "json_object" },
+          messages: messages,
+          temperature: self.class::TEMPERATURE
+        }
+      )
+      JSON.parse(response.dig("choices", 0, "message", "content"))
+    end
 
     def build_prompt(subject:, body_text:)
       base = "Subject: #{subject}\n\nBody:\n#{body_text}"

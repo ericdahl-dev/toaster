@@ -167,6 +167,41 @@ RSpec.describe BookingRequests::Reconcile do
       }.not_to change(Task, :count)
     end
 
+    context "when there is prior conversation history" do
+      it "assembles thread history from prior messages and sent drafts" do
+        inbox_message = build_inbox_message
+        result = described_class.call(inbox_message: inbox_message)
+        booking_request = result.booking_request
+
+        prior_message = create(:message,
+          account: booking_request.account,
+          booking_request: booking_request,
+          conversation_thread: booking_request.conversation_thread,
+          direction: "inbound",
+          body_text: "Earlier guest message",
+          sent_at: 2.hours.ago)
+
+        sent_draft = booking_request.drafts.first
+        sent_draft.update!(status: "sent")
+
+        reconciler = described_class.new(inbox_message: inbox_message)
+        history = reconciler.send(:build_thread_history, booking_request)
+
+        expect(history).to be_an(Array)
+        expect(history).not_to be_empty
+        roles = history.map { |h| h[:role] }
+        expect(roles).to include("user")
+        expect(roles).to include("assistant")
+
+        inbound_turn = history.find { |h| h[:content] == prior_message.body_text }
+        expect(inbound_turn).not_to be_nil
+        expect(inbound_turn[:role]).to eq("user")
+
+        assistant_turn = history.find { |h| h[:role] == "assistant" }
+        expect(assistant_turn[:content]).to eq(sent_draft.body)
+      end
+    end
+
     context "when updating an existing booking request" do
       it "records a booking_request.updated EventLog entry on re-reconciliation" do
         inbox_message = build_inbox_message

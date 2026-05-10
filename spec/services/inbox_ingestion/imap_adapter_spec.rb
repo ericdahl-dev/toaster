@@ -16,9 +16,9 @@ RSpec.describe InboxIngestion::ImapAdapter do
     it "calls uid_store with +FLAGS \\Seen for the given UIDs" do
       allow(imap_double).to receive(:uid_store)
 
-      described_class.new(imap_connection: imap_connection).mark_seen([42, 99])
+      described_class.new(imap_connection: imap_connection).mark_seen([ 42, 99 ])
 
-      expect(imap_double).to have_received(:uid_store).with([42, 99], "+FLAGS", [:Seen])
+      expect(imap_double).to have_received(:uid_store).with([ 42, 99 ], "+FLAGS", [ :Seen ])
     end
 
     it "does nothing when given an empty array" do

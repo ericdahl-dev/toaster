@@ -1247,3 +1247,77 @@ body {
     padding: 12px 18px;
   }
 }
+
+/* ── Thread timeline ── */
+.thread-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.thread-bubble {
+  border-radius: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+}
+
+.thread-bubble--inbound {
+  background: var(--surface);
+  border-color: var(--border);
+  max-width: 90%;
+}
+
+.thread-bubble--outbound {
+  background: #0a0f1a;
+  border-color: #1a2a45;
+  align-self: flex-end;
+  max-width: 90%;
+}
+
+.thread-bubble--pending {
+  background: #130f04;
+  border: 1px dashed var(--amber-dim);
+  align-self: flex-end;
+  max-width: 90%;
+}
+
+.thread-bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.thread-sender {
+  font-family: 'Figtree', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-hi);
+}
+
+.thread-timestamp {
+  font-size: 10px;
+  margin-left: auto;
+}
+
+.thread-subject {
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.thread-bubble-body {
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .thread-bubble--inbound,
+  .thread-bubble--outbound,
+  .thread-bubble--pending {
+    max-width: 100%;
+    align-self: stretch;
+  }
+}
