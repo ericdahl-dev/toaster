@@ -27,7 +27,7 @@ module BookingRequests
       raw = call_openai(prompt)
       latency_ms = ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_at) * 1000).to_i
 
-      persist_run(prompt:, result: raw, latency_ms:)
+      persist_run(prompt:, result: raw, latency_ms:, extra_attrs: extra_run_attrs)
 
       parse_result(raw)
     end
@@ -38,6 +38,10 @@ module BookingRequests
 
     def build_prompt(subject:, body_text:)
       "Subject: #{subject}\n\nBody:\n#{body_text}"
+    end
+
+    def extra_run_attrs
+      {}
     end
 
     def call_openai(prompt)
@@ -56,7 +60,7 @@ module BookingRequests
       JSON.parse(response.dig("choices", 0, "message", "content"))
     end
 
-    def persist_run(prompt:, result:, latency_ms:)
+    def persist_run(prompt:, result:, latency_ms:, extra_attrs: {})
       AiRun.create!(
         account:,
         booking_request:,
@@ -65,7 +69,8 @@ module BookingRequests
         prompt_version: self.class::PROMPT_VERSION,
         prompt:,
         response: result.to_json,
-        latency_ms:
+        latency_ms:,
+        **extra_attrs
       )
     end
   end
