@@ -77,15 +77,6 @@ module Imap
       }
     end
 
-    def parse_address(value)
-      return [nil, nil] if value.blank?
-
-      match = value.to_s.match(/\A(?:(.+?)\s*<)?([^<>@\s]+@[^<>@\s]+)>?\z/)
-      return [nil, value.to_s] unless match
-
-      [match[1]&.strip, match[2]]
-    end
-
     def extract_text(mail)
       if mail.multipart?
         part = mail.text_part

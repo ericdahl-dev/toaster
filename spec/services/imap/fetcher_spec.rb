@@ -1,6 +1,11 @@
 require "rails_helper"
 
 RSpec.describe Imap::Fetcher do
+  it "does not expose parse_address as an instance method (dead code deleted)" do
+    fetcher = described_class.new(imap_connection: build(:imap_connection))
+    expect(fetcher.class.private_method_defined?(:parse_address)).to be(false)
+  end
+
   describe "#fetch_messages" do
     it "raises an error if host is blank" do
       connection = build(:imap_connection, host: "")
