@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Admin::WaitlistController < Admin::BaseController
-  before_action :set_entry, only: [:invite]
+  before_action :set_entry, only: [:invite, :resend_invite]
 
   def index
     @entries = WaitlistEntry.order(created_at: :desc)
@@ -37,6 +37,22 @@ class Admin::WaitlistController < Admin::BaseController
         render :invite, status: :unprocessable_entity
       end
     end
+  end
+
+  def resend_invite
+    user = User.find_by(email: @entry.email)
+
+    if user.nil?
+      redirect_to admin_waitlist_index_path, alert: "No user found for #{@entry.email} — use Invite instead."
+      return
+    end
+
+    raw, hashed = Devise.token_generator.generate(User, :reset_password_token)
+    user.update_columns(reset_password_token: hashed, reset_password_sent_at: Time.current)
+    WaitlistMailer.invite(@entry, user, raw).deliver_later
+    @entry.update!(status: :invited, invited_at: Time.current)
+
+    redirect_to admin_waitlist_index_path, notice: "Invite resent to #{@entry.email}."
   end
 
   private

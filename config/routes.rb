@@ -38,6 +38,7 @@ Rails.application.routes.draw do
       member do
         get :invite
         post :invite
+        post :resend_invite
       end
     end
   end
