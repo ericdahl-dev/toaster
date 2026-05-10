@@ -41,7 +41,7 @@ Credentials plus checkpoint state for one mailbox on a **provider** (currently I
 A keyword→venue mapping scoped to a **mail connection**. When an inbox message arrives on a connection, the ingestion adapter evaluates filters in insertion order (ascending `priority`) and assigns the first matching **venue** to the resulting **booking request**. Filters are case-insensitive substring matches against the message subject. No match leaves `venue_id` nil. Filters belong to the connection, not the venue — one venue may appear in filters on multiple connections.
 
 **Transition**:
-A deliberate operator action that moves a **booking request** through its lifecycle. Valid paths: `pending → reviewing`; `reviewing → confirmed`, `reviewing → rejected`, `reviewing → cancelled`. Transitions are initiated from the booking request detail page via contextual buttons that reflect the current state. Transitions outside these paths are rejected.
+A deliberate operator action that moves a **booking request** through its lifecycle. Valid paths: `pending → reviewing`, `pending → confirmed`, `pending → cancelled`; `reviewing → pending`, `reviewing → confirmed`, `reviewing → rejected`, `reviewing → cancelled`; `confirmed → cancelled`; `rejected → cancelled`. Transitions are initiated from the booking request detail page via contextual buttons that reflect the current state. Transitions outside these paths are rejected.
 
 **Event log**:
 An append-only audit trail of all significant state changes and external interactions on a **booking request** — including job activity (sync, reconcile, push) and human actions (transitions, draft approve/reject). Rendered read-only in chronological order on the booking request detail page.
