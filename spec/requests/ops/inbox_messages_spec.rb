@@ -99,9 +99,9 @@ RSpec.describe "Ops inbox messages", type: :request do
         extraction_snapshot: {
           "event_date" => "2026-06-14",
           "headcount" => 120,
-          "budget_cents" => nil
+          "budget" => nil
         },
-        missing_fields: ["budget_cents"],
+        missing_fields: ["budget"],
         review_reasons: []
       )
 
@@ -122,7 +122,7 @@ RSpec.describe "Ops inbox messages", type: :request do
         "status" => "reviewing",
         "headcount" => 120,
         "event_date" => "2026-06-14",
-        "missing_fields" => ["budget_cents"]
+        "missing_fields" => ["budget"]
       )
     end
 

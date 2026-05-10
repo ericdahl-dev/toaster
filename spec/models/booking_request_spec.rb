@@ -24,12 +24,12 @@ RSpec.describe BookingRequest, type: :model do
       expect(build(:booking_request, account: account, contact: contact, conversation_thread: thread, headcount: 10)).to be_valid
     end
 
-    it "is invalid with negative budget_cents" do
-      expect(build(:booking_request, account: account, contact: contact, conversation_thread: thread, budget_cents: -1)).not_to be_valid
+    it "is invalid with negative budget" do
+      expect(build(:booking_request, account: account, contact: contact, conversation_thread: thread, budget: -1)).not_to be_valid
     end
 
-    it "is valid with zero budget_cents" do
-      expect(build(:booking_request, account: account, contact: contact, conversation_thread: thread, budget_cents: 0)).to be_valid
+    it "is valid with zero budget" do
+      expect(build(:booking_request, account: account, contact: contact, conversation_thread: thread, budget: 0)).to be_valid
     end
 
     it "is invalid when event_end_date is before event_date" do

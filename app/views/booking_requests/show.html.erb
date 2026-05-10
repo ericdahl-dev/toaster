@@ -27,10 +27,10 @@
       <div class="detail-value"><%= @booking_request.headcount %></div>
     </div>
   <% end %>
-  <% if @booking_request.budget_cents %>
+  <% if @booking_request.budget %>
     <div class="detail-cell">
       <div class="detail-label">Budget</div>
-      <div class="detail-value">$<%= (@booking_request.budget_cents / 100.0).round(0) %></div>
+      <div class="detail-value">$<%= @booking_request.budget.to_i %></div>
     </div>
   <% end %>
   <% if @booking_request.venue %>

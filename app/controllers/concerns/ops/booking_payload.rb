@@ -25,7 +25,7 @@ module Ops
         status: booking_request.status,
         event_date: booking_request.event_date,
         headcount: booking_request.headcount,
-        budget_cents: booking_request.budget_cents,
+        budget: booking_request.budget,
         missing_fields: booking_request.missing_fields,
         review_reasons: booking_request.review_reasons,
         extraction_snapshot: booking_request.extraction_snapshot,
