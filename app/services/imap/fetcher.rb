@@ -37,9 +37,9 @@ module Imap
 
     def search_uids(imap)
       if imap_connection.last_synced_uid.present?
-        imap.uid_search([ "UID", "#{imap_connection.last_synced_uid + 1}:*" ])
+        imap.uid_search("UID #{imap_connection.last_synced_uid + 1}:*")
       else
-        imap.uid_search([ "ALL" ])
+        imap.uid_search("ALL")
       end
     end
 
