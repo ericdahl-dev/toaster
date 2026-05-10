@@ -1,7 +1,30 @@
-<h1>Add a Venue</h1>
-<%= form_with url: venues_path, method: :post do |f| %>
-  <%= f.text_field :name, placeholder: "Venue name", required: true %>
-  <%= f.hidden_field :onboarding, value: true %>
-  <%= f.submit "Continue" %>
+<% content_for :fullpage do %>
+<div class="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon"><%= render "shared/toast_icon" %></div>
+      <span class="login-logo-text">Toaster</span>
+    </div>
+
+    <div class="onboarding-step-bar">
+      <span class="onboarding-step onboarding-step--done"></span>
+      <span class="onboarding-step onboarding-step--active"></span>
+      <span class="onboarding-step"></span>
+    </div>
+
+    <p class="login-eyebrow">Step 1 — Your venue</p>
+
+    <%= form_with url: venues_path, method: :post do |f| %>
+      <div class="form-group">
+        <%= f.label :name, "Venue name", class: "form-label" %>
+        <%= f.text_field :name, placeholder: "The Grand Ballroom", required: true, class: "form-input", autofocus: true %>
+      </div>
+      <%= f.hidden_field :onboarding, value: true %>
+      <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px">
+        <%= f.submit "Continue →", class: "btn btn-amber", style: "width:100%;justify-content:center;padding:10px 0;font-size:12px" %>
+        <%= link_to "Skip setup", onboarding_skip_path, class: "auth-link", style: "text-align:center;display:block", data: {turbo_method: :post} %>
+      </div>
+    <% end %>
+  </div>
+</div>
 <% end %>
-<%= link_to "Skip setup", onboarding_skip_path, data: {turbo_method: :post} %>

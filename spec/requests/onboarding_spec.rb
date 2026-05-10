@@ -55,6 +55,21 @@ RSpec.describe "Onboarding", type: :request do
         get "/onboarding"
         expect(response).to have_http_status(:ok)
       end
+
+      it "renders login-box chrome" do
+        get "/onboarding"
+        expect(response.body).to include("login-box")
+      end
+
+      it "renders the Toaster logo" do
+        get "/onboarding"
+        expect(response.body).to include("login-logo")
+      end
+
+      it "renders skip link with auth-link class" do
+        get "/onboarding"
+        expect(response.body).to match(/class="[^"]*auth-link[^"]*"/)
+      end
     end
   end
 
@@ -65,6 +80,26 @@ RSpec.describe "Onboarding", type: :request do
       get "/onboarding/venue"
       expect(response).to have_http_status(:ok)
     end
+
+    it "renders form-input styled fields" do
+      get "/onboarding/venue"
+      expect(response.body).to include("form-input")
+    end
+
+    it "renders btn-amber submit" do
+      get "/onboarding/venue"
+      expect(response.body).to include("btn-amber")
+    end
+
+    it "renders login-box chrome" do
+      get "/onboarding/venue"
+      expect(response.body).to include("login-box")
+    end
+
+    it "renders skip link with auth-link class" do
+      get "/onboarding/venue"
+      expect(response.body).to match(/class="[^"]*auth-link[^"]*"/)
+    end
   end
 
   describe "GET /onboarding/mail_connection" do
@@ -73,6 +108,26 @@ RSpec.describe "Onboarding", type: :request do
     it "renders the mail connection step" do
       get "/onboarding/mail_connection"
       expect(response).to have_http_status(:ok)
+    end
+
+    it "renders form-input styled fields" do
+      get "/onboarding/mail_connection"
+      expect(response.body).to include("form-input")
+    end
+
+    it "renders btn-amber submit" do
+      get "/onboarding/mail_connection"
+      expect(response.body).to include("btn-amber")
+    end
+
+    it "renders login-box chrome" do
+      get "/onboarding/mail_connection"
+      expect(response.body).to include("login-box")
+    end
+
+    it "renders skip link with auth-link class" do
+      get "/onboarding/mail_connection"
+      expect(response.body).to match(/class="[^"]*auth-link[^"]*"/)
     end
   end
 
