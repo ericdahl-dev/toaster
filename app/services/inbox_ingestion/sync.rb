@@ -18,9 +18,9 @@ module InboxIngestion
 
       adapter.each_normalized_message do |attrs|
         inbox_message, created = upsert(attrs)
-        imap_connection = adapter.respond_to?(:imap_connection) ? adapter.imap_connection : nil
+        venue = resolve_venue(attrs)
         # See docs/adr/0001-post-ingestion-booking-reconcile.md
-        BookingRequests::Reconcile.call(inbox_message: inbox_message, imap_connection: imap_connection)
+        BookingRequests::Reconcile.call(inbox_message: inbox_message, venue: venue)
         messages << inbox_message
         if created
           created_count += 1
@@ -41,6 +41,14 @@ module InboxIngestion
     private
 
     attr_reader :adapter
+
+    def resolve_venue(attrs)
+      return nil unless adapter.respond_to?(:imap_connection)
+
+      InboxIngestion::FilterMatcher
+        .new(imap_connection: adapter.imap_connection)
+        .match(subject: attrs[:subject])
+    end
 
     def upsert(attrs)
       attrs = attrs.deep_symbolize_keys
