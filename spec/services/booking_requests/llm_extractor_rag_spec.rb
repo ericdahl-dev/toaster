@@ -20,7 +20,7 @@ RSpec.describe BookingRequests::LlmExtractor do
   end
 
   def build_client(response = base_llm_response)
-    client = instance_double("OpenAI::Client")
+    client = double("OpenAI::Client")
     allow(client).to receive(:chat).and_return(
       { "choices" => [ { "message" => { "content" => response.to_json } } ] }
     )
