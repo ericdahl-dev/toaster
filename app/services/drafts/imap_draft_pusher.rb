@@ -68,9 +68,7 @@ module Drafts
     end
 
     def derive_subject
-      last_subject = booking_request.source_inbox_message&.subject
-      return "Re: #{last_subject}" if last_subject.present? && !last_subject.start_with?("Re:")
-      last_subject.presence || "Re: your inquiry"
+      Drafts::MailBuilder.new(draft: draft).subject_line
     end
   end
 end

@@ -31,15 +31,11 @@ class ReconcileDraftJob < ApplicationJob
   private
 
   def create_outbound_message(draft, result)
-    booking_request = draft.booking_request
-    Message.create!(
-      account: draft.account,
-      conversation_thread: booking_request.conversation_thread,
-      booking_request: booking_request,
-      direction: :outbound,
+    attrs = Drafts::MailBuilder.new(draft: draft).build_outbound_message_attrs(
       body_text: result.sent_body,
       sent_at: draft.sent_at || Time.current
     )
+    Message.create!(attrs)
   end
 
   def confirm_booking_request(booking_request)
