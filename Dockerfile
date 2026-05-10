@@ -1,6 +1,6 @@
 # No #syntax line: Coolify prepends its own; two directives break the build.
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
-# docker build -t my-app .
+# docker build --build-arg GIT_REVISION="$(git log -1 --format='%h %s')" -t my-app .
 # docker run -d -p 80:80 -p 443:443 --name my-app -e RAILS_MASTER_KEY=<value from config/master.key> my-app
 
 # Make sure RUBY_VERSION matches the Ruby version in .ruby-version
@@ -23,6 +23,7 @@ ENV RAILS_ENV="production" \
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build
+ARG GIT_REVISION=dev
 
 # Install packages needed to build gems and assets
 RUN apt-get update -qq && \
@@ -39,7 +40,7 @@ RUN bundle install && \
 COPY . .
 
 # Bake git revision into REVISION file for admin version display
-RUN git log -1 --format="%h %s" > REVISION 2>/dev/null || echo "dev" > REVISION
+RUN printf '%s\n' "$GIT_REVISION" > REVISION
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
