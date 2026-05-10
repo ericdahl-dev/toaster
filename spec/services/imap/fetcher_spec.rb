@@ -39,16 +39,16 @@ RSpec.describe Imap::Fetcher do
       end
 
       it "searches ALL when no last_synced_uid is set" do
-        allow(imap_double).to receive(:uid_search).with([ "ALL" ]).and_return([])
+        allow(imap_double).to receive(:uid_search).with("ALL").and_return([])
         fetcher.fetch_messages
-        expect(imap_double).to have_received(:uid_search).with([ "ALL" ])
+        expect(imap_double).to have_received(:uid_search).with("ALL")
       end
 
       it "searches by UID range when last_synced_uid is set" do
         imap_connection.update!(last_synced_uid: 42)
-        allow(imap_double).to receive(:uid_search).with([ "UID", "43:*" ]).and_return([])
+        allow(imap_double).to receive(:uid_search).with("UID 43:*").and_return([])
         fetcher.fetch_messages
-        expect(imap_double).to have_received(:uid_search).with([ "UID", "43:*" ])
+        expect(imap_double).to have_received(:uid_search).with("UID 43:*")
       end
 
       it "returns normalized messages for each fetched email" do
