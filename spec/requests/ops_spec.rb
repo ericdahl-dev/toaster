@@ -14,20 +14,9 @@ RSpec.describe "Ops endpoints", type: :request do
   end
 
   describe "GET /ops" do
-    it "returns a system health summary" do
-      create(:draft, status: :pending_review)
-
-      get "/ops", headers: {"X-Ops-Token" => "secret-token"}
-
-      expect(response).to have_http_status(:ok)
-      body = response.parsed_body
-      expect(body).to include(
-        "queued_jobs",
-        "failed_jobs",
-        "pending_drafts",
-        "approved_drafts"
-      )
-      expect(body["pending_drafts"]).to be >= 1
+    it "redirects to login when not authenticated" do
+      get "/ops"
+      expect(response).to redirect_to(new_user_session_path)
     end
   end
 
@@ -68,8 +57,8 @@ RSpec.describe "Ops endpoints", type: :request do
   end
 
   describe "auth" do
-    it "returns 401 when the token header is missing" do
-      get "/ops"
+    it "returns 401 when the token header is missing on JSON endpoints" do
+      get "/ops/failed_jobs"
 
       expect(response).to have_http_status(:unauthorized)
       expect(response.parsed_body).to include("error" => "Unauthorized")

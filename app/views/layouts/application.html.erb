@@ -76,8 +76,10 @@
             <%= link_to "/jobs", class: "nav-link", data: {action: "mobile-nav#close"} do %>
               <span class="icon">⚙️</span> Jobs
             <% end %>
+            <% if current_user.admin? %>
             <%= link_to "/ops", class: "nav-link #{request.path.start_with?('/ops') ? 'active' : ''}", data: {action: "mobile-nav#close"} do %>
               <span class="icon">🔭</span> Ops
+            <% end %>
             <% end %>
             <% if current_user.admin? %>
               <div class="sidebar-section sidebar-section--admin" style="margin-top:12px">Admin</div>

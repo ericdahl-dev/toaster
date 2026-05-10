@@ -1,0 +1,74 @@
+<div class="page-header">
+  <h1 class="page-title">Ops Dashboard</h1>
+</div>
+
+<div class="detail-grid" style="margin-bottom:24px">
+  <div class="detail-cell">
+    <div class="detail-label">Queued jobs</div>
+    <div class="detail-value"><%= @queued_jobs %></div>
+  </div>
+  <div class="detail-cell">
+    <div class="detail-label">Failed jobs</div>
+    <div class="detail-value" style="color:<%= @failed_jobs_count > 0 ? 'var(--danger)' : 'inherit' %>"><%= @failed_jobs_count %></div>
+  </div>
+  <div class="detail-cell">
+    <div class="detail-label">Pending drafts</div>
+    <div class="detail-value"><%= @pending_drafts %></div>
+  </div>
+  <div class="detail-cell">
+    <div class="detail-label">Approved drafts</div>
+    <div class="detail-value"><%= @approved_drafts %></div>
+  </div>
+</div>
+
+<% if @recent_failed_jobs.any? %>
+  <div class="section-heading">Recent failed jobs</div>
+  <div class="card" style="margin-bottom:24px">
+    <table class="data-table">
+      <thead>
+        <tr><th>Class</th><th>Queue</th><th>Error</th><th>Failed at</th></tr>
+      </thead>
+      <tbody>
+        <% @recent_failed_jobs.each do |job| %>
+          <tr>
+            <td style="font-size:12px"><%= job.job_class %></td>
+            <td class="dim" style="font-size:12px"><%= job.queue_name %></td>
+            <td style="font-size:11px;color:var(--danger);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><%= job.error&.lines&.first&.strip %></td>
+            <td class="dim" style="font-size:11px;white-space:nowrap"><%= job.finished_at&.strftime("%-d %b %H:%M") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <div style="margin-top:8px"><%= link_to "View all →", "/jobs", style: "font-size:12px" %></div>
+  </div>
+<% end %>
+
+<div class="section-heading">Recent AI runs</div>
+<% if @recent_ai_runs.any? %>
+  <div class="card" style="margin-bottom:24px">
+    <table class="data-table">
+      <thead>
+        <tr><th>Type</th><th>Model</th><th>Version</th><th>Latency</th><th>RAG</th><th>Time</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% @recent_ai_runs.each do |run| %>
+          <tr>
+            <td><code style="font-size:11px"><%= run.run_type %></code></td>
+            <td class="dim" style="font-size:12px"><%= run.llm_model %></td>
+            <td class="dim" style="font-size:12px"><%= run.prompt_version %></td>
+            <td class="dim" style="font-size:12px"><%= run.latency_ms %>ms</td>
+            <td class="dim" style="font-size:12px"><%= run.rag_chunk_count %></td>
+            <td class="dim" style="font-size:11px;white-space:nowrap"><%= run.created_at.strftime("%-d %b %H:%M") %></td>
+            <td>
+              <% if run.booking_request_id %>
+                <%= link_to "booking", booking_request_path(run.booking_request_id), style: "font-size:11px;margin-right:6px" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <p class="dim" style="font-size:13px">No AI runs yet.</p>
+<% end %>

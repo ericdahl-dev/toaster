@@ -1,14 +1,22 @@
+# frozen_string_literal: true
+
 class OpsController < ApplicationController
   skip_forgery_protection
-  include Ops::RequireToken
+
+  before_action :require_ops_auth!, only: [:failed_jobs, :retry_failed_job, :retry_draft]
+  before_action :require_ops_admin!, only: [:index]
 
   def index
-    render json: {
-      queued_jobs: GoodJob::Job.where(finished_at: nil).count,
-      failed_jobs: GoodJob::Job.where.not(error: nil).where.not(finished_at: nil).count,
-      pending_drafts: Draft.pending_review.count,
-      approved_drafts: Draft.approved.count
-    }
+    @queued_jobs = GoodJob::Job.where(finished_at: nil).count
+    @failed_jobs_count = GoodJob::Job.where.not(error: nil).where.not(finished_at: nil).count
+    @pending_drafts = Draft.pending_review.count
+    @approved_drafts = Draft.approved.count
+    @recent_ai_runs = AiRun.order(created_at: :desc).limit(10)
+    @recent_failed_jobs = GoodJob::Job
+      .where.not(error: nil)
+      .where.not(finished_at: nil)
+      .order(finished_at: :desc)
+      .limit(5)
   end
 
   def failed_jobs
@@ -47,5 +55,24 @@ class OpsController < ApplicationController
     render json: {status: "enqueued", draft_id: draft.id}
   rescue ActiveRecord::RecordNotFound
     render json: {error: "Draft not found"}, status: :not_found
+  end
+
+  private
+
+  def require_ops_auth!
+    token = ENV["OPS_AUTH_TOKEN"].presence
+    return render json: {error: "Unauthorized"}, status: :unauthorized unless token
+
+    provided = request.headers["X-Ops-Token"]
+    return if ActiveSupport::SecurityUtils.secure_compare(provided.to_s, token)
+
+    render json: {error: "Unauthorized"}, status: :unauthorized
+  end
+
+  def require_ops_admin!
+    authenticate_user!
+    return if current_user&.admin?
+
+    redirect_to root_path, status: :see_other
   end
 end
