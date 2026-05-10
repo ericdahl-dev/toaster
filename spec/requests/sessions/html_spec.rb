@@ -14,6 +14,28 @@ RSpec.describe "Sessions (HTML)", type: :request do
       expect(response.content_type).to match(%r{text/html})
       expect(response.body).to include("login")
     end
+
+    it "renders a remember_me checkbox" do
+      get "/login"
+
+      expect(response.body).to include('name="user[remember_me]"')
+    end
+  end
+
+  describe "POST /login with remember_me" do
+    it "sets a persistent cookie when remember_me is checked" do
+      post "/login", params: {user: {email: user.email, password: "password123", remember_me: "1"}}
+
+      remember_cookie = response.headers["Set-Cookie"].to_s
+      expect(remember_cookie).to include("remember_user_token")
+    end
+
+    it "does not set a persistent cookie when remember_me is unchecked" do
+      post "/login", params: {user: {email: user.email, password: "password123", remember_me: "0"}}
+
+      remember_cookie = response.headers["Set-Cookie"].to_s
+      expect(remember_cookie).not_to include("remember_user_token")
+    end
   end
 
   describe "POST /login" do
