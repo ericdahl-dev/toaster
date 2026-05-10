@@ -20,7 +20,6 @@ class DevelopmentDemoSeeds
     seed_thread_reviewing_missing
     seed_thread_with_draft
     seed_thread_confirmed
-    seed_thread_rejected
     seed_thread_cancelled
     seed_thread_multi_message
     seed_thread_with_task
@@ -208,7 +207,7 @@ class DevelopmentDemoSeeds
     )
   end
 
-  def seed_thread_rejected
+  def seed_thread_cancelled
     contact = upsert_contact(
       email: "casey.morales@example.com",
       name: "Casey Morales",
@@ -231,7 +230,7 @@ class DevelopmentDemoSeeds
       inbox: inbox,
       thread: thread,
       contact: contact,
-      status: :rejected,
+      status: :cancelled,
       event_date: Date.new(Date.current.year, 12, 31),
       headcount: 300,
       budget: nil,

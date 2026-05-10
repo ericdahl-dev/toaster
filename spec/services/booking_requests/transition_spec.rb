@@ -65,11 +65,6 @@ RSpec.describe BookingRequests::Transition do
         expect { described_class.call(booking_request: br, to: "confirmed") }.not_to raise_error
       end
 
-      it "allows reviewing → rejected" do
-        br = create(:booking_request, account: account, status: "reviewing")
-        expect { described_class.call(booking_request: br, to: "rejected") }.not_to raise_error
-      end
-
       it "allows reviewing → cancelled" do
         br = create(:booking_request, account: account, status: "reviewing")
         expect { described_class.call(booking_request: br, to: "cancelled") }.not_to raise_error
@@ -77,11 +72,6 @@ RSpec.describe BookingRequests::Transition do
 
       it "allows confirmed → cancelled" do
         br = create(:booking_request, account: account, status: "confirmed")
-        expect { described_class.call(booking_request: br, to: "cancelled") }.not_to raise_error
-      end
-
-      it "allows rejected → cancelled" do
-        br = create(:booking_request, account: account, status: "rejected")
         expect { described_class.call(booking_request: br, to: "cancelled") }.not_to raise_error
       end
     end
@@ -98,13 +88,6 @@ RSpec.describe BookingRequests::Transition do
         br = create(:booking_request, account: account, status: "cancelled")
         expect {
           described_class.call(booking_request: br, to: "pending")
-        }.to raise_error(BookingRequests::Transition::InvalidTransition)
-      end
-
-      it "raises InvalidTransition for rejected → confirmed" do
-        br = create(:booking_request, account: account, status: "rejected")
-        expect {
-          described_class.call(booking_request: br, to: "confirmed")
         }.to raise_error(BookingRequests::Transition::InvalidTransition)
       end
 
