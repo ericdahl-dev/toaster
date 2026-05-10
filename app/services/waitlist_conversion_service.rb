@@ -8,5 +8,7 @@ class WaitlistConversionService
     return unless entry&.invited?
 
     entry.update!(status: :converted)
+
+    Telemetry.capture(distinct_id: user.posthog_distinct_id, event: "waitlist_converted", properties: {account_id: user.account_id})
   end
 end

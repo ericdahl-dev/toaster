@@ -11,6 +11,16 @@ class User < ApplicationRecord
 
   before_validation :normalize_email
 
+  # Used by posthog-rails for automatic user association in error reports.
+  def posthog_distinct_id
+    email
+  end
+
+  # Used when calling PostHog.identify to set person properties.
+  def posthog_properties
+    {email: email, role: role, account_id: account_id, date_joined: created_at&.iso8601}
+  end
+
   private
 
   def normalize_email

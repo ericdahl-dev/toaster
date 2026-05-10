@@ -17,6 +17,7 @@ class MailConnectionsController < ApplicationController
     if type == "imap"
       @connection = current_user.account.imap_connections.build(imap_params)
       if @connection.save
+        Telemetry.capture(distinct_id: current_user.posthog_distinct_id, event: "mail_connection_created", properties: {connection_type: "imap", host: @connection.host})
         redirect_to mail_connections_path, notice: "Mail connection added."
       else
         render :new, status: :unprocessable_content

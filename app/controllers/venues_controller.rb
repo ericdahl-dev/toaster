@@ -15,6 +15,7 @@ class VenuesController < ApplicationController
   def create
     @venue = current_user.account.venues.build(venue_params)
     if @venue.save
+      Telemetry.capture(distinct_id: current_user.posthog_distinct_id, event: "venue_created", properties: {venue_id: @venue.id, venue_name: @venue.name})
       redirect_to venues_path, notice: "Venue created."
     else
       render :new, status: :unprocessable_entity

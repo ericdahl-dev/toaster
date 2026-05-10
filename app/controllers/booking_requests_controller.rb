@@ -13,7 +13,7 @@ class BookingRequestsController < ApplicationController
 
   def transition
     to = params[:to].to_s
-    BookingRequests::Transition.call(booking_request: @booking_request, to: to)
+    BookingRequests::Transition.call(booking_request: @booking_request, to: to, metadata: {distinct_id: current_user.posthog_distinct_id})
     redirect_to booking_request_path(@booking_request), notice: "Status updated to #{to}."
   rescue BookingRequests::Transition::InvalidTransition => e
     redirect_to booking_request_path(@booking_request), alert: e.message
