@@ -114,6 +114,8 @@ RSpec.describe InboxIngestion::Sync do
           "confidence" => 0.95,
           "notes" => nil
         })
+      allow_any_instance_of(BookingRequests::DraftWriter).to receive(:call_openai)
+        .and_return({"body" => "Thank you for your inquiry!"})
 
       expect {
         described_class.call(adapter: adapter)

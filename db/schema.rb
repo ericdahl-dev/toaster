@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_10_195635) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_10_201940) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -39,7 +39,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_10_195635) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_ai_runs_on_account_id"
     t.index ["booking_request_id"], name: "index_ai_runs_on_booking_request_id"
-    t.check_constraint "run_type::text = ANY (ARRAY['classifier'::character varying::text, 'extraction'::character varying::text])", name: "ai_runs_run_type_check"
+    t.check_constraint "run_type::text = ANY (ARRAY['classifier'::character varying::text, 'extraction'::character varying::text, 'draft_writer'::character varying::text])", name: "ai_runs_run_type_check"
   end
 
   create_table "booking_requests", force: :cascade do |t|

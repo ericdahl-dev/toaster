@@ -23,6 +23,7 @@ module BookingRequests
         assign_venue(booking_request)
         log_reconciliation(booking_request, is_new: is_new)
         create_review_task(booking_request) if booking_request.reviewing?
+        generate_draft(booking_request) if is_new
 
         booking_request
       end
@@ -62,6 +63,19 @@ module BookingRequests
         title: REVIEW_TASK_TITLE,
         status: "open"
       )
+    end
+
+    def generate_draft(booking_request)
+      return if booking_request.drafts.exists?
+
+      venue_chunks = venue.present? ? VenueRagRetriever.call(venue: venue, query: "#{inbox_message.subject} #{inbox_message.body_text}") : []
+
+      body = DraftWriter.new(account: booking_request.account, booking_request:, venue_chunks:).call(
+        subject: inbox_message.subject,
+        body_text: EmailBody::Strip.call(inbox_message.body_text)
+      )
+
+      Draft.create!(account: booking_request.account, booking_request:, body:, status: :pending_review)
     end
   end
 end
