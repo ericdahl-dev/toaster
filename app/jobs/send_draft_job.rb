@@ -14,22 +14,10 @@ class SendDraftJob < ApplicationJob
     return unless imap_connection
 
     Drafts::SmtpSender.call(draft: draft, imap_connection: imap_connection)
-    create_outbound_message(draft)
-    confirm_booking_request(draft.booking_request)
-  end
-
-  private
-
-  def create_outbound_message(draft)
-    attrs = Drafts::MailBuilder.new(draft: draft).build_outbound_message_attrs(
-      body_text: draft.body,
-      sent_at: draft.reload.sent_at || Time.current
+    Drafts::CompleteSend.call(
+      draft: draft.reload,
+      sent_body: draft.body,
+      actor: "send_draft_job"
     )
-    Message.create!(attrs)
-  end
-
-  def confirm_booking_request(booking_request)
-    return unless booking_request.reviewing?
-    BookingRequests::Transition.call(booking_request: booking_request, to: "confirmed", metadata: {actor: "send_draft_job"})
   end
 end
