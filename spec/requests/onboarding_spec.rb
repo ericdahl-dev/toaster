@@ -145,6 +145,34 @@ RSpec.describe "Onboarding", type: :request do
       get "/onboarding/mail_connection"
       expect(response.body).to match(/class="[^"]*auth-link[^"]*"/)
     end
+
+    it "submits IMAP credentials and redirects to onboarding complete" do
+      sign_in user
+      post "/mail_connections", params: {
+        mail_connection: {
+          type: "imap",
+          host: "imap.gmail.com",
+          port: 993,
+          username: "test@venue.com",
+          password: "secret"
+        },
+        onboarding: true
+      }
+
+      expect(response).to redirect_to(onboarding_complete_path)
+      expect(user.account.imap_connections.find_by(username: "test@venue.com")).not_to be_nil
+    end
+
+    it "re-renders onboarding mail connection form on validation failure" do
+      sign_in user
+      post "/mail_connections", params: {
+        mail_connection: { type: "imap", host: "", port: 993, username: "", password: "" },
+        onboarding: true
+      }
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(response.body).to include("login-box")
+    end
   end
 
   describe "POST /onboarding/skip" do
