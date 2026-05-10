@@ -12,7 +12,7 @@
   <%# ── Nav ── %>
   <header class="lp-nav">
     <a href="/" class="lp-nav-logo">
-      <div class="lp-nav-icon">🍞</div>
+      <div class="lp-nav-icon"><%= render "shared/toast_icon" %></div>
       <span>Toaster</span>
     </a>
     <%= link_to "Sign in", login_path, class: "btn btn-ghost lp-nav-signin" %>
@@ -134,7 +134,7 @@
   <%# ── Footer ── %>
   <footer class="lp-footer">
     <div class="lp-footer-logo">
-      <div class="lp-nav-icon lp-footer-icon">🍞</div>
+      <div class="lp-nav-icon lp-footer-icon"><%= render "shared/toast_icon" %></div>
       <span>Toaster</span>
     </div>
     <p class="lp-footer-copy">AI booking assistant for venue operators &mdash; invite-only beta</p>
