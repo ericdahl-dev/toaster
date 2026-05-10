@@ -3,6 +3,7 @@
   <head>
     <title><%= content_for(:title) || "Toaster" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
@@ -39,7 +40,7 @@
             </button>
           <% end %>
           <a href="/" class="topbar-logo">
-            <div class="toast-icon">🍞</div>
+            <div class="toast-icon"><%= render "shared/toast_icon" %></div>
             Toaster
           </a>
           <div class="topbar-sep"></div>
