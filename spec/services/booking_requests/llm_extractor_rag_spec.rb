@@ -32,7 +32,7 @@ RSpec.describe BookingRequests::LlmExtractor do
       let!(:chunk) { create(:venue_chunk, venue_document: doc, content: "The Rooftop holds 150 guests.") }
 
       before do
-        allow(BookingRequests::VenueRagRetriever).to receive(:call).and_return(["The Rooftop holds 150 guests."])
+        allow(BookingRequests::VenueRagRetriever).to receive(:call).and_return([ "The Rooftop holds 150 guests." ])
       end
 
       it "calls VenueRagRetriever with the venue and query" do

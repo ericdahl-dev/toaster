@@ -13,7 +13,7 @@ class DropAgentmailConnections < ActiveRecord::Migration[7.2]
       t.timestamps
     end
     add_index :agentmail_connections, :account_id
-    add_index :agentmail_connections, [:account_id, :inbox_id], unique: true
+    add_index :agentmail_connections, [ :account_id, :inbox_id ], unique: true
     add_foreign_key :agentmail_connections, :accounts
   end
 end

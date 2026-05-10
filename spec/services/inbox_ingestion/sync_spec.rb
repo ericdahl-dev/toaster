@@ -18,7 +18,7 @@ RSpec.describe InboxIngestion::Sync do
             provider_message_id: "<one@example.com>",
             direction: "inbound",
             subject: "Hello",
-            raw_payload: {"uid" => 1}
+            raw_payload: { "uid" => 1 }
           )
         end
         adapter.define_singleton_method(:write_checkpoint_after_batch) do |created_count:, deduped_count:, messages:|
@@ -96,7 +96,7 @@ RSpec.describe InboxIngestion::Sync do
           subject: "Wedding for 120 guests on June 14, 2026",
           body_text: "Hi, we're looking for a venue on June 14, 2026 for 120 guests with a budget of $15000.",
           received_at: Time.zone.parse("2026-04-01 10:00:00 UTC"),
-          raw_payload: {"uid" => 1}
+          raw_payload: { "uid" => 1 }
         )
       end
       adapter.define_singleton_method(:write_checkpoint_after_batch) { |_kwargs| nil }

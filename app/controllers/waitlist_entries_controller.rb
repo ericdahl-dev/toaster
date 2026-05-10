@@ -11,7 +11,7 @@ class WaitlistEntriesController < ApplicationController
     if @entry.persisted? || @entry.save
       if new_record
         WaitlistMailer.confirmation(@entry).deliver_later
-        Telemetry.capture(distinct_id: @entry.email, event: "waitlist_entry_submitted", properties: {company_name: @entry.company_name})
+        Telemetry.capture(distinct_id: @entry.email, event: "waitlist_entry_submitted", properties: { company_name: @entry.company_name })
       end
       render :success, status: :ok
     else

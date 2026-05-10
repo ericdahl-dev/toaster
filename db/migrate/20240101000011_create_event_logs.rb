@@ -9,6 +9,6 @@ class CreateEventLogs < ActiveRecord::Migration[7.2]
       t.timestamps
     end
     add_index :event_logs, :event_type
-    add_index :event_logs, [:subject_type, :subject_id]
+    add_index :event_logs, [ :subject_type, :subject_id ]
   end
 end

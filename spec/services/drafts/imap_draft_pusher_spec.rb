@@ -21,13 +21,13 @@ RSpec.describe Drafts::ImapDraftPusher do
 
     allow(imap_double).to receive(:select)
     allow(imap_double).to receive(:append)
-    allow(imap_double).to receive(:uid_search).and_return([99])
+    allow(imap_double).to receive(:uid_search).and_return([ 99 ])
   end
 
   describe "#call" do
     it "appends the message to the Drafts folder" do
       described_class.call(draft: draft, imap_connection: imap_connection)
-      expect(imap_double).to have_received(:append).with("Drafts", anything, [:Draft], anything)
+      expect(imap_double).to have_received(:append).with("Drafts", anything, [ :Draft ], anything)
     end
 
     it "persists imap_draft_uid and original_body on the draft" do

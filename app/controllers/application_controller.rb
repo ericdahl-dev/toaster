@@ -18,7 +18,7 @@ class ApplicationController < ActionController::Base
     WaitlistConversionService.call(resource)
 
     Telemetry.identify(distinct_id: resource.posthog_distinct_id, properties: resource.posthog_properties)
-    Telemetry.capture(distinct_id: resource.posthog_distinct_id, event: "user_signed_in", properties: {sign_in_count: resource.sign_in_count})
+    Telemetry.capture(distinct_id: resource.posthog_distinct_id, event: "user_signed_in", properties: { sign_in_count: resource.sign_in_count })
 
     resource.account.onboarded? ? booking_requests_path : onboarding_path
   end

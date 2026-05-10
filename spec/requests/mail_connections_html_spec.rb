@@ -79,7 +79,7 @@ RSpec.describe "MailConnections HTML", type: :request do
 
       it "re-renders with errors on invalid params" do
         post "/mail_connections", params: {
-          mail_connection: {type: "imap", host: "", port: "", username: "", password: ""}
+          mail_connection: { type: "imap", host: "", port: "", username: "", password: "" }
         }
 
         expect(response).to have_http_status(:unprocessable_content)
@@ -96,7 +96,7 @@ RSpec.describe "MailConnections HTML", type: :request do
 
       it "saves smtp_host and smtp_port" do
         patch "/mail_connections/#{imap_connection.id}", params: {
-          mail_connection: {smtp_host: "smtp.custom.com", smtp_port: "465"}
+          mail_connection: { smtp_host: "smtp.custom.com", smtp_port: "465" }
         }
 
         expect(response).to have_http_status(:redirect)

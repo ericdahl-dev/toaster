@@ -19,7 +19,7 @@ module MailConnections
   extend ActiveSupport::Concern
 
   included do
-    before_action :set_connection, only: [:show, :update, :destroy]
+    before_action :set_connection, only: [ :show, :update, :destroy ]
   end
 
   def index

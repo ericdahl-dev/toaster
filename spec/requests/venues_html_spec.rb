@@ -53,14 +53,14 @@ RSpec.describe "Venues HTML", type: :request do
       before { sign_in user }
 
       it "creates a venue and redirects" do
-        post "/venues", params: {venue: {name: "The Loft"}}
+        post "/venues", params: { venue: { name: "The Loft" } }
 
         expect(response).to have_http_status(:redirect)
         expect(Venue.where(account: account, name: "The Loft")).to exist
       end
 
       it "saves address and capacity" do
-        post "/venues", params: {venue: {name: "The Loft", address: "123 Main St", capacity: 80}}
+        post "/venues", params: { venue: { name: "The Loft", address: "123 Main St", capacity: 80 } }
 
         venue = Venue.find_by!(name: "The Loft")
         expect(venue.address).to eq("123 Main St")
@@ -68,7 +68,7 @@ RSpec.describe "Venues HTML", type: :request do
       end
 
       it "re-renders with errors on blank name" do
-        post "/venues", params: {venue: {name: ""}}
+        post "/venues", params: { venue: { name: "" } }
 
         expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include("Add Venue")
@@ -103,14 +103,14 @@ RSpec.describe "Venues HTML", type: :request do
       before { sign_in user }
 
       it "updates the venue and redirects" do
-        patch "/venues/#{venue.id}", params: {venue: {name: "New Name"}}
+        patch "/venues/#{venue.id}", params: { venue: { name: "New Name" } }
 
         expect(response).to have_http_status(:redirect)
         expect(venue.reload.name).to eq("New Name")
       end
 
       it "updates address and capacity" do
-        patch "/venues/#{venue.id}", params: {venue: {address: "999 Oak Ave", capacity: 200}}
+        patch "/venues/#{venue.id}", params: { venue: { address: "999 Oak Ave", capacity: 200 } }
 
         venue.reload
         expect(venue.address).to eq("999 Oak Ave")
@@ -121,7 +121,7 @@ RSpec.describe "Venues HTML", type: :request do
         patch "/venues/#{venue.id}", params: {
           venue: {
             venue_spaces_attributes: [
-              {name: "Rooftop", capacity_seated: 40, capacity_reception: 150}
+              { name: "Rooftop", capacity_seated: 40, capacity_reception: 150 }
             ]
           }
         }
@@ -135,7 +135,7 @@ RSpec.describe "Venues HTML", type: :request do
         space = create(:venue_space, venue: venue, name: "Rooftop")
         patch "/venues/#{venue.id}", params: {
           venue: {
-            venue_spaces_attributes: [{id: space.id, _destroy: "1"}]
+            venue_spaces_attributes: [ { id: space.id, _destroy: "1" } ]
           }
         }
 

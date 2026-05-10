@@ -34,7 +34,7 @@ RSpec.describe BookingRequests::Decisioner do
     end
 
     it "returns reviewing when missing fields present" do
-      expect(decisioner.call(base.merge(missing_fields: ["event_date"]))).to eq("reviewing")
+      expect(decisioner.call(base.merge(missing_fields: [ "event_date" ]))).to eq("reviewing")
     end
 
     it "returns reviewing when fit_status is in_progress" do

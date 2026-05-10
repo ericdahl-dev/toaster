@@ -51,7 +51,7 @@ module Ops
         }
       }
     rescue ActiveRecord::RecordNotFound
-      render json: {error: "Inbox message not found"}, status: :not_found
+      render json: { error: "Inbox message not found" }, status: :not_found
     end
   end
 end

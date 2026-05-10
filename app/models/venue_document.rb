@@ -6,5 +6,5 @@ class VenueDocument < ApplicationRecord
 
   validates :source_filename, presence: true
 
-  enum :status, {pending: "pending", processing: "processing", ready: "ready", failed: "failed"}, default: "pending"
+  enum :status, { pending: "pending", processing: "processing", ready: "ready", failed: "failed" }, default: "pending"
 end

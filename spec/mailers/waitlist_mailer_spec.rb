@@ -8,7 +8,7 @@ RSpec.describe WaitlistMailer, type: :mailer do
     let(:mail) { described_class.confirmation(entry) }
 
     it "sends to the waitlist entry email" do
-      expect(mail.to).to eq(["owner@venue.com"])
+      expect(mail.to).to eq([ "owner@venue.com" ])
     end
 
     it "has the correct subject" do
@@ -16,7 +16,7 @@ RSpec.describe WaitlistMailer, type: :mailer do
     end
 
     it "is from the Toaster address" do
-      expect(mail.from).to eq(["toaster@ericdahl.dev"])
+      expect(mail.from).to eq([ "toaster@ericdahl.dev" ])
     end
 
     it "includes confirmation copy in the HTML body" do
@@ -36,7 +36,7 @@ RSpec.describe WaitlistMailer, type: :mailer do
     let(:mail) { described_class.invite(entry, user, raw_token) }
 
     it "sends to the waitlist entry email" do
-      expect(mail.to).to eq([user.email])
+      expect(mail.to).to eq([ user.email ])
     end
 
     it "has the correct subject" do
@@ -44,7 +44,7 @@ RSpec.describe WaitlistMailer, type: :mailer do
     end
 
     it "is from the Toaster address" do
-      expect(mail.from).to eq(["toaster@ericdahl.dev"])
+      expect(mail.from).to eq([ "toaster@ericdahl.dev" ])
     end
 
     it "includes the prospect's first name in the HTML body" do

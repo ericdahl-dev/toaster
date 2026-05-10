@@ -21,7 +21,7 @@ RSpec.describe BookingRequests::Classifier do
     context "when OpenAI returns booking_request: true" do
       before do
         stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
-        allow(classifier).to receive(:call_openai).and_return({"booking_request" => true})
+        allow(classifier).to receive(:call_openai).and_return({ "booking_request" => true })
       end
 
       it "returns true" do
@@ -45,7 +45,7 @@ RSpec.describe BookingRequests::Classifier do
     context "when OpenAI returns booking_request: false" do
       before do
         stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
-        allow(classifier).to receive(:call_openai).and_return({"booking_request" => false})
+        allow(classifier).to receive(:call_openai).and_return({ "booking_request" => false })
       end
 
       it "returns false" do

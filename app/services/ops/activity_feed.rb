@@ -40,9 +40,9 @@ module Ops
 
     def thread_key_for(message)
       if message.provider_thread_id.present?
-        [:thread, message.account_id, message.provider, message.provider_thread_id]
+        [ :thread, message.account_id, message.provider, message.provider_thread_id ]
       else
-        [:singleton, message.account_id, message.provider, message.id]
+        [ :singleton, message.account_id, message.provider, message.id ]
       end
     end
 
@@ -54,15 +54,15 @@ module Ops
       connection = ActiveRecord::Base.connection
 
       connection.select_all(draft_peaks_thread_sql).each do |row|
-        key = [:thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"]]
+        key = [ :thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"] ]
         peak = parse_sql_time(row["peak"])
-        activity[key] = [activity[key], peak].compact.max
+        activity[key] = [ activity[key], peak ].compact.max
       end
 
       connection.select_all(draft_peaks_singleton_sql).each do |row|
-        key = [:singleton, row["account_id"].to_i, row["provider"], row["anchor_id"].to_i]
+        key = [ :singleton, row["account_id"].to_i, row["provider"], row["anchor_id"].to_i ]
         peak = parse_sql_time(row["peak"])
-        activity[key] = [activity[key], peak].compact.max
+        activity[key] = [ activity[key], peak ].compact.max
       end
     end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Admin::WaitlistController < Admin::BaseController
-  before_action :set_entry, only: [:invite, :resend_invite]
+  before_action :set_entry, only: [ :invite, :resend_invite ]
 
   def index
     @entries = WaitlistEntry.order(created_at: :desc)

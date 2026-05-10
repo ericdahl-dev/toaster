@@ -20,9 +20,9 @@ module Ops
         provider_thread_id: params[:provider_thread_id],
         anchor_inbox_message_id: params[:anchor_inbox_message_id]&.to_i
       )
-      render json: {inbox_thread: result}
+      render json: { inbox_thread: result }
     rescue ActiveRecord::RecordNotFound
-      render json: {error: "Inbox thread not found"}, status: :not_found
+      render json: { error: "Inbox thread not found" }, status: :not_found
     end
 
     private
@@ -64,7 +64,7 @@ module Ops
       if row.kind == "thread"
         BookingRequest.joins(:conversation_thread).where(
           account_id: row.account_id,
-          conversation_threads: {provider_thread_id: row.provider_thread_id}
+          conversation_threads: { provider_thread_id: row.provider_thread_id }
         )
       else
         BookingRequest.where(account_id: row.account_id, source_inbox_message_id: row.anchor_inbox_message_id)

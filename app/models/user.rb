@@ -5,7 +5,7 @@ class User < ApplicationRecord
 
   belongs_to :account
 
-  enum :role, {venue_manager: 0, admin: 1}, default: :venue_manager
+  enum :role, { venue_manager: 0, admin: 1 }, default: :venue_manager
 
   validates :name, presence: true
 
@@ -18,7 +18,7 @@ class User < ApplicationRecord
 
   # Used when calling PostHog.identify to set person properties.
   def posthog_properties
-    {email: email, role: role, account_id: account_id, date_joined: created_at&.iso8601}
+    { email: email, role: role, account_id: account_id, date_joined: created_at&.iso8601 }
   end
 
   private

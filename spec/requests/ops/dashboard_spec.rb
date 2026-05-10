@@ -52,7 +52,7 @@ RSpec.describe "Ops HTML dashboard", type: :request do
     end
 
     it "GET /ops/ai_runs returns JSON with token" do
-      get "/ops/ai_runs", headers: {"X-Ops-Token" => "secret"}
+      get "/ops/ai_runs", headers: { "X-Ops-Token" => "secret" }
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to include("application/json")
     end

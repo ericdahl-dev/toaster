@@ -38,8 +38,8 @@ RSpec.describe "Admin::Accounts", type: :request do
         sign_in_as(admin)
         expect {
           post admin_accounts_path, params: {
-            account: {name: "New Venue Co"},
-            user: {name: "Owner Name", email: "owner@example.com", password: "password123"}
+            account: { name: "New Venue Co" },
+            user: { name: "Owner Name", email: "owner@example.com", password: "password123" }
           }
         }.to change(Account, :count).by(1).and change(User, :count).by(1)
 
@@ -55,7 +55,7 @@ RSpec.describe "Admin::Accounts", type: :request do
     context "when signed in as admin with invalid params" do
       it "re-renders the form" do
         sign_in_as(admin)
-        post admin_accounts_path, params: {account: {name: ""}, user: {name: "", email: "", password: ""}}
+        post admin_accounts_path, params: { account: { name: "" }, user: { name: "", email: "", password: "" } }
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end

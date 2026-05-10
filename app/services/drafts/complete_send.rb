@@ -38,7 +38,7 @@ module Drafts
       BookingRequests::Transition.call(
         booking_request: booking_request,
         to: "confirmed",
-        metadata: {actor: actor}
+        metadata: { actor: actor }
       )
     end
   end
