@@ -147,12 +147,72 @@ body {
 
 .sidebar-revision {
   margin-top: auto;
-  padding: 12px 16px 8px;
+  border-top: 1px solid var(--border);
+  padding: 10px 16px 14px;
+}
+
+.sidebar-revision-label {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+.sidebar-revision-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--amber-bg);
+  border: 1px solid var(--amber-dim);
+  border-radius: 4px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.sidebar-revision-chip:has(a:hover) {
+  background: rgba(245, 158, 11, 0.09);
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.sidebar-revision-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.6);
+  animation: revision-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes revision-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 5px rgba(245, 158, 11, 0.6); }
+  50%       { opacity: 0.5; box-shadow: 0 0 2px rgba(245, 158, 11, 0.15); }
+}
+
+.sidebar-revision-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  flex: 1;
+}
+
+.sidebar-revision-pr {
+  font-family: 'Figtree', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.01em;
+}
+
+.sidebar-revision-sha {
+  font-family: 'DM Mono', monospace;
   font-size: 10px;
-  font-family: monospace;
-  color: var(--muted, #555);
-  opacity: 0.5;
-  user-select: none;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+  margin-left: auto;
 }
 
 .nav-link--admin { color: var(--amber-dim); }
