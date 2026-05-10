@@ -18,7 +18,13 @@ class MailConnectionsController < ApplicationController
       @connection = current_user.account.imap_connections.build(imap_params)
       if @connection.save
         Telemetry.capture(distinct_id: current_user.posthog_distinct_id, event: "mail_connection_created", properties: { connection_type: "imap", host: @connection.host })
-        redirect_to mail_connections_path, notice: "Mail connection added."
+        if params[:onboarding]
+          redirect_to onboarding_complete_path, notice: "Inbox connected."
+        else
+          redirect_to mail_connections_path, notice: "Mail connection added."
+        end
+      elsif params[:onboarding]
+        render "onboarding/mail_connection", status: :unprocessable_content
       else
         render :new, status: :unprocessable_content
       end

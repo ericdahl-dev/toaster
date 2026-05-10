@@ -14,7 +14,7 @@
 
     <p class="login-eyebrow">Step 2 — Connect inbox</p>
 
-    <%= form_with url: mail_connections_path, method: :post do |f| %>
+    <%= form_with url: mail_connections_path, scope: :mail_connection, method: :post do |f| %>
       <div class="form-group">
         <%= f.label :host, "IMAP host", class: "form-label" %>
         <%= f.text_field :host, placeholder: "imap.gmail.com", required: true, class: "form-input", autofocus: true %>
@@ -31,7 +31,8 @@
         <%= f.label :password, "Password / app password", class: "form-label" %>
         <%= f.password_field :password, placeholder: "••••••••", required: true, class: "form-input" %>
       </div>
-      <%= f.hidden_field :onboarding, value: true %>
+      <%= f.hidden_field :type, value: "imap" %>
+      <%= hidden_field_tag :onboarding, true %>
       <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px">
         <%= f.submit "Connect →", class: "btn btn-amber", style: "width:100%;justify-content:center;padding:10px 0;font-size:12px" %>
         <%= link_to "Skip setup", onboarding_skip_path, class: "auth-link", style: "text-align:center;display:block", data: {turbo_method: :post} %>
