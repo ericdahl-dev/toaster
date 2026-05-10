@@ -23,7 +23,7 @@ RSpec.describe BookingRequests::LlmCall do
   let(:booking_request) { create(:booking_request, account:) }
 
   def build_client(response)
-    client = instance_double(OpenAI::Client)
+    client = instance_double("OpenAI::Client")
     allow(client).to receive(:chat).and_return(
       { "choices" => [ { "message" => { "content" => response.to_json } } ] }
     )

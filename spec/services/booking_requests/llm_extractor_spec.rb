@@ -7,7 +7,7 @@ RSpec.describe BookingRequests::LlmExtractor do
   let(:booking_request) { create(:booking_request, account:) }
 
   def build_client(response)
-    client = instance_double(OpenAI::Client)
+    client = instance_double("OpenAI::Client")
     allow(client).to receive(:chat).and_return(
       { "choices" => [ { "message" => { "content" => response.to_json } } ] }
     )
@@ -85,7 +85,7 @@ RSpec.describe BookingRequests::LlmExtractor do
 
       context "when the client raises" do
         let(:extractor) do
-          client = instance_double(OpenAI::Client)
+          client = instance_double("OpenAI::Client")
           allow(client).to receive(:chat).and_raise(StandardError, "timeout")
           described_class.new(account:, booking_request:, client:)
         end
