@@ -10,8 +10,7 @@ gem "puma", ">= 5.0"
 # IMAP support for polling-based inbox sync
 gem "net-imap"
 
-# Transactional email via Resend
-gem "resend"
+# Transactional email via Forward Email (SMTP)
 
 # OpenAI API (embeddings + LLM)
 gem "ruby-openai"

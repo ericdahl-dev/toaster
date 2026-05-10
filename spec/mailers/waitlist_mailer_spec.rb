@@ -16,7 +16,7 @@ RSpec.describe WaitlistMailer, type: :mailer do
     end
 
     it "is from the Toaster address" do
-      expect(mail.from).to eq(["onboarding@resend.dev"])
+      expect(mail.from).to eq(["noreply@ericdahl.dev"])
     end
 
     it "includes confirmation copy in the HTML body" do
@@ -44,7 +44,7 @@ RSpec.describe WaitlistMailer, type: :mailer do
     end
 
     it "is from the Toaster address" do
-      expect(mail.from).to eq(["onboarding@resend.dev"])
+      expect(mail.from).to eq(["noreply@ericdahl.dev"])
     end
 
     it "includes the prospect's first name in the HTML body" do
