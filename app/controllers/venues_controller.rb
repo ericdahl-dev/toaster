@@ -16,9 +16,15 @@ class VenuesController < ApplicationController
     @venue = current_user.account.venues.build(venue_params)
     if @venue.save
       Telemetry.capture(distinct_id: current_user.posthog_distinct_id, event: "venue_created", properties: { venue_id: @venue.id, venue_name: @venue.name })
-      redirect_to venues_path, notice: "Venue created."
+      if params[:onboarding]
+        redirect_to onboarding_mail_connection_path, notice: "Venue created."
+      else
+        redirect_to venues_path, notice: "Venue created."
+      end
+    elsif params[:onboarding]
+      render "onboarding/venue", status: :unprocessable_content
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 

@@ -14,12 +14,12 @@
 
     <p class="login-eyebrow">Step 1 — Your venue</p>
 
-    <%= form_with url: venues_path, method: :post do |f| %>
+    <%= form_with url: venues_path, scope: :venue, method: :post do |f| %>
       <div class="form-group">
         <%= f.label :name, "Venue name", class: "form-label" %>
         <%= f.text_field :name, placeholder: "The Grand Ballroom", required: true, class: "form-input", autofocus: true %>
       </div>
-      <%= f.hidden_field :onboarding, value: true %>
+      <%= hidden_field_tag :onboarding, true %>
       <div style="margin-top:24px;display:flex;flex-direction:column;gap:10px">
         <%= f.submit "Continue →", class: "btn btn-amber", style: "width:100%;justify-content:center;padding:10px 0;font-size:12px" %>
         <%= link_to "Skip setup", onboarding_skip_path, class: "auth-link", style: "text-align:center;display:block", data: {turbo_method: :post} %>
