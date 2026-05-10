@@ -39,6 +39,8 @@ RSpec.describe BookingRequests::LlmExtractor do
     end
 
     context "with a valid client" do
+      before { allow_any_instance_of(described_class).to receive(:call_openai).and_call_original }
+
       it "returns a result with extracted fields" do
         result = extractor.call(subject: "Party inquiry", body_text: "40 guests, June 14 2026, $500 budget")
 
@@ -84,6 +86,7 @@ RSpec.describe BookingRequests::LlmExtractor do
       end
 
       context "when the client raises" do
+        before { allow_any_instance_of(described_class).to receive(:call_openai).and_call_original }
         let(:extractor) do
           client = double("OpenAI::Client")
           allow(client).to receive(:chat).and_raise(StandardError, "timeout")

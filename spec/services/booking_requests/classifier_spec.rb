@@ -25,6 +25,7 @@ RSpec.describe BookingRequests::Classifier do
     end
 
     context "when client returns booking_request: true" do
+      before { allow_any_instance_of(described_class).to receive(:call_openai).and_call_original }
       let(:classifier) { described_class.new(account:, booking_request:, client: build_client({ "booking_request" => true })) }
 
       it "returns true" do
@@ -46,6 +47,7 @@ RSpec.describe BookingRequests::Classifier do
     end
 
     context "when client returns booking_request: false" do
+      before { allow_any_instance_of(described_class).to receive(:call_openai).and_call_original }
       let(:classifier) { described_class.new(account:, booking_request:, client: build_client({ "booking_request" => false })) }
 
       it "returns false" do
@@ -60,6 +62,7 @@ RSpec.describe BookingRequests::Classifier do
     end
 
     context "when the client raises an error" do
+      before { allow_any_instance_of(described_class).to receive(:call_openai).and_call_original }
       let(:classifier) do
         client = double("OpenAI::Client")
         allow(client).to receive(:chat).and_raise(StandardError, "timeout")
