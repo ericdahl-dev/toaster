@@ -4,7 +4,8 @@
     "posthog": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "mcp-remote@latest", "https://mcp.posthog.com/mcp"]
+      "args": ["-y", "mcp-remote@latest", "https://mcp.posthog.com/mcp?features=flags,dashboards,insights,error_tracking"],
+			"enabled": false
     }
   }
 }

@@ -115,7 +115,7 @@ RSpec.describe InboxIngestion::Sync do
           "notes" => nil
         })
       allow_any_instance_of(BookingRequests::DraftWriter).to receive(:call_openai)
-        .and_return({"body" => "Thank you for your inquiry!"})
+        .and_return({ "body" => "Thank you for your inquiry!" })
 
       expect {
         described_class.call(adapter: adapter)
@@ -198,7 +198,7 @@ RSpec.describe InboxIngestion::Sync do
             provider_message_id: "<msg@example.com>",
             direction: "inbound",
             subject: "Test",
-            raw_payload: {"uid" => uid}
+            raw_payload: { "uid" => uid }
           )
         end
         adapter.define_singleton_method(:write_checkpoint_after_batch) { |**| nil }
@@ -218,7 +218,7 @@ RSpec.describe InboxIngestion::Sync do
 
         described_class.call(adapter: adapter)
 
-        expect(seen_uids).to eq([99])
+        expect(seen_uids).to eq([ 99 ])
       end
 
       it "does not call mark_seen when Reconcile returns draft_created: false" do

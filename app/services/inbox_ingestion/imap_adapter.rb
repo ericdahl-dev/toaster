@@ -34,7 +34,7 @@ module InboxIngestion
 
       Imap::Session.call(imap_connection: @imap_connection) do |imap|
         imap.select(@imap_connection.inbox_folder)
-        imap.uid_store(uids, "+FLAGS", [:Seen])
+        imap.uid_store(uids, "+FLAGS", [ :Seen ])
       end
     end
   end

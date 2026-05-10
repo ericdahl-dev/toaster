@@ -62,7 +62,7 @@ RSpec.configure do |config|
           "notes" => nil
         })
       allow_any_instance_of(BookingRequests::DraftWriter).to receive(:call_openai)
-        .and_return({"body" => "Thank you for your inquiry. We will be in touch shortly."})
+        .and_return({ "body" => "Thank you for your inquiry. We will be in touch shortly." })
     end
   end
 end

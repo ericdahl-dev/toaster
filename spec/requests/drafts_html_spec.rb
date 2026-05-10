@@ -16,7 +16,7 @@ RSpec.describe "Draft approval UI", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(response.body).to include(draft.body)
-      expect(response.body).to include("pending_review")
+      expect(response.body).to include("Pending review")
     end
   end
 
