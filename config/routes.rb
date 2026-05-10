@@ -45,6 +45,14 @@ Rails.application.routes.draw do
 
   root "home#index"
 
+  scope "/onboarding", controller: :onboarding do
+    get "/", action: :show, as: :onboarding
+    get "/venue", action: :venue, as: :onboarding_venue
+    get "/mail_connection", action: :mail_connection, as: :onboarding_mail_connection
+    get "/complete", action: :complete, as: :onboarding_complete
+    post "/skip", action: :skip, as: :onboarding_skip
+  end
+
   post "/waitlist", to: "waitlist_entries#create", as: :waitlist
 
   resources :booking_requests, only: [:index, :show] do

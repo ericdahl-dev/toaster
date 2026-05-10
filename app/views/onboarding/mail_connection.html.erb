@@ -1,0 +1,10 @@
+<h1>Connect Your Inbox</h1>
+<%= form_with url: mail_connections_path, method: :post do |f| %>
+  <%= f.text_field :host, placeholder: "IMAP host (e.g. imap.gmail.com)", required: true %>
+  <%= f.number_field :port, placeholder: "993", value: 993 %>
+  <%= f.email_field :username, placeholder: "your@email.com", required: true %>
+  <%= f.password_field :password, placeholder: "Password or app password", required: true %>
+  <%= f.hidden_field :onboarding, value: true %>
+  <%= f.submit "Connect" %>
+<% end %>
+<%= link_to "Skip setup", onboarding_skip_path, data: {turbo_method: :post} %>
