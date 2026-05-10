@@ -6,7 +6,10 @@
 
 services:
   web:
-    build: .
+    build:
+      context: .
+      args:
+        GIT_REVISION: ${SOURCE_COMMIT:-dev}
     command: [ "./bin/rails", "server", "-b", "0.0.0.0" ]
     expose:
       - "3000"
@@ -27,7 +30,10 @@ services:
     restart: unless-stopped
 
   worker:
-    build: .
+    build:
+      context: .
+      args:
+        GIT_REVISION: ${SOURCE_COMMIT:-dev}
     command: [ "bundle", "exec", "good_job", "start" ]
     environment:
       - DATABASE_URL
