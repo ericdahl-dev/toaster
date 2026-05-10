@@ -137,6 +137,18 @@ body {
 
 .nav-link .icon { font-size: 14px; width: 16px; text-align: center; opacity: 0.8; }
 
+.sidebar-section--admin {
+  border-top: 1px solid var(--amber-dim);
+  color: var(--amber-dim);
+  margin-left: 12px;
+  margin-right: 12px;
+  padding-left: 4px;
+}
+
+.nav-link--admin { color: var(--amber-dim); }
+.nav-link--admin:hover { color: var(--amber); background: var(--amber-bg); }
+.nav-link--admin.active { color: var(--amber); border-left-color: var(--amber); background: var(--amber-bg); }
+
 /* ── Main content ── */
 .main {
   overflow-y: auto;

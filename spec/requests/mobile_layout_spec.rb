@@ -27,6 +27,26 @@ RSpec.describe "Mobile layout", type: :request do
 
       expect(response.body).to include("sidebar-overlay")
     end
+
+    it "does not show the Admin section for a non-admin user" do
+      get "/booking_requests"
+
+      expect(response.body).not_to include("admin_waitlist")
+      expect(response.body).not_to include("Prospects")
+    end
+  end
+
+  describe "when signed in as admin" do
+    let!(:admin) { create(:user, :admin, account: account) }
+
+    before { sign_in admin }
+
+    it "shows the Admin section with a Prospects link" do
+      get "/booking_requests"
+
+      expect(response.body).to include("Prospects")
+      expect(response.body).to include("/admin/waitlist")
+    end
   end
 
   describe "when signed out" do
