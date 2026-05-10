@@ -22,24 +22,27 @@ RSpec.describe BookingRequests::LlmCall do
   let(:account) { create(:account) }
   let(:booking_request) { create(:booking_request, account:) }
 
-  subject(:instance) { BookingRequests::TestLlmCall.new(account:, booking_request:) }
+  def build_client(response)
+    client = double("OpenAI::Client")
+    allow(client).to receive(:chat).and_return(
+      { "choices" => [ { "message" => { "content" => response.to_json } } ] }
+    )
+    client
+  end
+
+  subject(:instance) { BookingRequests::TestLlmCall.new(account:, booking_request:, client: build_client({ "result" => "parsed" })) }
 
   describe "#call" do
-    context "when OPENAI_API_KEY is absent" do
+    context "when OPENAI_API_KEY is absent and no client injected" do
       before { stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => nil)) }
 
-      it "raises ConfigurationError" do
-        expect { instance.call(subject: "test", body_text: "test") }
+      it "raises ConfigurationError on initialize" do
+        expect { BookingRequests::TestLlmCall.new(account:, booking_request:) }
           .to raise_error(BookingRequests::LlmCall::ConfigurationError)
       end
     end
 
-    context "with a valid API key" do
-      before do
-        stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
-        allow(instance).to receive(:call_openai).and_return({ "result" => "parsed" })
-      end
-
+    context "with an injected client" do
       it "returns the parsed result" do
         expect(instance.call(subject: "s", body_text: "b")).to eq("parsed")
       end
