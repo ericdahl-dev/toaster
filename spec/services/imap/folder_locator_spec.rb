@@ -21,10 +21,10 @@ RSpec.describe Imap::FolderLocator do
   describe "#call" do
     context "when the server exposes special-use attributes on standard LIST" do
       before do
-        drafts_mb = mailbox("Drafts", [:Drafts])
-        sent_mb = mailbox("Sent", [:Sent])
+        drafts_mb = mailbox("Drafts", [ :Drafts ])
+        sent_mb = mailbox("Sent", [ :Sent ])
         # Both the fallback list and the special-use list return these mailboxes
-        allow(imap_double).to receive(:list).and_return([drafts_mb, sent_mb])
+        allow(imap_double).to receive(:list).and_return([ drafts_mb, sent_mb ])
       end
 
       it "picks the folder with the matching special-use attribute" do
@@ -38,7 +38,7 @@ RSpec.describe Imap::FolderLocator do
       before do
         drafts_mb = mailbox("Drafts", [])
         sent_mb = mailbox("Sent", [])
-        allow(imap_double).to receive(:list).with("", "*").and_return([drafts_mb, sent_mb])
+        allow(imap_double).to receive(:list).with("", "*").and_return([ drafts_mb, sent_mb ])
         # The service catches all errors from the special-use attempt; simulate
         # it returning no special-use attributes (empty list) so we fall through
         # to name-based matching — the rescue path is exercised separately by
@@ -54,7 +54,7 @@ RSpec.describe Imap::FolderLocator do
 
     context "when no recognised folders exist" do
       before do
-        allow(imap_double).to receive(:list).and_return([mailbox("INBOX")])
+        allow(imap_double).to receive(:list).and_return([ mailbox("INBOX") ])
       end
 
       it "returns nil for both folders" do

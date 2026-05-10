@@ -28,7 +28,7 @@ RSpec.describe BookingRequests::Transition do
         described_class.call(
           booking_request: booking_request,
           to: "reviewing",
-          metadata: {reason: "missing_fields"}
+          metadata: { reason: "missing_fields" }
         )
         expect(EventLog.last.payload).to include("reason" => "missing_fields")
       end

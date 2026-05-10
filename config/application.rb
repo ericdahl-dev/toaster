@@ -56,7 +56,7 @@ module Toaster
       expire_waitlist_invites: {
         cron: "0 * * * *",
         class: "ExpireWaitlistInvitesJob",
-        set: {queue: :default},
+        set: { queue: :default },
         description: "Flip invited WaitlistEntries to expired after Devise reset window"
       }
     }

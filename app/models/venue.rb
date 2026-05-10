@@ -12,5 +12,5 @@ class Venue < ApplicationRecord
     reject_if: :all_blank
 
   validates :name, presence: true
-  validates :capacity, numericality: {greater_than: 0, allow_nil: true}
+  validates :capacity, numericality: { greater_than: 0, allow_nil: true }
 end

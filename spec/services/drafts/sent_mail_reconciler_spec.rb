@@ -51,14 +51,14 @@ RSpec.describe Drafts::SentMailReconciler do
     raw = mail.to_s
 
     fetch_result = instance_double(Net::IMAP::FetchData)
-    allow(fetch_result).to receive(:attr).and_return({"UID" => 1, "RFC822" => raw})
-    allow(imap_double).to receive(:uid_fetch).and_return([fetch_result])
+    allow(fetch_result).to receive(:attr).and_return({ "UID" => 1, "RFC822" => raw })
+    allow(imap_double).to receive(:uid_fetch).and_return([ fetch_result ])
   end
 
   describe "#call" do
     context "when the sent message is identical to the original body" do
       before do
-        stub_sent_search([1])
+        stub_sent_search([ 1 ])
         stub_sent_message("Hello, thank you for your inquiry.")
       end
 
@@ -76,7 +76,7 @@ RSpec.describe Drafts::SentMailReconciler do
 
     context "when the sent message has minor edits (similarity >= 50%)" do
       before do
-        stub_sent_search([1])
+        stub_sent_search([ 1 ])
         stub_sent_message("Hello, thanks for your inquiry.")
       end
 
@@ -89,7 +89,7 @@ RSpec.describe Drafts::SentMailReconciler do
 
     context "when the sent message is heavily rewritten (similarity < 50%)" do
       before do
-        stub_sent_search([1])
+        stub_sent_search([ 1 ])
         stub_sent_message("x" * 200)
       end
 
@@ -105,8 +105,8 @@ RSpec.describe Drafts::SentMailReconciler do
         stub_sent_search([])
         allow(imap_double).to receive(:select).with("Drafts")
         flag_result = instance_double(Net::IMAP::FetchData)
-        allow(flag_result).to receive(:attr).and_return({"FLAGS" => [:Draft]})
-        allow(imap_double).to receive(:uid_fetch).with([42], "FLAGS").and_return([flag_result])
+        allow(flag_result).to receive(:attr).and_return({ "FLAGS" => [ :Draft ] })
+        allow(imap_double).to receive(:uid_fetch).with([ 42 ], "FLAGS").and_return([ flag_result ])
       end
 
       it "returns :pending without changing the draft status" do
@@ -120,7 +120,7 @@ RSpec.describe Drafts::SentMailReconciler do
       before do
         stub_sent_search([])
         allow(imap_double).to receive(:select).with("Drafts")
-        allow(imap_double).to receive(:uid_fetch).with([42], "FLAGS").and_return([])
+        allow(imap_double).to receive(:uid_fetch).with([ 42 ], "FLAGS").and_return([])
       end
 
       it "marks the draft as rejected" do
@@ -134,7 +134,7 @@ RSpec.describe Drafts::SentMailReconciler do
   describe "body_similarity (private — tested via outcomes)" do
     it "treats whitespace-normalised identical bodies as 1.0" do
       draft.update!(original_body: "Hello   world")
-      stub_sent_search([1])
+      stub_sent_search([ 1 ])
       stub_sent_message("Hello world")
       result = described_class.call(draft: draft, imap_connection: imap_connection)
       expect(result.similarity).to eq(1.0)

@@ -28,6 +28,10 @@
         <%= f.submit "Sign in →", class: "btn btn-amber", style: "width:100%;justify-content:center;padding:10px 0;font-size:12px" %>
       </div>
     <% end %>
+
+    <div style="margin-top:20px;text-align:center">
+      <%= link_to "Forgot password?", new_user_password_path, class: "auth-link" %>
+    </div>
   </div>
 </div>
 <% end %>

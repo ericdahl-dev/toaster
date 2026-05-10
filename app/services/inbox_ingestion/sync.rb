@@ -54,7 +54,7 @@ module InboxIngestion
         created = msg.new_record?
         msg.assign_attributes(attrs.except(:provider, :provider_message_id))
         msg.save!
-        [msg, created]
+        [ msg, created ]
       rescue ActiveRecord::RecordNotUnique
         msg = InboxMessage.find_by!(
           account: account,
@@ -63,7 +63,7 @@ module InboxIngestion
         )
         msg.assign_attributes(attrs.except(:provider, :provider_message_id))
         msg.save!
-        [msg, false]
+        [ msg, false ]
       end
     end
   end

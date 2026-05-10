@@ -91,12 +91,12 @@ module Drafts
       thread_id_bare = thread_id.gsub(/[<>]/, "")
 
       by_references = begin
-        imap.uid_search(["HEADER", "References", thread_id_bare])
+        imap.uid_search([ "HEADER", "References", thread_id_bare ])
       rescue
         []
       end
       by_in_reply = begin
-        imap.uid_search(["HEADER", "In-Reply-To", thread_id_bare])
+        imap.uid_search([ "HEADER", "In-Reply-To", thread_id_bare ])
       rescue
         []
       end
@@ -108,7 +108,7 @@ module Drafts
 
       imap.select(drafts_folder)
       result = begin
-        imap.uid_fetch([draft.imap_draft_uid], "FLAGS")
+        imap.uid_fetch([ draft.imap_draft_uid ], "FLAGS")
       rescue
         nil
       end
@@ -133,7 +133,7 @@ module Drafts
       return 0.0 if a.empty? || b.empty?
 
       lcs_length = lcs(a, b)
-      lcs_length.to_f / [a.length, b.length].max
+      lcs_length.to_f / [ a.length, b.length ].max
     end
 
     def normalize(text)
@@ -152,7 +152,7 @@ module Drafts
           curr[j + 1] = if ca == cb
             prev[j] + 1
           else
-            [curr[j], prev[j + 1]].max
+            [ curr[j], prev[j + 1] ].max
           end
         end
         prev = curr

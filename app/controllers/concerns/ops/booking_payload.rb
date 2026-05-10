@@ -29,7 +29,7 @@ module Ops
         missing_fields: booking_request.missing_fields,
         review_reasons: booking_request.review_reasons,
         extraction_snapshot: booking_request.extraction_snapshot,
-        pending_draft: pending_draft ? {id: pending_draft.id, body: pending_draft.body} : nil
+        pending_draft: pending_draft ? { id: pending_draft.id, body: pending_draft.body } : nil
       }
     end
   end

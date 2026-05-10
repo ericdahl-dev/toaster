@@ -5,8 +5,8 @@ class OpsController < ApplicationController
   include Ops::RequireToken
   include Ops::RequireAdmin
 
-  skip_before_action :require_ops_auth!, only: [:index]
-  skip_before_action :require_ops_admin!, only: [:failed_jobs, :retry_failed_job, :retry_draft]
+  skip_before_action :require_ops_auth!, only: [ :index ]
+  skip_before_action :require_ops_admin!, only: [ :failed_jobs, :retry_failed_job, :retry_draft ]
 
   def index
     @queued_jobs = GoodJob::Job.where(finished_at: nil).count
@@ -37,25 +37,25 @@ class OpsController < ApplicationController
           failed_at: job.finished_at
         }
       end
-    render json: {failed_jobs: failures}
+    render json: { failed_jobs: failures }
   end
 
   def retry_failed_job
     job = GoodJob::Job.find(params[:id])
     job.retry_job
-    render json: {status: "retried", job_id: job.id}
+    render json: { status: "retried", job_id: job.id }
   rescue ActiveRecord::RecordNotFound
-    render json: {error: "Failed job not found"}, status: :not_found
+    render json: { error: "Failed job not found" }, status: :not_found
   end
 
   def retry_draft
     draft = Draft.find(params[:id])
     unless draft.approved?
-      return render json: {error: "Draft is not in approved state"}, status: :unprocessable_entity
+      return render json: { error: "Draft is not in approved state" }, status: :unprocessable_entity
     end
     PushDraftJob.perform_later(draft.id)
-    render json: {status: "enqueued", draft_id: draft.id}
+    render json: { status: "enqueued", draft_id: draft.id }
   rescue ActiveRecord::RecordNotFound
-    render json: {error: "Draft not found"}, status: :not_found
+    render json: { error: "Draft not found" }, status: :not_found
   end
 end

@@ -48,7 +48,7 @@ RSpec.describe "Ops inbox threads", type: :request do
         received_at: 1.day.ago
       )
 
-      get "/ops/inbox_threads", headers: {"X-Ops-Token" => "secret-token"}
+      get "/ops/inbox_threads", headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       threads = response.parsed_body.fetch("inbox_threads")
@@ -105,8 +105,8 @@ RSpec.describe "Ops inbox threads", type: :request do
       )
 
       get "/ops/inbox_threads/view",
-        params: {account_id: account.id, provider: "imap", provider_thread_id: "t-line"},
-        headers: {"X-Ops-Token" => "secret-token"}
+        params: { account_id: account.id, provider: "imap", provider_thread_id: "t-line" },
+        headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body.fetch("inbox_thread")
@@ -144,8 +144,8 @@ RSpec.describe "Ops inbox threads", type: :request do
       create(:draft, account: account, booking_request: booking, status: :rejected, body: "Bad")
 
       get "/ops/inbox_threads/view",
-        params: {account_id: account.id, provider: "imap", provider_thread_id: "t-rej"},
-        headers: {"X-Ops-Token" => "secret-token"}
+        params: { account_id: account.id, provider: "imap", provider_thread_id: "t-rej" },
+        headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       draft_item = response.parsed_body.dig("inbox_thread", "timeline").find { |i| i["type"] == "draft" }
@@ -156,8 +156,8 @@ RSpec.describe "Ops inbox threads", type: :request do
       account = create(:account)
 
       get "/ops/inbox_threads/view",
-        params: {account_id: account.id, provider: "imap", provider_thread_id: "missing"},
-        headers: {"X-Ops-Token" => "secret-token"}
+        params: { account_id: account.id, provider: "imap", provider_thread_id: "missing" },
+        headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:not_found)
     end

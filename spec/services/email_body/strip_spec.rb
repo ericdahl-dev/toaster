@@ -50,7 +50,7 @@ RSpec.describe EmailBody::Strip do
         <<~EMAIL
           We'd love to book your east room.
 
-          -- 
+          --#{' '}
           John Doe
           CEO, Example Corp
         EMAIL

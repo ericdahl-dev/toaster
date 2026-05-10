@@ -65,7 +65,7 @@ RSpec.describe "Admin::Waitlist", type: :request do
 
     it "resends the invite rather than failing with email-taken error" do
       post invite_admin_waitlist_path(entry),
-        params: {account: {name: "Test Venue"}, user: {name: admin.name, email: admin.email}}
+        params: { account: { name: "Test Venue" }, user: { name: admin.name, email: admin.email } }
 
       expect(response).to redirect_to(admin_waitlist_index_path)
       follow_redirect!

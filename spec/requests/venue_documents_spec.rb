@@ -15,7 +15,7 @@ RSpec.describe "VenueDocuments", type: :request do
 
       it "creates a VenueDocument and enqueues ingestion" do
         expect {
-          post venue_documents_path(venue), params: {document: {file: file}}
+          post venue_documents_path(venue), params: { document: { file: file } }
         }.to change(VenueDocument, :count).by(1)
           .and have_enqueued_job(IngestVenueDocumentJob)
 
@@ -23,26 +23,26 @@ RSpec.describe "VenueDocuments", type: :request do
       end
 
       it "sets source_filename from uploaded file" do
-        post venue_documents_path(venue), params: {document: {file: file}}
+        post venue_documents_path(venue), params: { document: { file: file } }
 
         expect(VenueDocument.last.source_filename).to eq("event_guide.txt")
       end
 
       it "rejects upload for another account's venue" do
         other_venue = create(:venue)
-        post venue_documents_path(other_venue), params: {document: {file: file}}
+        post venue_documents_path(other_venue), params: { document: { file: file } }
         expect(response).to have_http_status(:not_found)
       end
 
       it "returns unprocessable when no file given" do
-        post venue_documents_path(venue), params: {document: {file: nil}}
+        post venue_documents_path(venue), params: { document: { file: nil } }
         expect(response).to have_http_status(:unprocessable_content)
       end
     end
 
     context "when signed out" do
       it "redirects to login" do
-        post venue_documents_path(venue), params: {document: {file: file}}
+        post venue_documents_path(venue), params: { document: { file: file } }
         expect(response).to have_http_status(:redirect)
         expect(response.location).to include("/login")
       end

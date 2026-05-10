@@ -21,11 +21,11 @@ RSpec.describe "IMAP inbox ingestion" do
           direction: "inbound",
           from_email: "lead@example.com",
           from_name: "Lead Person",
-          to_emails: ["agent@example.com"],
+          to_emails: [ "agent@example.com" ],
           subject: "Wedding inquiry",
           body_text: "Looking for a June date",
           received_at: Time.zone.parse("2026-04-01 10:00:00 UTC"),
-          raw_payload: {"uid" => 1, "message_id" => "<msg-1@example.com>"}
+          raw_payload: { "uid" => 1, "message_id" => "<msg-1@example.com>" }
         }
       ])
 
@@ -52,7 +52,7 @@ RSpec.describe "IMAP inbox ingestion" do
           direction: "inbound",
           from_email: "lead@example.com",
           subject: "Inquiry",
-          raw_payload: {"uid" => 5, "message_id" => "<msg-1@example.com>"}
+          raw_payload: { "uid" => 5, "message_id" => "<msg-1@example.com>" }
         }
       ])
 
@@ -80,7 +80,7 @@ RSpec.describe "IMAP inbox ingestion" do
           direction: "inbound",
           from_email: "lead@example.com",
           subject: "Updated subject",
-          raw_payload: {"uid" => 1}
+          raw_payload: { "uid" => 1 }
         }
       ])
 
@@ -103,7 +103,7 @@ RSpec.describe "IMAP inbox ingestion" do
           direction: "inbound",
           from_email: "lead@example.com",
           subject: "Race condition",
-          raw_payload: {"uid" => 10}
+          raw_payload: { "uid" => 10 }
         }
       ])
 

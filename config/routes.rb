@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
   devise_for :users,
     path: "",
-    path_names: {sign_in: "login", sign_out: "logout"},
-    controllers: {sessions: "sessions"}
+    path_names: { sign_in: "login", sign_out: "logout" },
+    controllers: { sessions: "sessions" }
 
   # Friendly named helpers that mirror the old hand-rolled auth paths
   direct(:login) { new_user_session_path }
@@ -19,7 +19,7 @@ Rails.application.routes.draw do
     get "/inbox_threads", to: "ops/inbox_threads#index"
     get "/inbox_threads/view", to: "ops/inbox_threads#show"
 
-    resources :ai_runs, only: [:index, :show], controller: "ops/ai_runs"
+    resources :ai_runs, only: [ :index, :show ], controller: "ops/ai_runs"
 
     post "/retry_failed_job/:id", to: "ops#retry_failed_job"
     post "/retry_draft/:id", to: "ops#retry_draft"
@@ -33,9 +33,9 @@ Rails.application.routes.draw do
   get "/jobs", to: redirect("/"), constraints: ->(req) { req.env["warden"]&.authenticated? }
 
   namespace :admin do
-    resources :accounts, only: [:new, :create]
-    resources :users, only: [:new, :create]
-    resources :waitlist, only: [:index] do
+    resources :accounts, only: [ :new, :create ]
+    resources :users, only: [ :new, :create ]
+    resources :waitlist, only: [ :index ] do
       member do
         get :invite
         post :invite
@@ -56,7 +56,7 @@ Rails.application.routes.draw do
 
   post "/waitlist", to: "waitlist_entries#create", as: :waitlist
 
-  resources :booking_requests, only: [:index, :show] do
+  resources :booking_requests, only: [ :index, :show ] do
     member do
       post :transition
     end
@@ -67,11 +67,11 @@ Rails.application.routes.draw do
       end
     end
   end
-  resources :mail_connections, only: [:index, :new, :create, :edit, :update] do
-    resources :inbox_filters, only: [:create, :destroy]
+  resources :mail_connections, only: [ :index, :new, :create, :edit, :update ] do
+    resources :inbox_filters, only: [ :create, :destroy ]
   end
-  resources :venues, only: [:index, :new, :create, :edit, :update, :destroy] do
-    resources :documents, only: [:create, :destroy], controller: "venue_documents"
+  resources :venues, only: [ :index, :new, :create, :edit, :update, :destroy ] do
+    resources :documents, only: [ :create, :destroy ], controller: "venue_documents"
   end
-  resources :inbox_threads, only: [:index, :show]
+  resources :inbox_threads, only: [ :index, :show ]
 end

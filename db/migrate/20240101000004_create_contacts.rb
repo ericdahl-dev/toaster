@@ -7,6 +7,6 @@ class CreateContacts < ActiveRecord::Migration[7.2]
       t.string :phone
       t.timestamps
     end
-    add_index :contacts, [:account_id, :email]
+    add_index :contacts, [ :account_id, :email ]
   end
 end

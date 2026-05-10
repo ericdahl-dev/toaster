@@ -7,7 +7,7 @@ RSpec.describe "Onboarding", type: :request do
   let!(:user) { create(:user, account: account) }
 
   def sign_in_as(u)
-    post "/login", params: {user: {email: u.email, password: "password123"}}
+    post "/login", params: { user: { email: u.email, password: "password123" } }
   end
 
   describe "sign-in redirect" do

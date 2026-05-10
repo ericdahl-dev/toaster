@@ -17,9 +17,9 @@ module Ops
 
     def show
       run = AiRun.find(params[:id])
-      render json: {ai_run: run_detail(run)}
+      render json: { ai_run: run_detail(run) }
     rescue ActiveRecord::RecordNotFound
-      render json: {error: "AiRun not found"}, status: :not_found
+      render json: { error: "AiRun not found" }, status: :not_found
     end
 
     private

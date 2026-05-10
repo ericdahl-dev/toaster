@@ -37,7 +37,7 @@ RSpec.describe BookingRequests::LlmCall do
     context "with a valid API key" do
       before do
         stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
-        allow(instance).to receive(:call_openai).and_return({"result" => "parsed"})
+        allow(instance).to receive(:call_openai).and_return({ "result" => "parsed" })
       end
 
       it "returns the parsed result" do

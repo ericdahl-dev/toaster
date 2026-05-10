@@ -2,7 +2,7 @@
 
 class VenuesController < ApplicationController
   before_action :require_authenticated_html_user!
-  before_action :set_venue, only: [:edit, :update, :destroy]
+  before_action :set_venue, only: [ :edit, :update, :destroy ]
 
   def index
     @venues = current_user.account.venues.order(:name)
@@ -15,7 +15,7 @@ class VenuesController < ApplicationController
   def create
     @venue = current_user.account.venues.build(venue_params)
     if @venue.save
-      Telemetry.capture(distinct_id: current_user.posthog_distinct_id, event: "venue_created", properties: {venue_id: @venue.id, venue_name: @venue.name})
+      Telemetry.capture(distinct_id: current_user.posthog_distinct_id, event: "venue_created", properties: { venue_id: @venue.id, venue_name: @venue.name })
       redirect_to venues_path, notice: "Venue created."
     else
       render :new, status: :unprocessable_entity
@@ -53,7 +53,7 @@ class VenuesController < ApplicationController
   def venue_params
     params.require(:venue).permit(
       :name, :address, :capacity,
-      venue_spaces_attributes: [:id, :name, :min_guests, :capacity_seated, :capacity_reception, :pricing_floor_cents, :_destroy]
+      venue_spaces_attributes: [ :id, :name, :min_guests, :capacity_seated, :capacity_reception, :pricing_floor_cents, :_destroy ]
     )
   end
 end

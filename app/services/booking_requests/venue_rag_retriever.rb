@@ -18,7 +18,7 @@ module BookingRequests
 
       chunks = venue.venue_documents.where(status: :ready)
         .joins(:venue_chunks)
-        .where.not(venue_chunks: {embedding: nil})
+        .where.not(venue_chunks: { embedding: nil })
 
       return [] unless chunks.exists?
 
@@ -27,7 +27,7 @@ module BookingRequests
 
       VenueChunk
         .joins(:venue_document)
-        .where(venue_documents: {venue_id: venue.id, status: "ready"})
+        .where(venue_documents: { venue_id: venue.id, status: "ready" })
         .nearest_neighbors(:embedding, query_embedding, distance: :cosine)
         .limit(TOP_K)
         .pluck(:content)

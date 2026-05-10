@@ -22,12 +22,12 @@ module Ops
         raise ActiveRecord::RecordNotFound if anchor.provider_thread_id.present?
 
         messages = InboxMessage.where(account_id: account_id, provider: provider, id: anchor_inbox_message_id).includes(:booking_request).to_a
-        key = [:singleton, account_id, provider, anchor_inbox_message_id]
+        key = [ :singleton, account_id, provider, anchor_inbox_message_id ]
       else
         raise ActiveRecord::RecordNotFound unless provider_thread_id.present?
 
         messages = InboxMessage.where(account_id: account_id, provider: provider, provider_thread_id: provider_thread_id).includes(:booking_request).to_a
-        key = [:thread, account_id, provider, provider_thread_id]
+        key = [ :thread, account_id, provider, provider_thread_id ]
       end
 
       bookings = bookings_for_key(key)
@@ -58,7 +58,7 @@ module Ops
       when :thread
         BookingRequest.joins(:conversation_thread).where(
           account_id: key[1],
-          conversation_threads: {provider_thread_id: key[3]}
+          conversation_threads: { provider_thread_id: key[3] }
         )
       when :singleton
         BookingRequest.where(account_id: key[1], source_inbox_message_id: key[3])
@@ -85,7 +85,7 @@ module Ops
         missing_fields: booking_request.missing_fields,
         review_reasons: booking_request.review_reasons,
         extraction_snapshot: booking_request.extraction_snapshot,
-        pending_draft: pending_draft ? {id: pending_draft.id, body: pending_draft.body} : nil
+        pending_draft: pending_draft ? { id: pending_draft.id, body: pending_draft.body } : nil
       }
     end
 

@@ -56,7 +56,7 @@ RSpec.describe Ops::ActivityFeed do
       make_thread_message(provider_thread_id: "newer", received_at: 1.hour.ago)
 
       rows = described_class.call
-      expect(rows.map(&:provider_thread_id)).to eq(["newer", "older"])
+      expect(rows.map(&:provider_thread_id)).to eq([ "newer", "older" ])
     end
 
     it "handles singleton messages (no provider_thread_id)" do

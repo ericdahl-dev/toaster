@@ -11,7 +11,7 @@ RSpec.describe "Ops::AiRuns", type: :request do
     ENV["OPS_AUTH_TOKEN"] = prev.nil? ? nil.tap { ENV.delete("OPS_AUTH_TOKEN") } : prev
   end
 
-  let(:headers) { {"X-Ops-Token" => "secret-token"} }
+  let(:headers) { { "X-Ops-Token" => "secret-token" } }
   let(:account) { create(:account) }
   let(:booking_request) { create(:booking_request, account:) }
 
@@ -27,7 +27,7 @@ RSpec.describe "Ops::AiRuns", type: :request do
     it "filters by run_type" do
       create(:ai_run, account:, booking_request:, run_type: "extraction")
       classifier_run = create(:ai_run, account:, run_type: "classifier")
-      get "/ops/ai_runs", params: {run_type: "classifier"}, headers: headers
+      get "/ops/ai_runs", params: { run_type: "classifier" }, headers: headers
       ids = response.parsed_body["ai_runs"].map { |r| r["id"] }
       expect(ids).to include(classifier_run.id)
       expect(ids.size).to eq(1)

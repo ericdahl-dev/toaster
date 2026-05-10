@@ -31,7 +31,7 @@ RSpec.describe BookingRequests::Reconcile do
     before do
       stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
       allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai)
-        .and_return({"booking_request" => true})
+        .and_return({ "booking_request" => true })
       allow_any_instance_of(BookingRequests::LlmExtractor).to receive(:call_openai)
         .and_return(full_extractor_response)
     end

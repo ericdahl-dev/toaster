@@ -10,6 +10,6 @@ class CreateGmailConnections < ActiveRecord::Migration[7.2]
       t.boolean :active, null: false, default: true
       t.timestamps
     end
-    add_index :gmail_connections, [:account_id, :email], unique: true
+    add_index :gmail_connections, [ :account_id, :email ], unique: true
   end
 end

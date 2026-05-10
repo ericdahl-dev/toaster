@@ -49,10 +49,10 @@ module BookingRequests
       response = client.chat(
         parameters: {
           model: self.class::MODEL,
-          response_format: {type: "json_object"},
+          response_format: { type: "json_object" },
           messages: [
-            {role: "system", content: self.class::SYSTEM_PROMPT},
-            {role: "user", content: prompt}
+            { role: "system", content: self.class::SYSTEM_PROMPT },
+            { role: "user", content: prompt }
           ],
           temperature: self.class::TEMPERATURE
         }

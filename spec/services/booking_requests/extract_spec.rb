@@ -16,7 +16,7 @@ RSpec.describe BookingRequests::Extract do
   before do
     stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
     allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai)
-      .and_return({"booking_request" => true})
+      .and_return({ "booking_request" => true })
     allow_any_instance_of(BookingRequests::LlmExtractor).to receive(:call_openai)
       .and_return({
         "event_date" => nil, "headcount" => 40, "budget" => nil,
@@ -37,7 +37,7 @@ RSpec.describe BookingRequests::Extract do
 
       allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai) do
         llm_called_in_extra_transaction = ActiveRecord::Base.connection.open_transactions > baseline_transactions
-        {"booking_request" => true}
+        { "booking_request" => true }
       end
 
       described_class.call(inbox_message: inbox_message)
@@ -49,7 +49,7 @@ RSpec.describe BookingRequests::Extract do
       call_count = 0
       allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai) do
         call_count += 1
-        {"booking_request" => true}
+        { "booking_request" => true }
       end
 
       # Simulate RecordNotUnique on first attempt then succeed
@@ -69,7 +69,7 @@ RSpec.describe BookingRequests::Extract do
     context "when classifier returns false" do
       before do
         allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai)
-          .and_return({"booking_request" => false})
+          .and_return({ "booking_request" => false })
       end
 
       it "returns nil without creating a BookingRequest" do

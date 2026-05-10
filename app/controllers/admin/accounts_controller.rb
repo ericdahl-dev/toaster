@@ -15,7 +15,7 @@ class Admin::AccountsController < Admin::BaseController
         @account.save!
         @user.save!
       end
-      Telemetry.capture(distinct_id: current_user.posthog_distinct_id, event: "admin_account_created", properties: {account_id: @account.id, account_name: @account.name, user_email: @user.email})
+      Telemetry.capture(distinct_id: current_user.posthog_distinct_id, event: "admin_account_created", properties: { account_id: @account.id, account_name: @account.name, user_email: @user.email })
       redirect_to new_admin_account_path, notice: "Account and user created successfully."
     else
       render :new, status: :unprocessable_entity

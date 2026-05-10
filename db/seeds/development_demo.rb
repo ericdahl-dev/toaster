@@ -36,8 +36,8 @@ class DevelopmentDemoSeeds
 
   def seed_venues
     [
-      {name: "Riverside Hall", address: "100 River Rd", capacity: 220},
-      {name: "Skyline Rooftop", address: "55 High St, 12th floor", capacity: 80}
+      { name: "Riverside Hall", address: "100 River Rd", capacity: 220 },
+      { name: "Skyline Rooftop", address: "55 High St, 12th floor", capacity: 80 }
     ].each do |attrs|
       venue = Venue.find_or_initialize_by(account: account, name: attrs[:name])
       venue.assign_attributes(attrs.except(:name))
@@ -96,7 +96,7 @@ class DevelopmentDemoSeeds
       notes: "Ask about AV package.",
       missing_fields: [],
       review_reasons: [],
-      extraction_snapshot: {"venue_type" => "offsite", "dates_mentioned" => ["June 18"]}
+      extraction_snapshot: { "venue_type" => "offsite", "dates_mentioned" => [ "June 18" ] }
     )
   end
 
@@ -129,7 +129,7 @@ class DevelopmentDemoSeeds
       budget: nil,
       notes: nil,
       missing_fields: %w[event_date headcount],
-      review_reasons: ["Seasonal window too wide"],
+      review_reasons: [ "Seasonal window too wide" ],
       extraction_snapshot: {}
     )
   end
@@ -164,7 +164,7 @@ class DevelopmentDemoSeeds
       notes: nil,
       missing_fields: [],
       review_reasons: [],
-      extraction_snapshot: {"dietary" => "vegetarian options"}
+      extraction_snapshot: { "dietary" => "vegetarian options" }
     )
     upsert_pending_draft(booking_request: br, body: <<~TEXT.strip)
       Hi Taylor — thanks for the note. We can host July 9 for 24 with a vegetarian-forward menu.
@@ -204,7 +204,7 @@ class DevelopmentDemoSeeds
       venue: venue,
       missing_fields: [],
       review_reasons: [],
-      extraction_snapshot: {"confirmed" => true}
+      extraction_snapshot: { "confirmed" => true }
     )
   end
 
@@ -237,7 +237,7 @@ class DevelopmentDemoSeeds
       budget: nil,
       notes: "Over capacity for venues list.",
       missing_fields: [],
-      review_reasons: ["Exceeds venue capacity"],
+      review_reasons: [ "Exceeds venue capacity" ],
       extraction_snapshot: {}
     )
   end
@@ -453,7 +453,7 @@ class DevelopmentDemoSeeds
         body_text: body_text,
         body_html: "<p>#{ERB::Util.html_escape(body_text)}</p>",
         received_at: received_at,
-        raw_payload: {"seed" => true, "provider_message_id" => provider_message_id, "direction" => "outbound"}
+        raw_payload: { "seed" => true, "provider_message_id" => provider_message_id, "direction" => "outbound" }
       )
       m.save!
     end
@@ -470,12 +470,12 @@ class DevelopmentDemoSeeds
         direction: :inbound,
         from_name: contact.name,
         from_email: contact.email,
-        to_emails: ["events@toaster.local"],
+        to_emails: [ "events@toaster.local" ],
         subject: subject,
         body_text: body_text,
         body_html: "<p>#{ERB::Util.html_escape(body_text)}</p>",
         received_at: received_at,
-        raw_payload: {"seed" => true, "singleton" => true}
+        raw_payload: { "seed" => true, "singleton" => true }
       )
       m.save!
     end
@@ -492,12 +492,12 @@ class DevelopmentDemoSeeds
         direction: :inbound,
         from_name: contact.name,
         from_email: contact.email,
-        to_emails: ["events@toaster.local"],
+        to_emails: [ "events@toaster.local" ],
         subject: subject,
         body_text: body_text,
         body_html: "<p>#{ERB::Util.html_escape(body_text)}</p>",
         received_at: received_at,
-        raw_payload: {"seed" => true, "provider_message_id" => provider_message_id}
+        raw_payload: { "seed" => true, "provider_message_id" => provider_message_id }
       )
       m.save!
     end

@@ -42,7 +42,7 @@ Rails.application.configure do
   config.force_ssl = true
 
   # Allow plain HTTP for /up so Docker/Coolify healthchecks (curl to 127.0.0.1) succeed.
-  config.ssl_options = {redirect: {exclude: ->(request) { request.path == "/up" }}}
+  config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
   # Log to STDOUT by default
   config.logger = ActiveSupport::Logger.new($stdout)
@@ -50,7 +50,7 @@ Rails.application.configure do
     .then { |logger| ActiveSupport::TaggedLogging.new(logger) }
 
   # Prepend all log lines with the following tags.
-  config.log_tags = [:request_id]
+  config.log_tags = [ :request_id ]
 
   # "info" includes generic and useful information about system operation, but avoids logging too much
   # information to avoid inadvertent exposure of personally identifiable information (PII). If you
@@ -80,7 +80,7 @@ Rails.application.configure do
     enable_starttls_auto: true
   }
   config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.default_url_options = {host: ENV.fetch("APP_HOST", "toaster.app")}
+  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "toaster.app") }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
@@ -93,7 +93,7 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   # Only use :id for inspections in production.
-  config.active_record.attributes_for_inspect = [:id]
+  config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
@@ -101,5 +101,5 @@ Rails.application.configure do
   #   /.*\.example\.com/ # Allow requests from subdomains like `www.example.com`
   # ]
   # Allow /up with Host 127.0.0.1 / localhost (Docker healthchecks); real traffic uses config.hosts in application.rb.
-  config.host_authorization = {exclude: ->(request) { request.path == "/up" }}
+  config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
 end

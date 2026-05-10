@@ -9,6 +9,6 @@ class WaitlistConversionService
 
     entry.update!(status: :converted)
 
-    Telemetry.capture(distinct_id: user.posthog_distinct_id, event: "waitlist_converted", properties: {account_id: user.account_id})
+    Telemetry.capture(distinct_id: user.posthog_distinct_id, event: "waitlist_converted", properties: { account_id: user.account_id })
   end
 end

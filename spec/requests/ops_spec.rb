@@ -22,7 +22,7 @@ RSpec.describe "Ops endpoints", type: :request do
 
   describe "GET /ops/failed_jobs" do
     it "returns an empty list when no jobs have failed" do
-      get "/ops/failed_jobs", headers: {"X-Ops-Token" => "secret-token"}
+      get "/ops/failed_jobs", headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       expect(response.parsed_body["failed_jobs"]).to eq([])
@@ -34,7 +34,7 @@ RSpec.describe "Ops endpoints", type: :request do
       draft = create(:draft, status: :approved)
 
       expect {
-        post "/ops/retry_draft/#{draft.id}", headers: {"X-Ops-Token" => "secret-token"}
+        post "/ops/retry_draft/#{draft.id}", headers: { "X-Ops-Token" => "secret-token" }
       }.to have_enqueued_job(PushDraftJob).with(draft.id)
 
       expect(response).to have_http_status(:ok)
@@ -44,13 +44,13 @@ RSpec.describe "Ops endpoints", type: :request do
     it "returns 422 when draft is not in approved state" do
       draft = create(:draft, status: :pending_review)
 
-      post "/ops/retry_draft/#{draft.id}", headers: {"X-Ops-Token" => "secret-token"}
+      post "/ops/retry_draft/#{draft.id}", headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "returns 404 for a missing draft" do
-      post "/ops/retry_draft/0", headers: {"X-Ops-Token" => "secret-token"}
+      post "/ops/retry_draft/0", headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:not_found)
     end

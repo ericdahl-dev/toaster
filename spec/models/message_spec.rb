@@ -36,7 +36,7 @@ RSpec.describe Message, type: :model do
 
   describe "enums" do
     it "has inbound and outbound directions" do
-      expect(Message.directions).to eq({"inbound" => "inbound", "outbound" => "outbound"})
+      expect(Message.directions).to eq({ "inbound" => "inbound", "outbound" => "outbound" })
     end
   end
 

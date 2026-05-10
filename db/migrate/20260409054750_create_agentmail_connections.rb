@@ -10,6 +10,6 @@ class CreateAgentmailConnections < ActiveRecord::Migration[7.2]
       t.timestamps
     end
 
-    add_index :agentmail_connections, [:account_id, :inbox_id], unique: true
+    add_index :agentmail_connections, [ :account_id, :inbox_id ], unique: true
   end
 end

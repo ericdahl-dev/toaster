@@ -10,7 +10,7 @@ module Authentication
   def require_authenticated_user!
     return if current_user
 
-    render json: {error: "Unauthorized"}, status: :unauthorized
+    render json: { error: "Unauthorized" }, status: :unauthorized
   end
 
   def require_authenticated_html_user!

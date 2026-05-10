@@ -10,7 +10,7 @@ class DraftsController < ApplicationController
     Telemetry.capture(
       distinct_id: current_user.posthog_distinct_id,
       event: "draft_approved",
-      properties: {draft_id: @draft.id, booking_request_id: @draft.booking_request_id}
+      properties: { draft_id: @draft.id, booking_request_id: @draft.booking_request_id }
     )
 
     redirect_to booking_request_path(@draft.booking_request), notice: "Draft approved — sending now."
@@ -22,7 +22,7 @@ class DraftsController < ApplicationController
     Telemetry.capture(
       distinct_id: current_user.posthog_distinct_id,
       event: "draft_rejected",
-      properties: {draft_id: @draft.id, booking_request_id: @draft.booking_request_id}
+      properties: { draft_id: @draft.id, booking_request_id: @draft.booking_request_id }
     )
 
     redirect_to booking_request_path(@draft.booking_request), notice: "Draft rejected."

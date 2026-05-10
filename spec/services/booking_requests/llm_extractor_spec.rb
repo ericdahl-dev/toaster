@@ -62,7 +62,7 @@ RSpec.describe BookingRequests::LlmExtractor do
       end
 
       context "when LLM returns null event_date" do
-        let(:llm_response) { {"event_date" => nil, "headcount" => 40, "budget" => nil, "start_time" => nil, "celebration_type" => nil, "confidence" => 0.4, "notes" => nil} }
+        let(:llm_response) { { "event_date" => nil, "headcount" => 40, "budget" => nil, "start_time" => nil, "celebration_type" => nil, "confidence" => 0.4, "notes" => nil } }
 
         it "returns nil event_date" do
           result = extractor.call(subject: "Party", body_text: "40 guests")
@@ -71,7 +71,7 @@ RSpec.describe BookingRequests::LlmExtractor do
       end
 
       context "when LLM returns unparseable date" do
-        let(:llm_response) { {"event_date" => "not a date", "headcount" => nil, "budget" => nil, "start_time" => nil, "celebration_type" => nil, "confidence" => 0.3, "notes" => nil} }
+        let(:llm_response) { { "event_date" => "not a date", "headcount" => nil, "budget" => nil, "start_time" => nil, "celebration_type" => nil, "confidence" => 0.3, "notes" => nil } }
 
         it "sets event_date to nil without raising" do
           result = extractor.call(subject: "Party", body_text: "some text")

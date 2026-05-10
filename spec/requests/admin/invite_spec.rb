@@ -35,24 +35,24 @@ RSpec.describe "Admin::Waitlist invite", type: :request do
       it "creates Account and User in a single transaction" do
         expect {
           post invite_admin_waitlist_path(entry), params: {
-            account: {name: entry.company_name},
-            user: {name: entry.full_name, email: entry.email}
+            account: { name: entry.company_name },
+            user: { name: entry.full_name, email: entry.email }
           }
         }.to change(Account, :count).by(1).and change(User, :count).by(1)
       end
 
       it "creates the user as a venue_manager" do
         post invite_admin_waitlist_path(entry), params: {
-          account: {name: entry.company_name},
-          user: {name: entry.full_name, email: entry.email}
+          account: { name: entry.company_name },
+          user: { name: entry.full_name, email: entry.email }
         }
         expect(User.find_by(email: entry.email).role).to eq("venue_manager")
       end
 
       it "marks the WaitlistEntry as invited" do
         post invite_admin_waitlist_path(entry), params: {
-          account: {name: entry.company_name},
-          user: {name: entry.full_name, email: entry.email}
+          account: { name: entry.company_name },
+          user: { name: entry.full_name, email: entry.email }
         }
         expect(entry.reload).to be_invited
         expect(entry.reload.invited_at).to be_present
@@ -61,16 +61,16 @@ RSpec.describe "Admin::Waitlist invite", type: :request do
       it "enqueues an invite email" do
         expect {
           post invite_admin_waitlist_path(entry), params: {
-            account: {name: entry.company_name},
-            user: {name: entry.full_name, email: entry.email}
+            account: { name: entry.company_name },
+            user: { name: entry.full_name, email: entry.email }
           }
         }.to have_enqueued_mail(WaitlistMailer, :invite)
       end
 
       it "redirects to waitlist index with notice" do
         post invite_admin_waitlist_path(entry), params: {
-          account: {name: entry.company_name},
-          user: {name: entry.full_name, email: entry.email}
+          account: { name: entry.company_name },
+          user: { name: entry.full_name, email: entry.email }
         }
         expect(response).to redirect_to(admin_waitlist_index_path)
         expect(flash[:notice]).to be_present
@@ -82,8 +82,8 @@ RSpec.describe "Admin::Waitlist invite", type: :request do
         sign_in_as(admin)
         expect {
           post invite_admin_waitlist_path(entry), params: {
-            account: {name: ""},
-            user: {name: "", email: ""}
+            account: { name: "" },
+            user: { name: "", email: "" }
           }
         }.not_to change(Account, :count)
         expect(response).to have_http_status(:unprocessable_entity)

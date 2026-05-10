@@ -7,6 +7,6 @@ class CreateConversationThreads < ActiveRecord::Migration[7.2]
       t.string :subject
       t.timestamps
     end
-    add_index :conversation_threads, [:account_id, :gmail_thread_id], unique: true
+    add_index :conversation_threads, [ :account_id, :gmail_thread_id ], unique: true
   end
 end

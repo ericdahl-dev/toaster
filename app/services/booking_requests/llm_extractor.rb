@@ -45,7 +45,7 @@ module BookingRequests
     end
 
     def extra_run_attrs
-      {rag_chunk_count: @_rag_chunks&.size || 0}
+      { rag_chunk_count: @_rag_chunks&.size || 0 }
     end
 
     def retrieve_venue_chunks(subject:, body_text:)
