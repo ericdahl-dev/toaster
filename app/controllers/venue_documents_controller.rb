@@ -38,7 +38,11 @@ class VenueDocumentsController < ApplicationController
 
   def destroy
     doc = @venue.venue_documents.find(params[:id])
-    FileUtils.rm_f(doc.file_path) if doc.file_path.present?
+    if doc.file_path.present?
+      safe_root = Rails.root.join("tmp", "venue_documents").to_s
+      resolved = File.expand_path(doc.file_path)
+      FileUtils.rm_f(resolved) if resolved.start_with?(safe_root)
+    end
     doc.destroy!
     redirect_to edit_venue_path(@venue), notice: "Document removed."
   end
