@@ -28,6 +28,18 @@ RSpec.describe Drafts::SentMailReconciler do
     allow(Imap::FolderLocator).to receive(:call).and_return(folder_result)
   end
 
+  describe "single IMAP session" do
+    it "opens exactly one TCP connection for the full reconcile" do
+      allow(imap_double).to receive(:select)
+      allow(imap_double).to receive(:uid_search).and_return([])
+      allow(imap_double).to receive(:uid_fetch).and_return([])
+
+      described_class.call(draft: draft, imap_connection: imap_connection)
+
+      expect(Net::IMAP).to have_received(:new).once
+    end
+  end
+
   def stub_sent_search(uids)
     allow(imap_double).to receive(:select).with("Sent")
     allow(imap_double).to receive(:uid_search).and_return(uids)
