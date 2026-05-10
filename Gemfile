@@ -57,6 +57,7 @@ gem "tailwindcss-rails"
 
 group :development do
   gem "dotenv-rails"
+  gem "letter_opener"
 end
 
 group :development, :test do

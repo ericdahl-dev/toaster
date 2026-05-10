@@ -1,0 +1,7 @@
+<% if resource.errors.any? %>
+  <div class="flash flash-alert" style="position:static;margin-bottom:20px;animation:none" data-turbo-temporary>
+    <% resource.errors.full_messages.each do |message| %>
+      <div><%= message %></div>
+    <% end %>
+  </div>
+<% end %>
