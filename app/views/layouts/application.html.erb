@@ -87,24 +87,6 @@
                 <span class="icon">📝</span> Prospects
               <% end %>
             <% end %>
-            <% if current_user.admin? %>
-              <div class="sidebar-revision">
-                <% sha = APP_REVISION.split(" ").first %>
-                <% pr_number = APP_REVISION[/#(\d+)\)/, 1] %>
-                <div class="sidebar-revision-label">Deployed</div>
-                <div class="sidebar-revision-chip">
-                  <span class="sidebar-revision-dot"></span>
-                  <% if pr_number %>
-                    <%= link_to "https://github.com/ericdahl-dev/toaster/pull/#{pr_number}", target: "_blank", rel: "noopener", class: "sidebar-revision-link" do %>
-                      <span class="sidebar-revision-pr">#<%= pr_number %></span>
-                      <span class="sidebar-revision-sha"><%= sha %></span>
-                    <% end %>
-                  <% else %>
-                    <span class="sidebar-revision-sha"><%= sha %></span>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
           </nav>
         <% end %>
 
