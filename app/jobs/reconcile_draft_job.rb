@@ -43,6 +43,7 @@ class ReconcileDraftJob < ApplicationJob
   end
 
   def confirm_booking_request(booking_request)
-    booking_request.confirmed! if booking_request.reviewing?
+    return unless booking_request.reviewing?
+    BookingRequests::Transition.call(booking_request: booking_request, to: "confirmed", metadata: {actor: "reconcile_draft_job"})
   end
 end
