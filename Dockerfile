@@ -38,6 +38,9 @@ RUN bundle install && \
 # Copy application code
 COPY . .
 
+# Bake git revision into REVISION file for admin version display
+RUN git log -1 --format="%h %s" > REVISION 2>/dev/null || echo "dev" > REVISION
+
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
 

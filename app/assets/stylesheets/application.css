@@ -145,6 +145,16 @@ body {
   padding-left: 4px;
 }
 
+.sidebar-revision {
+  margin-top: auto;
+  padding: 12px 16px 8px;
+  font-size: 10px;
+  font-family: monospace;
+  color: var(--muted, #555);
+  opacity: 0.5;
+  user-select: none;
+}
+
 .nav-link--admin { color: var(--amber-dim); }
 .nav-link--admin:hover { color: var(--amber); background: var(--amber-bg); }
 .nav-link--admin.active { color: var(--amber); border-left-color: var(--amber); background: var(--amber-bg); }
