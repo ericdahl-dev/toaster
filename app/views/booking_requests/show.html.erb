@@ -115,6 +115,37 @@
   </div>
 <% end %>
 
+<% if @booking_request.staff_summary.present? %>
+  <div class="section-heading" style="margin-top:28px">AI summary</div>
+  <div class="card" style="margin-bottom:24px">
+    <p style="margin:0;font-size:14px;color:var(--text)"><%= @booking_request.staff_summary %></p>
+  </div>
+<% end %>
+
+<% if (ai_runs = @booking_request.ai_runs.order(created_at: :desc)).any? %>
+  <div class="section-heading" style="margin-top:28px">AI runs</div>
+  <div class="card" style="margin-bottom:24px">
+    <table class="data-table">
+      <thead>
+        <tr><th>Type</th><th>Model</th><th>Version</th><th>Latency</th><th>RAG chunks</th><th>Time</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% ai_runs.each do |run| %>
+          <tr>
+            <td><code style="font-size:11px"><%= run.run_type %></code></td>
+            <td class="dim" style="font-size:12px"><%= run.llm_model %></td>
+            <td class="dim" style="font-size:12px"><%= run.prompt_version %></td>
+            <td class="dim" style="font-size:12px"><%= run.latency_ms %>ms</td>
+            <td class="dim" style="font-size:12px"><%= run.rag_chunk_count %></td>
+            <td class="dim" style="font-size:11px;white-space:nowrap"><%= run.created_at.strftime("%-d %b %H:%M") %></td>
+            <td><a href="/ops/ai_runs/<%= run.id %>" style="font-size:11px">inspect</a></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>
+
 <%
   event_logs = EventLog.where(subject_type: "BookingRequest", subject_id: @booking_request.id)
                        .order(created_at: :asc)

@@ -1,10 +1,6 @@
 class OpsController < ApplicationController
-  # Queue/system observability endpoints for operators.
-  # All responses are scoped to the last 24 hours unless otherwise noted.
   skip_forgery_protection
   include Ops::RequireToken
-
-  LOOKBACK = 24.hours
 
   def index
     render json: {
@@ -32,25 +28,6 @@ class OpsController < ApplicationController
         }
       end
     render json: {failed_jobs: failures}
-  end
-
-  def ai_runs
-    runs = AiRun
-      .where(created_at: LOOKBACK.ago..)
-      .order(created_at: :desc)
-      .limit(100)
-      .map do |run|
-        {
-          id: run.id,
-          account_id: run.account_id,
-          booking_request_id: run.booking_request_id,
-          llm_model: run.llm_model,
-          input_tokens: run.input_tokens,
-          output_tokens: run.output_tokens,
-          created_at: run.created_at
-        }
-      end
-    render json: {ai_runs: runs}
   end
 
   def retry_failed_job
