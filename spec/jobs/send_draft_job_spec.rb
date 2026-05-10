@@ -51,6 +51,17 @@ RSpec.describe SendDraftJob do
       expect(booking_request.reload.status).to eq("confirmed")
     end
 
+    it "writes an EventLog entry for the auto-confirm transition" do
+      expect {
+        described_class.new.perform(draft.id)
+      }.to change(EventLog, :count).by(1)
+      log = EventLog.last
+      expect(log.event_type).to eq("booking_request.status_changed")
+      expect(log.payload["from"]).to eq("reviewing")
+      expect(log.payload["to"]).to eq("confirmed")
+      expect(log.payload["actor"]).to eq("send_draft_job")
+    end
+
     it "does not confirm BookingRequest already in other status" do
       booking_request.update!(status: "pending")
       described_class.new.perform(draft.id)

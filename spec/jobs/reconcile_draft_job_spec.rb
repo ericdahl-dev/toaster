@@ -45,6 +45,17 @@ RSpec.describe ReconcileDraftJob do
         expect(booking_request.reload.status).to eq("confirmed")
       end
 
+      it "writes an EventLog entry for the auto-confirm transition" do
+        expect {
+          described_class.new.perform(draft.id)
+        }.to change(EventLog, :count).by(1)
+        log = EventLog.last
+        expect(log.event_type).to eq("booking_request.status_changed")
+        expect(log.payload["from"]).to eq("reviewing")
+        expect(log.payload["to"]).to eq("confirmed")
+        expect(log.payload["actor"]).to eq("reconcile_draft_job")
+      end
+
       it "sets Message direction to outbound" do
         described_class.new.perform(draft.id)
         expect(Message.last.direction).to eq("outbound")
@@ -78,6 +89,12 @@ RSpec.describe ReconcileDraftJob do
       it "transitions BookingRequest to confirmed" do
         described_class.new.perform(draft.id)
         expect(booking_request.reload.status).to eq("confirmed")
+      end
+
+      it "writes an EventLog entry for the auto-confirm transition" do
+        expect {
+          described_class.new.perform(draft.id)
+        }.to change(EventLog, :count).by(1)
       end
     end
 
