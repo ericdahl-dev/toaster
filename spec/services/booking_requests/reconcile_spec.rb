@@ -34,6 +34,8 @@ RSpec.describe BookingRequests::Reconcile do
         .and_return({ "booking_request" => true })
       allow_any_instance_of(BookingRequests::LlmExtractor).to receive(:call_openai)
         .and_return(full_extractor_response)
+      allow_any_instance_of(BookingRequests::DraftWriter).to receive(:call_openai)
+        .and_return({ "body" => "Thank you for your inquiry!" })
     end
 
     def build_inbox_message(overrides = {})
@@ -60,6 +62,25 @@ RSpec.describe BookingRequests::Reconcile do
     end
 
     context "when creating a new booking request" do
+      it "creates a Draft in pending_review status" do
+        expect {
+          described_class.call(inbox_message: build_inbox_message)
+        }.to change(Draft, :count).by(1)
+
+        draft = Draft.last
+        expect(draft.status).to eq("pending_review")
+        expect(draft.body).to eq("Thank you for your inquiry!")
+      end
+
+      it "does not create a second Draft on re-reconciliation" do
+        inbox_message = build_inbox_message
+        described_class.call(inbox_message: inbox_message)
+
+        expect {
+          described_class.call(inbox_message: inbox_message)
+        }.not_to change(Draft, :count)
+      end
+
       it "creates a BookingRequest" do
         expect {
           described_class.call(inbox_message: build_inbox_message)

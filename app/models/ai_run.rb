@@ -4,7 +4,7 @@ class AiRun < ApplicationRecord
 
   validates :llm_model, presence: true
   validates :prompt, presence: true
-  validates :run_type, presence: true, inclusion: { in: %w[classifier extraction] }
+  validates :run_type, presence: true, inclusion: { in: %w[classifier extraction draft_writer] }
 
   validate :booking_request_belongs_to_account
 
