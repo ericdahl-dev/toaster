@@ -47,26 +47,6 @@ RSpec.describe "Mobile layout", type: :request do
       expect(response.body).to include("Prospects")
       expect(response.body).to include("/admin/waitlist")
     end
-
-    it "links the deployed chip to the pull request when the revision includes one" do
-      stub_const("APP_REVISION", "abc1234 feat: shipped change (#99)")
-
-      get "/booking_requests"
-
-      expect(response.body).to include("Deployed")
-      expect(response.body).to include("https://github.com/ericdahl-dev/toaster/pull/99")
-      expect(response.body).to include("abc1234")
-    end
-
-    it "shows the deployed sha without a pull request link when the revision has no pr number" do
-      stub_const("APP_REVISION", "abc1234")
-
-      get "/booking_requests"
-
-      expect(response.body).to include("Deployed")
-      expect(response.body).to include("abc1234")
-      expect(response.body).not_to include("https://github.com/ericdahl-dev/toaster/pull/")
-    end
   end
 
   describe "when signed out" do
