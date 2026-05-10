@@ -20,7 +20,7 @@ class BookingRequest < ApplicationRecord
 
   validates :status, presence: true
   validates :headcount, numericality: {greater_than: 0, allow_nil: true}
-  validates :budget_cents, numericality: {greater_than_or_equal_to: 0, allow_nil: true}
+  validates :budget, numericality: {greater_than_or_equal_to: 0, allow_nil: true}
   validate :event_date_range_valid
   validate :contact_belongs_to_account
   validate :conversation_thread_belongs_to_account

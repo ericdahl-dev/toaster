@@ -1,7 +1,8 @@
 FactoryBot.define do
   factory :ai_run do
     association :account
-    llm_model { "gpt-4" }
+    run_type { "extraction" }
+    llm_model { "gpt-4o-mini" }
     prompt { "Test prompt" }
     response { "Test response" }
   end

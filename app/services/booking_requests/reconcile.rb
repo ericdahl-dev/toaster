@@ -16,6 +16,8 @@ module BookingRequests
         is_new = !BookingRequest.exists?(source_inbox_message: inbox_message)
 
         result = BookingRequests::Extract.call(inbox_message: inbox_message)
+        return nil if result.nil?
+
         booking_request = result.booking_request
 
         assign_venue(booking_request)

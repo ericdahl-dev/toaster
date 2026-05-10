@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module BookingRequests
   class Extract
     Result = Struct.new(:booking_request, :contact, :conversation_thread, :message, keyword_init: true)
@@ -21,19 +23,37 @@ module BookingRequests
           thread = find_or_build_thread(contact)
           thread.save!
 
-          extracted = FieldExtractor.call(subject: inbox_message.subject, body_text: inbox_message.body_text)
+          account = inbox_message.account
+          stripped_body = EmailBody::Strip.call(inbox_message.body_text)
+
+          classifier = Classifier.new(account:)
+          is_booking = classifier.call(subject: inbox_message.subject, body_text: stripped_body)
+          return nil unless is_booking
+
+          raw = LlmExtractor.new(account:).call(
+            subject: inbox_message.subject,
+            body_text: stripped_body
+          )
 
           booking_request = BookingRequest.find_or_initialize_by(source_inbox_message: inbox_message)
-          booking_request.account = inbox_message.account
+          booking_request.account = account
           booking_request.contact = contact
           booking_request.conversation_thread = thread
-          booking_request.event_date = extracted[:event_date]
-          booking_request.headcount = extracted[:headcount]
-          booking_request.budget_cents = extracted[:budget_cents]
-          booking_request.extraction_snapshot = extracted[:snapshot]
-          booking_request.missing_fields = extracted[:missing_fields]
-          booking_request.review_reasons = extracted[:review_reasons]
-          booking_request.status = extracted[:status]
+
+          validated = ValidateExtraction.new(booking_request:).call(raw)
+          status = Decisioner.call(validated)
+
+          booking_request.event_date = validated[:event_date]
+          booking_request.headcount = validated[:headcount]
+          booking_request.budget = validated[:budget]
+          booking_request.start_time = validated[:start_time]
+          booking_request.celebration_type = validated[:celebration_type]
+          booking_request.fit_status = validated[:fit_status]
+          booking_request.staff_summary = validated[:staff_summary]
+          booking_request.missing_fields = validated[:missing_fields]
+          booking_request.review_reasons = []
+          booking_request.extraction_snapshot = raw.transform_keys(&:to_s)
+          booking_request.status = status
           booking_request.save!
 
           message = find_or_build_canonical_message(booking_request, thread)

@@ -66,6 +66,30 @@ An append-only audit trail of all significant state changes and external interac
 > **Dev:** "After we unify ingestion, does every provider use the same checkpoint column?"
 > **Domain expert:** "No. IMAP thinks in server UIDs. The shared path only cares that the adapter advances the right cursor for that provider."
 
+**Classifier**:
+A cheap, fast LLM call (gpt-4o-mini, structured output `{ booking_request: boolean }`) that runs as the first step inside `BookingRequests::Extract`. Non-booking emails (auto-replies, out-of-office, noise) are filtered here — no `BookingRequest` row is created for them. Each classifier call is persisted as an `AiRun` with `run_type: "classifier"`.
+
+**LLM extraction**:
+Replaces `FieldExtractor` (regex-based). `BookingRequests::LlmExtractor` calls OpenAI with structured output and produces: `event_date`, `headcount`, `budget` (dollars, not cents), `start_time`, `celebration_type`, `confidence`, `notes`. Each call is persisted as an `AiRun` with `run_type: "extraction"`. Raises `ConfigurationError` when `OPENAI_API_KEY` is absent.
+
+**Budget**:
+A rough dollar estimate from an inbound email — stored as a decimal on `BookingRequest` (column: `budget`). Not cents. Not a financial transaction amount.
+
+**Validate-before-apply**:
+`BookingRequests::ValidateExtraction` — normalizes raw LLM output, computes derived fields (`fit_status`, `staff_summary`, `missing_fields`), and reads `VenueSpace` records for fit logic. Pure Ruby, no LLM calls. Runs after `LlmExtractor`, before any `BookingRequest` write.
+
+**Fit status**:
+Computed by `ValidateExtraction` using the booking request's venue's `VenueSpace` records. Values: `qualified`, `not_a_fit`, `in_progress`. Nil when no venue is assigned. Stored on `BookingRequest`.
+
+**Decisioner**:
+`BookingRequests::Decisioner` — pure function that maps a validated extraction result to a `BookingRequest` status (`pending` or `reviewing`). Routes to `reviewing` on: any missing required fields, `fit_status: not_a_fit`, or `confidence < CONFIDENCE_THRESHOLD (0.8)`.
+
+**Email body stripping**:
+`EmailBody::Strip` — standalone string→string service that removes quoted reply headers, original message blocks, and signatures from raw email body text before any LLM call. Called in `BookingRequests::Extract` before the classifier and extractor run.
+
+**AiRun**:
+Persisted record of one LLM call: `run_type` (`classifier` | `extraction`), `llm_model`, `prompt`, `prompt_version`, `response`, `input_tokens`, `output_tokens`, `latency_ms`. Belongs to `Account` and optionally to `BookingRequest`. Every classifier and extraction call produces one `AiRun`.
+
 ## Flagged ambiguities
 
 - "Sync" was used for both job enqueue and ingestion orchestration — resolved: **inbox ingestion** is the orchestrated fetch+upsert+checkpoint step; jobs remain thin schedulers.

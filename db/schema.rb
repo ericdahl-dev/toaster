@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_09_172432) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_10_010955) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -27,29 +27,37 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_09_172432) do
     t.bigint "booking_request_id"
     t.datetime "created_at", null: false
     t.integer "input_tokens"
+    t.integer "latency_ms"
     t.string "llm_model", null: false
     t.integer "output_tokens"
     t.text "prompt", null: false
+    t.string "prompt_version"
     t.text "response"
+    t.string "run_type", default: "extraction", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_ai_runs_on_account_id"
     t.index ["booking_request_id"], name: "index_ai_runs_on_booking_request_id"
+    t.check_constraint "run_type::text = ANY (ARRAY['classifier'::character varying, 'extraction'::character varying]::text[])", name: "ai_runs_run_type_check"
   end
 
   create_table "booking_requests", force: :cascade do |t|
     t.bigint "account_id", null: false
-    t.integer "budget_cents"
+    t.decimal "budget", precision: 10, scale: 2
+    t.string "celebration_type"
     t.bigint "contact_id", null: false
     t.bigint "conversation_thread_id", null: false
     t.datetime "created_at", null: false
     t.date "event_date"
     t.date "event_end_date"
     t.jsonb "extraction_snapshot", default: {}, null: false
+    t.string "fit_status"
     t.integer "headcount"
     t.jsonb "missing_fields", default: [], null: false
     t.text "notes"
     t.jsonb "review_reasons", default: [], null: false
     t.bigint "source_inbox_message_id"
+    t.text "staff_summary"
+    t.string "start_time"
     t.string "status", default: "pending", null: false
     t.datetime "updated_at", null: false
     t.bigint "venue_id"
