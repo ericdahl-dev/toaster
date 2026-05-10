@@ -14,7 +14,7 @@ class IngestVenueDocumentJob < ApplicationJob
     text = UnstructuredClient.extract(doc.file_path)
     chunks = TextChunker.call(text)
 
-    client = OpenAI::Client.new
+    client = OpenAI::Client.new(access_token: openai_api_key)
     doc.venue_chunks.delete_all
 
     chunks.each do |chunk_text|
@@ -36,6 +36,6 @@ class IngestVenueDocumentJob < ApplicationJob
   private
 
   def openai_api_key
-    Rails.application.credentials.dig(:openai, :api_key) || ENV.fetch("OPENAI_API_KEY", nil)
+    ENV["OPENAI_API_KEY"]
   end
 end
