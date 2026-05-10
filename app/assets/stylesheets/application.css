@@ -513,6 +513,31 @@ body {
 .hi  { color: var(--text-hi); }
 .dim { color: var(--muted); }
 
+/* ── Onboarding ── */
+.onboarding-step-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 28px;
+}
+
+.onboarding-step {
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--border);
+  transition: background 0.2s;
+}
+
+.onboarding-step--active { background: var(--amber); }
+.onboarding-step--done   { background: var(--amber-dim); }
+
+.onboarding-lead {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
 /* ── Shell without sidebar (logged-out) ── */
 .shell--no-sidebar {
   grid-template-columns: 1fr;

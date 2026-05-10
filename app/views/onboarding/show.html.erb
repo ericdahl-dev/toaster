@@ -1,4 +1,24 @@
-<h1>Welcome to Toaster</h1>
-<p>Let's get your account set up. You'll add a venue and connect your inbox.</p>
-<%= link_to "Get started", onboarding_venue_path %>
-<%= link_to "Skip setup", onboarding_skip_path, data: {turbo_method: :post} %>
+<% content_for :fullpage do %>
+<div class="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon"><%= render "shared/toast_icon" %></div>
+      <span class="login-logo-text">Toaster</span>
+    </div>
+
+    <div class="onboarding-step-bar">
+      <span class="onboarding-step onboarding-step--active"></span>
+      <span class="onboarding-step"></span>
+      <span class="onboarding-step"></span>
+    </div>
+
+    <p class="login-eyebrow">Welcome</p>
+    <p class="onboarding-lead">Let's get your account ready.<br>Takes about two minutes.</p>
+
+    <div style="margin-top:32px;display:flex;flex-direction:column;gap:10px">
+      <%= link_to "Get started →", onboarding_venue_path, class: "btn btn-amber", style: "width:100%;justify-content:center;padding:10px 0;font-size:12px" %>
+      <%= link_to "Skip setup", onboarding_skip_path, class: "auth-link", style: "text-align:center;display:block", data: {turbo_method: :post} %>
+    </div>
+  </div>
+</div>
+<% end %>
