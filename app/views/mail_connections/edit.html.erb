@@ -57,6 +57,7 @@
 
 <% if @connection.inbox_filters.any? %>
   <div class="card" style="margin-bottom:16px">
+    <div class="table-scroll">
     <table class="data-table">
       <thead>
         <tr>
@@ -83,6 +84,7 @@
         <% end %>
       </tbody>
     </table>
+    </div>
   </div>
 <% else %>
   <div class="card" style="margin-bottom:16px">

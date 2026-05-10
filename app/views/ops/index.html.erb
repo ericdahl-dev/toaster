@@ -24,6 +24,7 @@
 <% if @recent_failed_jobs.any? %>
   <div class="section-heading">Recent failed jobs</div>
   <div class="card" style="margin-bottom:24px">
+    <div class="table-scroll">
     <table class="data-table">
       <thead>
         <tr><th>Class</th><th>Queue</th><th>Error</th><th>Failed at</th></tr>
@@ -39,6 +40,7 @@
         <% end %>
       </tbody>
     </table>
+    </div>
     <div style="margin-top:8px"><%= link_to "View all →", "/jobs", style: "font-size:12px" %></div>
   </div>
 <% end %>
@@ -46,6 +48,7 @@
 <div class="section-heading">Recent AI runs</div>
 <% if @recent_ai_runs.any? %>
   <div class="card" style="margin-bottom:24px">
+    <div class="table-scroll">
     <table class="data-table">
       <thead>
         <tr><th>Type</th><th>Model</th><th>Version</th><th>Latency</th><th>RAG</th><th>Time</th><th></th></tr>
@@ -68,6 +71,7 @@
         <% end %>
       </tbody>
     </table>
+    </div>
   </div>
 <% else %>
   <p class="dim" style="font-size:13px">No AI runs yet.</p>
