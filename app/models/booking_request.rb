@@ -14,7 +14,6 @@ class BookingRequest < ApplicationRecord
     pending: "pending",
     reviewing: "reviewing",
     confirmed: "confirmed",
-    rejected: "rejected",
     cancelled: "cancelled"
   }
 

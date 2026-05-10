@@ -4,9 +4,8 @@ module BookingRequests
 
     ALLOWED_TRANSITIONS = {
       "pending" => %w[reviewing confirmed cancelled],
-      "reviewing" => %w[pending confirmed rejected cancelled],
+      "reviewing" => %w[pending confirmed cancelled],
       "confirmed" => %w[cancelled],
-      "rejected" => %w[cancelled],
       "cancelled" => []
     }.freeze
 

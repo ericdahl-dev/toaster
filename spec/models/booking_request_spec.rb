@@ -79,7 +79,6 @@ RSpec.describe BookingRequest, type: :model do
         "pending" => "pending",
         "reviewing" => "reviewing",
         "confirmed" => "confirmed",
-        "rejected" => "rejected",
         "cancelled" => "cancelled"
       })
     end

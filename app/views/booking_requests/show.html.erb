@@ -80,7 +80,7 @@
       <%
         btn_class = case target
           when "confirmed" then "btn-success"
-          when "rejected", "cancelled" then "btn-danger"
+          when "cancelled" then "btn-danger"
           else "btn-ghost"
         end
       %>
@@ -89,7 +89,7 @@
             method: :post,
             params: {to: target},
             class: "btn #{btn_class}",
-            data: {"turbo-confirm": ["rejected", "cancelled"].include?(target) ? "Mark as #{target}?" : nil}.compact %>
+            data: {"turbo-confirm": target == "cancelled" ? "Mark as #{target}?" : nil}.compact %>
     <% end %>
   </div>
 <% end %>

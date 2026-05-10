@@ -17,14 +17,14 @@ RSpec.describe DevelopmentDemoSeeds do
 
       expect(InboxMessage.where(account: account, provider: described_class::PROVIDER).count).to eq(inbox_count)
       expect(BookingRequest.where(account: account).count).to eq(booking_count)
-      expect(inbox_count).to eq(13)
-      expect(booking_count).to eq(9)
+      expect(inbox_count).to eq(12)
+      expect(booking_count).to eq(8)
     end
 
     it "covers booking workflow statuses" do
       described_class.run(account: account)
       statuses = BookingRequest.where(account: account).distinct.pluck(:status).sort
-      expect(statuses).to eq(%w[cancelled confirmed pending rejected reviewing])
+      expect(statuses).to eq(%w[cancelled confirmed pending reviewing])
     end
   end
 end
