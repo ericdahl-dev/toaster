@@ -1,0 +1,38 @@
+<% content_for :fullpage do %>
+<div class="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">🍞</div>
+      <span class="login-logo-text">Toaster</span>
+    </div>
+    <p class="login-eyebrow">Set your password</p>
+
+    <%= render "users/shared/error_messages", resource: resource %>
+
+    <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put }) do |f| %>
+      <%= f.hidden_field :reset_password_token %>
+
+      <div class="form-group">
+        <%= f.label :password, "New password", class: "form-label" %>
+        <% if @minimum_password_length %>
+          <p class="form-hint"><%= @minimum_password_length %> characters minimum</p>
+        <% end %>
+        <%= f.password_field :password, autofocus: true, autocomplete: "new-password", class: "form-input", placeholder: "••••••••" %>
+      </div>
+
+      <div class="form-group">
+        <%= f.label :password_confirmation, "Confirm password", class: "form-label" %>
+        <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "form-input", placeholder: "••••••••" %>
+      </div>
+
+      <div style="margin-top:24px">
+        <%= f.submit "Set password →", class: "btn btn-amber", style: "width:100%;justify-content:center;padding:10px 0;font-size:12px" %>
+      </div>
+    <% end %>
+
+    <div style="margin-top:20px;text-align:center">
+      <%= link_to "Back to sign in", new_user_session_path, class: "auth-link" %>
+    </div>
+  </div>
+</div>
+<% end %>
