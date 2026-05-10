@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class WaitlistMailer < ApplicationMailer
-  default from: "Toaster <noreply@ericdahl.dev>"
+  default from: "Toaster <toaster@ericdahl.dev>"
 
   def confirmation(waitlist_entry)
     @entry = waitlist_entry
