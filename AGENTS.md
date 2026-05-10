@@ -23,6 +23,7 @@ rvm use . && bundle exec rspec
 ## Learned User Preferences
 
 - Use RVM to match the pinned Ruby (`rvm use .` from repo root) before `bundle`, `rspec`, or other gem commands so native extensions match the active interpreter.
+- Issue tracking is **GitHub Issues only** — use `gh issue` commands. Do not use `bd`, beads, or any other issue tracker.
 - Prefer local test coverage only (SimpleCov); do not add Codecov or other remote coverage upload unless asked.
 - Keep `parallel_rspec` usage local-only unless explicitly asked; CI should continue to run serial `bundle exec rspec`.
 - Prefer self-documenting code: clear naming and structure first; use comments for non-obvious rationale (domain rules, invariants, security or performance tradeoffs), not to narrate obvious lines.
