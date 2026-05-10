@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+# Release command: run before the new app container starts.
+# Configure this as the Coolify "Release Command" for both the web and worker services:
+#   bundle exec bin/release
+#
+# This ensures migrations are applied on every deploy regardless of which
+# container starts first.
+
+bundle exec rails db:migrate
