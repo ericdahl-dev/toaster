@@ -2,9 +2,9 @@ require "rails_helper"
 
 RSpec.describe InboxIngestion::Sync do
   describe ".call" do
-    context "with post-ingestion booking stubbed" do
+    context "with reconcile stubbed" do
       before do
-        allow(BookingRequests::PostIngestion).to receive(:after_inbox_message_persisted)
+        allow(BookingRequests::Reconcile).to receive(:call)
       end
 
       it "persists one normalized row and invokes checkpoint commit once" do
@@ -82,7 +82,7 @@ RSpec.describe InboxIngestion::Sync do
       end
     end
 
-    it "calls PostIngestion after each upsert so Reconcile creates a booking request" do
+    it "calls Reconcile after each upsert so a booking request is created" do
       account = create(:account)
       adapter = Object.new
       adapter.define_singleton_method(:account) { account }
