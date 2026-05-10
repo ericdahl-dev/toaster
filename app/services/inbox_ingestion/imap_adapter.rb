@@ -28,5 +28,14 @@ module InboxIngestion
 
       @imap_connection.update!(last_synced_uid: @max_uid)
     end
+
+    def mark_seen(uids)
+      return if uids.blank?
+
+      Imap::Session.call(imap_connection: @imap_connection) do |imap|
+        imap.select(@imap_connection.inbox_folder)
+        imap.uid_store(uids, "+FLAGS", [:Seen])
+      end
+    end
   end
 end

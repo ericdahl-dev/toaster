@@ -2,6 +2,8 @@ module BookingRequests
   class Reconcile
     REVIEW_TASK_TITLE = "Review and qualify booking request"
 
+    Result = Struct.new(:booking_request, :draft_created, keyword_init: true)
+
     def self.call(inbox_message:, venue: nil)
       new(inbox_message: inbox_message, venue: venue).call
     end
@@ -15,17 +17,17 @@ module BookingRequests
       ActiveRecord::Base.transaction do
         is_new = !BookingRequest.exists?(source_inbox_message: inbox_message)
 
-        result = BookingRequests::Extract.call(inbox_message: inbox_message)
-        return nil if result.nil?
+        extract_result = BookingRequests::Extract.call(inbox_message: inbox_message)
+        return nil if extract_result.nil?
 
-        booking_request = result.booking_request
+        booking_request = extract_result.booking_request
 
         assign_venue(booking_request)
         log_reconciliation(booking_request, is_new: is_new)
         create_review_task(booking_request) if booking_request.reviewing?
-        generate_draft(booking_request) if is_new
+        draft_created = is_new && generate_draft(booking_request)
 
-        booking_request
+        Result.new(booking_request: booking_request, draft_created: draft_created)
       end
     end
 
@@ -66,7 +68,7 @@ module BookingRequests
     end
 
     def generate_draft(booking_request)
-      return if booking_request.drafts.exists?
+      return false if booking_request.drafts.exists?
 
       venue_chunks = venue.present? ? VenueRagRetriever.call(venue: venue, query: "#{inbox_message.subject} #{inbox_message.body_text}") : []
 
@@ -76,6 +78,7 @@ module BookingRequests
       )
 
       Draft.create!(account: booking_request.account, booking_request:, body:, status: :pending_review)
+      true
     end
   end
 end

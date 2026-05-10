@@ -136,6 +136,7 @@ RSpec.describe InboxIngestion::Sync do
         called_with_venue = nil
         allow(BookingRequests::Reconcile).to receive(:call) do |inbox_message:, venue:|
           called_with_venue = venue
+          nil
         end
 
         adapter = Object.new
@@ -164,6 +165,7 @@ RSpec.describe InboxIngestion::Sync do
         called_with_venue = :not_called
         allow(BookingRequests::Reconcile).to receive(:call) do |inbox_message:, venue:|
           called_with_venue = venue
+          nil
         end
 
         adapter = Object.new
@@ -183,6 +185,77 @@ RSpec.describe InboxIngestion::Sync do
         described_class.call(adapter: adapter)
 
         expect(called_with_venue).to be_nil
+      end
+    end
+
+    context "mark_seen behaviour" do
+      def build_adapter(account:, reconcile_result:, uid: 42)
+        adapter = Object.new
+        adapter.define_singleton_method(:account) { account }
+        adapter.define_singleton_method(:each_normalized_message) do |&block|
+          block.call(
+            provider: "imap",
+            provider_message_id: "<msg@example.com>",
+            direction: "inbound",
+            subject: "Test",
+            raw_payload: {"uid" => uid}
+          )
+        end
+        adapter.define_singleton_method(:write_checkpoint_after_batch) { |**| nil }
+        allow(BookingRequests::Reconcile).to receive(:call).and_return(reconcile_result)
+        adapter
+      end
+
+      it "calls mark_seen with the UID when Reconcile returns draft_created: true" do
+        account = create(:account)
+        result = BookingRequests::Reconcile::Result.new(
+          booking_request: build(:booking_request, account: account),
+          draft_created: true
+        )
+        adapter = build_adapter(account: account, reconcile_result: result, uid: 99)
+        seen_uids = nil
+        adapter.define_singleton_method(:mark_seen) { |uids| seen_uids = uids }
+
+        described_class.call(adapter: adapter)
+
+        expect(seen_uids).to eq([99])
+      end
+
+      it "does not call mark_seen when Reconcile returns draft_created: false" do
+        account = create(:account)
+        result = BookingRequests::Reconcile::Result.new(
+          booking_request: build(:booking_request, account: account),
+          draft_created: false
+        )
+        adapter = build_adapter(account: account, reconcile_result: result, uid: 55)
+        mark_seen_called = false
+        adapter.define_singleton_method(:mark_seen) { |_uids| mark_seen_called = true }
+
+        described_class.call(adapter: adapter)
+
+        expect(mark_seen_called).to be(false)
+      end
+
+      it "does not call mark_seen when Reconcile returns nil (not a booking request)" do
+        account = create(:account)
+        adapter = build_adapter(account: account, reconcile_result: nil, uid: 7)
+        mark_seen_called = false
+        adapter.define_singleton_method(:mark_seen) { |_uids| mark_seen_called = true }
+
+        described_class.call(adapter: adapter)
+
+        expect(mark_seen_called).to be(false)
+      end
+
+      it "does not call mark_seen when adapter does not respond to it" do
+        account = create(:account)
+        result = BookingRequests::Reconcile::Result.new(
+          booking_request: build(:booking_request, account: account),
+          draft_created: true
+        )
+        adapter = build_adapter(account: account, reconcile_result: result, uid: 3)
+
+        expect { described_class.call(adapter: adapter) }.not_to raise_error
       end
     end
   end
