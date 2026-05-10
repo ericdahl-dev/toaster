@@ -4,12 +4,12 @@ require "rails_helper"
 
 RSpec.describe "Mobile layout", type: :request do
   describe "mobile viewport sizing styles" do
-    it "serves css with dynamic viewport height for app shells" do
-      get "/assets/application.css"
+    it "uses dynamic viewport height for full-height containers" do
+      css = File.read(Rails.root.join("app/assets/stylesheets/application.css"))
 
-      expect(response).to have_http_status(:ok)
-      expect(response.body).to include(".shell")
-      expect(response.body).to include("min-height: 100dvh;")
+      expect(css).to match(/\.shell\s*\{[^}]*min-height:\s*100dvh;/m)
+      expect(css).to match(/\.login-page\s*\{[^}]*min-height:\s*100dvh;/m)
+      expect(css).to match(/\.lp\s*\{[^}]*min-height:\s*100dvh;/m)
     end
   end
 
