@@ -12,6 +12,17 @@ class Admin::WaitlistController < Admin::BaseController
       @account = Account.new(name: @entry.company_name)
       @user = User.new(name: @entry.full_name, email: @entry.email)
     else
+      existing_user = User.find_by(email: @entry.email)
+
+      if existing_user
+        raw, hashed = Devise.token_generator.generate(User, :reset_password_token)
+        existing_user.update_columns(reset_password_token: hashed, reset_password_sent_at: Time.current)
+        WaitlistMailer.invite(@entry, existing_user, raw).deliver_later
+        @entry.update!(status: :invited, invited_at: Time.current)
+        redirect_to admin_waitlist_index_path, notice: "Invite resent to #{@entry.email}."
+        return
+      end
+
       @account = Account.new(account_params)
       @user = User.new(user_params.merge(role: :venue_manager, password: SecureRandom.hex(24)))
       @user.account = @account

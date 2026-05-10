@@ -57,4 +57,19 @@ RSpec.describe "Admin::Waitlist", type: :request do
       end
     end
   end
+
+  describe "POST /admin/waitlist/:id/invite (re-invite expired entry with existing user)" do
+    let!(:entry) { create(:waitlist_entry, status: :expired, email: admin.email) }
+
+    before { sign_in_as(admin) }
+
+    it "resends the invite rather than failing with email-taken error" do
+      post invite_admin_waitlist_path(entry),
+        params: {account: {name: "Test Venue"}, user: {name: admin.name, email: admin.email}}
+
+      expect(response).to redirect_to(admin_waitlist_index_path)
+      follow_redirect!
+      expect(response.body).to match(/invite (re)?sent/i)
+    end
+  end
 end
