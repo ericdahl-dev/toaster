@@ -7,7 +7,7 @@
 # - Rails.error integration for rescued exceptions
 posthog_token = ENV.fetch("POSTHOG_PROJECT_TOKEN", nil)
 
-if posthog_token.present?
+if posthog_token.present? && !Rails.env.test?
   PostHog.init do |config|
     config.api_key = posthog_token
     config.host = ENV.fetch("POSTHOG_HOST", nil)
