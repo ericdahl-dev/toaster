@@ -13,6 +13,28 @@ module BookingRequests
     end
 
     def call
+      account = inbox_message.account
+      stripped_body = EmailBody::Strip.call(inbox_message.body_text)
+
+      is_booking = Classifier.new(account:).call(
+        subject: inbox_message.subject,
+        body_text: stripped_body
+      )
+      return nil unless is_booking
+
+      raw = LlmExtractor.new(account:).call(
+        subject: inbox_message.subject,
+        body_text: stripped_body
+      )
+
+      persist(account:, raw:)
+    end
+
+    private
+
+    attr_reader :inbox_message
+
+    def persist(account:, raw:)
       attempts = 0
 
       begin
@@ -22,18 +44,6 @@ module BookingRequests
 
           thread = find_or_build_thread(contact)
           thread.save!
-
-          account = inbox_message.account
-          stripped_body = EmailBody::Strip.call(inbox_message.body_text)
-
-          classifier = Classifier.new(account:)
-          is_booking = classifier.call(subject: inbox_message.subject, body_text: stripped_body)
-          return nil unless is_booking
-
-          raw = LlmExtractor.new(account:).call(
-            subject: inbox_message.subject,
-            body_text: stripped_body
-          )
 
           booking_request = BookingRequest.find_or_initialize_by(source_inbox_message: inbox_message)
           booking_request.account = account
@@ -71,10 +81,6 @@ module BookingRequests
         raise
       end
     end
-
-    private
-
-    attr_reader :inbox_message
 
     def find_or_build_contact
       account = inbox_message.account
