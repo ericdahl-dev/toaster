@@ -6,35 +6,39 @@ RSpec.describe BookingRequests::LlmExtractor do
   let(:account) { create(:account) }
   let(:booking_request) { create(:booking_request, account:) }
 
-  subject(:extractor) { described_class.new(account:, booking_request:) }
+  def build_client(response)
+    client = instance_double(OpenAI::Client)
+    allow(client).to receive(:chat).and_return(
+      { "choices" => [ { "message" => { "content" => response.to_json } } ] }
+    )
+    client
+  end
+
+  let(:llm_response) do
+    {
+      "event_date" => "2026-06-14",
+      "headcount" => 40,
+      "budget" => 500.0,
+      "start_time" => "7:00 PM",
+      "celebration_type" => "birthday",
+      "confidence" => 0.95,
+      "notes" => "Guest of honor: Sarah"
+    }
+  end
+
+  subject(:extractor) { described_class.new(account:, booking_request:, client: build_client(llm_response)) }
 
   describe "#call" do
-    context "when OPENAI_API_KEY is absent" do
+    context "when OPENAI_API_KEY is absent and no client injected" do
       before { stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => nil)) }
 
-      it "raises ConfigurationError" do
-        expect { extractor.call(subject: "Party", body_text: "40 guests June 14, 2026") }
+      it "raises ConfigurationError on initialize" do
+        expect { described_class.new(account:, booking_request:) }
           .to raise_error(BookingRequests::LlmExtractor::ConfigurationError)
       end
     end
 
-    context "with a valid API key" do
-      before { stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key")) }
-
-      let(:llm_response) do
-        {
-          "event_date" => "2026-06-14",
-          "headcount" => 40,
-          "budget" => 500.0,
-          "start_time" => "7:00 PM",
-          "celebration_type" => "birthday",
-          "confidence" => 0.95,
-          "notes" => "Guest of honor: Sarah"
-        }
-      end
-
-      before { allow(extractor).to receive(:call_openai).and_return(llm_response) }
-
+    context "with a valid client" do
       it "returns a result with extracted fields" do
         result = extractor.call(subject: "Party inquiry", body_text: "40 guests, June 14 2026, $500 budget")
 
@@ -79,8 +83,12 @@ RSpec.describe BookingRequests::LlmExtractor do
         end
       end
 
-      context "when OpenAI call raises" do
-        before { allow(extractor).to receive(:call_openai).and_raise(StandardError, "timeout") }
+      context "when the client raises" do
+        subject(:extractor) do
+          client = instance_double(OpenAI::Client)
+          allow(client).to receive(:chat).and_raise(StandardError, "timeout")
+          described_class.new(account:, booking_request:, client:)
+        end
 
         it "raises the error" do
           expect { extractor.call(subject: "Party", body_text: "40 guests") }
