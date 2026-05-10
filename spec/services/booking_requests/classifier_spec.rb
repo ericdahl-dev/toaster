@@ -14,8 +14,6 @@ RSpec.describe BookingRequests::Classifier do
     client
   end
 
-  subject(:classifier) { described_class.new(account:, booking_request:, client: build_client({ "booking_request" => true })) }
-
   describe "#call" do
     context "when OPENAI_API_KEY is absent and no client injected" do
       before { stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => nil)) }
@@ -27,7 +25,7 @@ RSpec.describe BookingRequests::Classifier do
     end
 
     context "when client returns booking_request: true" do
-      subject(:classifier) { described_class.new(account:, booking_request:, client: build_client({ "booking_request" => true })) }
+      let(:classifier) { described_class.new(account:, booking_request:, client: build_client({ "booking_request" => true })) }
 
       it "returns true" do
         expect(classifier.call(subject: "Party inquiry", body_text: "We want to book 40 guests")).to be true
@@ -48,7 +46,7 @@ RSpec.describe BookingRequests::Classifier do
     end
 
     context "when client returns booking_request: false" do
-      subject(:classifier) { described_class.new(account:, booking_request:, client: build_client({ "booking_request" => false })) }
+      let(:classifier) { described_class.new(account:, booking_request:, client: build_client({ "booking_request" => false })) }
 
       it "returns false" do
         expect(classifier.call(subject: "Out of office", body_text: "I am away")).to be false
@@ -62,7 +60,7 @@ RSpec.describe BookingRequests::Classifier do
     end
 
     context "when the client raises an error" do
-      subject(:classifier) do
+      let(:classifier) do
         client = instance_double(OpenAI::Client)
         allow(client).to receive(:chat).and_raise(StandardError, "timeout")
         described_class.new(account:, booking_request:, client:)

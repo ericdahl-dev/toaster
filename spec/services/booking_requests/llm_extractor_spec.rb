@@ -26,7 +26,7 @@ RSpec.describe BookingRequests::LlmExtractor do
     }
   end
 
-  subject(:extractor) { described_class.new(account:, booking_request:, client: build_client(llm_response)) }
+  let(:extractor) { described_class.new(account:, booking_request:, client: build_client(llm_response)) }
 
   describe "#call" do
     context "when OPENAI_API_KEY is absent and no client injected" do
@@ -84,7 +84,7 @@ RSpec.describe BookingRequests::LlmExtractor do
       end
 
       context "when the client raises" do
-        subject(:extractor) do
+        let(:extractor) do
           client = instance_double(OpenAI::Client)
           allow(client).to receive(:chat).and_raise(StandardError, "timeout")
           described_class.new(account:, booking_request:, client:)
