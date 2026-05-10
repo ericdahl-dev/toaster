@@ -6,30 +6,10 @@ module Ops
     include Ops::RequireToken
     include Ops::BookingPayload
 
-    THREAD_LIMIT = 50
-    MESSAGE_SCAN_LIMIT = 400
-
     def index
-      recent = InboxMessage
-        .includes(:booking_request)
-        .order(Arel.sql("COALESCE(received_at, created_at) DESC"))
-        .limit(MESSAGE_SCAN_LIMIT)
-        .to_a
-
-      buckets = Hash.new { |h, k| h[k] = [] }
-      recent.each { |m| buckets[thread_key_for(m)] << m }
-
-      activity = {}
-      buckets.each_key do |key|
-        msgs = buckets[key]
-        activity[key] = msgs.map { |m| message_activity_ts(m) }.max
-      end
-      merge_draft_peaks!(activity)
-
-      sorted_keys = activity.sort_by { |_, t| -t.to_f }.first(THREAD_LIMIT).map(&:first)
-
+      feed = Ops::ActivityFeed.call
       render json: {
-        inbox_threads: sorted_keys.map { |key| build_thread_list_row(key, buckets[key], activity[key]) }
+        inbox_threads: feed.map { |row| build_thread_list_row(row) }
       }
     end
 
@@ -76,112 +56,48 @@ module Ops
 
     private
 
-    def thread_key_for(message)
-      if message.provider_thread_id.present?
-        [:thread, message.account_id, message.provider, message.provider_thread_id]
-      else
-        [:singleton, message.account_id, message.provider, message.id]
-      end
-    end
-
     def message_activity_ts(message)
       message.received_at || message.created_at
     end
 
-    def merge_draft_peaks!(activity)
-      connection = ActiveRecord::Base.connection
-      connection.select_all(sanitized_draft_peaks_thread_sql).each do |row|
-        key = [:thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"]]
-        peak = parse_sql_time(row["peak"])
-        activity[key] = [activity[key], peak].compact.max
-      end
-
-      connection.select_all(sanitized_draft_peaks_singleton_sql).each do |row|
-        key = [:singleton, row["account_id"].to_i, row["provider"], row["anchor_id"].to_i]
-        peak = parse_sql_time(row["peak"])
-        activity[key] = [activity[key], peak].compact.max
-      end
-    end
-
-    def sanitized_draft_peaks_thread_sql
-      <<~SQL.squish
-        SELECT booking_requests.account_id,
-               inbox_messages.provider,
-               conversation_threads.provider_thread_id,
-               MAX(CASE
-                 WHEN drafts.status = 'sent' THEN COALESCE(drafts.sent_at, drafts.updated_at)
-                 ELSE drafts.created_at
-               END) AS peak
-        FROM drafts
-        INNER JOIN booking_requests ON booking_requests.id = drafts.booking_request_id
-        INNER JOIN conversation_threads ON conversation_threads.id = booking_requests.conversation_thread_id
-        INNER JOIN inbox_messages ON inbox_messages.id = booking_requests.source_inbox_message_id
-        WHERE conversation_threads.provider_thread_id IS NOT NULL
-        GROUP BY booking_requests.account_id, inbox_messages.provider, conversation_threads.provider_thread_id
-      SQL
-    end
-
-    def sanitized_draft_peaks_singleton_sql
-      <<~SQL.squish
-        SELECT booking_requests.account_id,
-               inbox_messages.provider,
-               inbox_messages.id AS anchor_id,
-               MAX(CASE
-                 WHEN drafts.status = 'sent' THEN COALESCE(drafts.sent_at, drafts.updated_at)
-                 ELSE drafts.created_at
-               END) AS peak
-        FROM drafts
-        INNER JOIN booking_requests ON booking_requests.id = drafts.booking_request_id
-        INNER JOIN inbox_messages ON inbox_messages.id = booking_requests.source_inbox_message_id
-        WHERE inbox_messages.provider_thread_id IS NULL
-        GROUP BY booking_requests.account_id, inbox_messages.provider, inbox_messages.id
-      SQL
-    end
-
-    def parse_sql_time(value)
-      return nil if value.blank?
-
-      Time.zone.parse(value.to_s)
-    end
-
-    def build_thread_list_row(key, cached_messages, last_activity_at)
-      messages = if cached_messages.present?
-        cached_messages
-      else
-        messages_for_thread_key(key)
-      end
+    def build_thread_list_row(row)
+      messages = messages_for_row(row)
       preview = preview_message(messages)
 
-      bookings = bookings_for_thread_key(key)
+      bookings = bookings_for_row(row)
       primary = pick_primary_booking(bookings.order(created_at: :desc).to_a)
 
       {
-        account_id: key[1],
-        provider: key[2],
-        kind: (key[0] == :singleton) ? "singleton" : "thread",
-        provider_thread_id: (key[0] == :thread) ? key[3] : nil,
-        anchor_inbox_message_id: (key[0] == :singleton) ? key[3] : nil,
+        account_id: row.account_id,
+        provider: row.provider,
+        kind: row.kind,
+        provider_thread_id: row.provider_thread_id,
+        anchor_inbox_message_id: row.anchor_inbox_message_id,
         subject: preview&.subject,
         from_name: preview&.from_name,
         from_email: preview&.from_email,
-        last_activity_at: last_activity_at&.iso8601,
+        last_activity_at: row.last_activity_at&.iso8601,
         booking_request: booking_request_summary(primary)
       }
     end
 
-    def messages_for_thread_key(key)
-      case key[0]
-      when :thread
-        InboxMessage.where(account_id: key[1], provider: key[2], provider_thread_id: key[3]).includes(:booking_request).to_a
-      when :singleton
-        InboxMessage.where(account_id: key[1], provider: key[2], id: key[3]).includes(:booking_request).to_a
+    def messages_for_row(row)
+      if row.kind == "thread"
+        InboxMessage.where(account_id: row.account_id, provider: row.provider, provider_thread_id: row.provider_thread_id).includes(:booking_request).to_a
+      else
+        InboxMessage.where(account_id: row.account_id, provider: row.provider, id: row.anchor_inbox_message_id).includes(:booking_request).to_a
       end
     end
 
-    def preview_message(messages)
-      inbound = messages.select(&:inbound?)
-      pool = inbound.presence || messages
-      pool.max_by { |m| message_activity_ts(m) }
+    def bookings_for_row(row)
+      if row.kind == "thread"
+        BookingRequest.joins(:conversation_thread).where(
+          account_id: row.account_id,
+          conversation_threads: {provider_thread_id: row.provider_thread_id}
+        )
+      else
+        BookingRequest.where(account_id: row.account_id, source_inbox_message_id: row.anchor_inbox_message_id)
+      end
     end
 
     def bookings_for_thread_key(key)
@@ -194,6 +110,12 @@ module Ops
       when :singleton
         BookingRequest.where(account_id: key[1], source_inbox_message_id: key[3])
       end
+    end
+
+    def preview_message(messages)
+      inbound = messages.select(&:inbound?)
+      pool = inbound.presence || messages
+      pool.max_by { |m| message_activity_ts(m) }
     end
 
     def pick_primary_booking(booking_list)
