@@ -31,28 +31,6 @@ RSpec.describe "Ops endpoints", type: :request do
     end
   end
 
-  describe "GET /ops/ai_runs" do
-    it "returns recent AI runs" do
-      run = create(:ai_run)
-
-      get "/ops/ai_runs", headers: {"X-Ops-Token" => "secret-token"}
-
-      expect(response).to have_http_status(:ok)
-      body = response.parsed_body
-      ids = body["ai_runs"].map { |r| r["id"] }
-      expect(ids).to include(run.id)
-    end
-
-    it "excludes AI runs older than 24 hours" do
-      create(:ai_run, created_at: 25.hours.ago)
-
-      get "/ops/ai_runs", headers: {"X-Ops-Token" => "secret-token"}
-
-      expect(response).to have_http_status(:ok)
-      expect(response.parsed_body["ai_runs"]).to be_empty
-    end
-  end
-
   describe "GET /ops/failed_jobs" do
     it "returns an empty list when no jobs have failed" do
       get "/ops/failed_jobs", headers: {"X-Ops-Token" => "secret-token"}

@@ -39,7 +39,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_10_060115) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_ai_runs_on_account_id"
     t.index ["booking_request_id"], name: "index_ai_runs_on_booking_request_id"
-    t.check_constraint "run_type::text = ANY (ARRAY['classifier'::character varying, 'extraction'::character varying]::text[])", name: "ai_runs_run_type_check"
+    t.check_constraint "run_type::text = ANY (ARRAY['classifier'::character varying::text, 'extraction'::character varying::text])", name: "ai_runs_run_type_check"
   end
 
   create_table "booking_requests", force: :cascade do |t|
