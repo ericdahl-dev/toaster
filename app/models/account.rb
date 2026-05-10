@@ -15,11 +15,11 @@ class Account < ApplicationRecord
   validates :name, presence: true
 
   def onboarded?
-    return true if onboarded_at?
-    if venues.exists? && imap_connections.exists?
-      update_column(:onboarded_at, Time.current)
-      return true
-    end
-    false
+    onboarded_at? || (venues.exists? && imap_connections.exists?)
+  end
+
+  def complete_onboarding!
+    return if onboarded_at?
+    update_column(:onboarded_at, Time.current)
   end
 end

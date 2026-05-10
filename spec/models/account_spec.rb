@@ -22,12 +22,19 @@ RSpec.describe Account, type: :model do
       expect(account.onboarded?).to be false
     end
 
-    it "returns true and stamps onboarded_at when account has venue and mail connection" do
+    it "returns true when account has venue and mail connection" do
       account = create(:account, onboarded_at: nil)
       create(:venue, account: account)
       create(:imap_connection, account: account)
       expect(account.onboarded?).to be true
-      expect(account.reload.onboarded_at).not_to be_nil
+    end
+
+    it "does NOT stamp onboarded_at (pure predicate, no side effects)" do
+      account = create(:account, onboarded_at: nil)
+      create(:venue, account: account)
+      create(:imap_connection, account: account)
+      account.onboarded?
+      expect(account.reload.onboarded_at).to be_nil
     end
 
     it "returns false when account has venue but no mail connection" do
@@ -40,6 +47,21 @@ RSpec.describe Account, type: :model do
       account = create(:account, onboarded_at: nil)
       create(:imap_connection, account: account)
       expect(account.onboarded?).to be false
+    end
+  end
+
+  describe "#complete_onboarding!" do
+    it "stamps onboarded_at" do
+      account = create(:account, onboarded_at: nil)
+      account.complete_onboarding!
+      expect(account.reload.onboarded_at).not_to be_nil
+    end
+
+    it "is idempotent — does not overwrite an existing timestamp" do
+      t = 1.day.ago
+      account = create(:account, onboarded_at: t)
+      account.complete_onboarding!
+      expect(account.reload.onboarded_at).to be_within(1.second).of(t)
     end
   end
 
