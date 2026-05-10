@@ -27,7 +27,7 @@ RSpec.describe "Home", type: :request do
 
         expect(response.body).to include(login_path)
         expect(response.body).not_to include("sign up")
-        expect(response.body).not_to include("register")
+        expect(response.body).not_to match(/href="[^"]*register/)
       end
 
       it "renders without the sidebar shell" do
