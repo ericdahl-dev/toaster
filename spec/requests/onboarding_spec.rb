@@ -6,14 +6,15 @@ RSpec.describe "Onboarding", type: :request do
   let(:account) { create(:account, onboarded_at: nil) }
   let!(:user) { create(:user, account: account) }
 
-  def sign_in_as(u)
+  def post_login(u)
+    get "/login"
     post "/login", params: { user: { email: u.email, password: "password123" } }
   end
 
   describe "sign-in redirect" do
     context "new user (no venues, no connections)" do
       it "redirects to onboarding after sign-in" do
-        sign_in_as(user)
+        post_login(user)
         expect(response).to redirect_to(onboarding_path)
       end
     end
@@ -25,7 +26,7 @@ RSpec.describe "Onboarding", type: :request do
       end
 
       it "redirects to booking requests after sign-in" do
-        sign_in_as(user)
+        post_login(user)
         expect(response).to redirect_to(booking_requests_path)
       end
     end
@@ -34,7 +35,7 @@ RSpec.describe "Onboarding", type: :request do
       before { account.update!(onboarded_at: 1.day.ago) }
 
       it "redirects to booking requests after sign-in" do
-        sign_in_as(user)
+        post_login(user)
         expect(response).to redirect_to(booking_requests_path)
       end
     end
