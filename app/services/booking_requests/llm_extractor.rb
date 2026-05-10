@@ -34,6 +34,29 @@ module BookingRequests
 
     private
 
+    def build_prompt(subject:, body_text:)
+      base = "Subject: #{subject}\n\nBody:\n#{body_text}"
+      chunks = retrieve_venue_chunks(subject:, body_text:)
+      @_rag_chunks = chunks
+      return base if chunks.empty?
+
+      venue_context = "Venue Context:\n#{chunks.map { |c| "- #{c}" }.join("\n")}"
+      "#{venue_context}\n\n#{base}"
+    end
+
+    def extra_run_attrs
+      {rag_chunk_count: @_rag_chunks&.size || 0}
+    end
+
+    def retrieve_venue_chunks(subject:, body_text:)
+      return [] if booking_request&.venue.nil?
+
+      VenueRagRetriever.call(
+        venue: booking_request.venue,
+        query: "#{subject} #{body_text}"
+      )
+    end
+
     def parse_date(value)
       return nil if value.blank?
       Date.parse(value)
