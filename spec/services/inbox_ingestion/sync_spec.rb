@@ -2,9 +2,9 @@ require "rails_helper"
 
 RSpec.describe InboxIngestion::Sync do
   describe ".call" do
-    context "with post-ingestion booking stubbed" do
+    context "with reconcile stubbed" do
       before do
-        allow(BookingRequests::PostIngestion).to receive(:after_inbox_message_persisted)
+        allow(BookingRequests::Reconcile).to receive(:call)
       end
 
       it "persists one normalized row and invokes checkpoint commit once" do
@@ -82,7 +82,7 @@ RSpec.describe InboxIngestion::Sync do
       end
     end
 
-    it "calls PostIngestion after each upsert so Reconcile creates a booking request" do
+    it "calls Reconcile after each upsert so a booking request is created" do
       account = create(:account)
       adapter = Object.new
       adapter.define_singleton_method(:account) { account }
@@ -101,6 +101,20 @@ RSpec.describe InboxIngestion::Sync do
       end
       adapter.define_singleton_method(:write_checkpoint_after_batch) { |_kwargs| nil }
 
+      stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
+      allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai)
+        .and_return({ "booking_request" => true })
+      allow_any_instance_of(BookingRequests::LlmExtractor).to receive(:call_openai)
+        .and_return({
+          "event_date" => "2026-06-14",
+          "headcount" => 120,
+          "budget" => 15000.0,
+          "start_time" => nil,
+          "celebration_type" => "wedding",
+          "confidence" => 0.95,
+          "notes" => nil
+        })
+
       expect {
         described_class.call(adapter: adapter)
       }.to change(BookingRequest, :count).by(1)
@@ -108,6 +122,66 @@ RSpec.describe InboxIngestion::Sync do
       inbox_message = InboxMessage.find_by!(account: account, provider: "imap", provider_message_id: "<booking@example.com>")
       expect(inbox_message.booking_request).to be_present
       expect(EventLog.where(event_type: "booking_request.created", subject_type: "BookingRequest").count).to eq(1)
+    end
+
+    context "with an adapter that has imap_connection and inbox filters" do
+      it "resolves venue via FilterMatcher and passes it to Reconcile" do
+        account = create(:account)
+        venue = create(:venue, account: account)
+        imap_connection = create(:imap_connection, account: account)
+        create(:inbox_filter, imap_connection: imap_connection, venue: venue, keyword: "wedding", position: 0)
+
+        called_with_venue = nil
+        allow(BookingRequests::Reconcile).to receive(:call) do |inbox_message:, venue:|
+          called_with_venue = venue
+        end
+
+        adapter = Object.new
+        adapter.define_singleton_method(:account) { account }
+        adapter.define_singleton_method(:imap_connection) { imap_connection }
+        adapter.define_singleton_method(:each_normalized_message) do |&block|
+          block.call(
+            provider: "imap",
+            provider_message_id: "<w@example.com>",
+            direction: "inbound",
+            subject: "Wedding inquiry",
+            raw_payload: {}
+          )
+        end
+        adapter.define_singleton_method(:write_checkpoint_after_batch) { |**| nil }
+
+        described_class.call(adapter: adapter)
+
+        expect(called_with_venue).to eq(venue)
+      end
+
+      it "passes nil venue when no filter matches" do
+        account = create(:account)
+        imap_connection = create(:imap_connection, account: account)
+
+        called_with_venue = :not_called
+        allow(BookingRequests::Reconcile).to receive(:call) do |inbox_message:, venue:|
+          called_with_venue = venue
+        end
+
+        adapter = Object.new
+        adapter.define_singleton_method(:account) { account }
+        adapter.define_singleton_method(:imap_connection) { imap_connection }
+        adapter.define_singleton_method(:each_normalized_message) do |&block|
+          block.call(
+            provider: "imap",
+            provider_message_id: "<x@example.com>",
+            direction: "inbound",
+            subject: "Unrelated",
+            raw_payload: {}
+          )
+        end
+        adapter.define_singleton_method(:write_checkpoint_after_batch) { |**| nil }
+
+        described_class.call(adapter: adapter)
+
+        expect(called_with_venue).to be_nil
+      end
     end
   end
 end
