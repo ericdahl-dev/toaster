@@ -471,8 +471,8 @@ DEPENDENCIES
   net-imap
   parallel_tests (~> 5.7)
   pg (~> 1.1)
-  posthog-rails
-  posthog-ruby
+  posthog-rails (~> 3.8)
+  posthog-ruby (~> 3.8)
   propshaft
   puma (>= 5.0)
   pundit
