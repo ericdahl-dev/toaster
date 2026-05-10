@@ -20,6 +20,11 @@ module BookingRequests
     RUN_TYPE = "extraction"
     TEMPERATURE = 0.2
 
+    def initialize(account:, booking_request: nil, client: nil, venue_chunks: [])
+      super(account:, booking_request:, client:)
+      @venue_chunks = venue_chunks
+    end
+
     def parse_result(raw)
       {
         event_date: parse_date(raw["event_date"]),
@@ -34,27 +39,18 @@ module BookingRequests
 
     private
 
+    attr_reader :venue_chunks
+
     def build_prompt(subject:, body_text:)
       base = "Subject: #{subject}\n\nBody:\n#{body_text}"
-      chunks = retrieve_venue_chunks(subject:, body_text:)
-      @_rag_chunks = chunks
-      return base if chunks.empty?
+      return base if venue_chunks.empty?
 
-      venue_context = "Venue Context:\n#{chunks.map { |c| "- #{c}" }.join("\n")}"
+      venue_context = "Venue Context:\n#{venue_chunks.map { |c| "- #{c}" }.join("\n")}"
       "#{venue_context}\n\n#{base}"
     end
 
     def extra_run_attrs
-      { rag_chunk_count: @_rag_chunks&.size || 0 }
-    end
-
-    def retrieve_venue_chunks(subject:, body_text:)
-      return [] if booking_request&.venue.nil?
-
-      VenueRagRetriever.call(
-        venue: booking_request.venue,
-        query: "#{subject} #{body_text}"
-      )
+      { rag_chunk_count: venue_chunks.size }
     end
 
     def parse_date(value)

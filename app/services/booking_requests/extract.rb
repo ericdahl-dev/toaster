@@ -4,12 +4,13 @@ module BookingRequests
   class Extract
     Result = Struct.new(:booking_request, :contact, :conversation_thread, :message, keyword_init: true)
 
-    def self.call(inbox_message:)
-      new(inbox_message: inbox_message).call
+    def self.call(inbox_message:, venue: nil)
+      new(inbox_message: inbox_message, venue: venue).call
     end
 
-    def initialize(inbox_message:)
+    def initialize(inbox_message:, venue: nil)
       @inbox_message = inbox_message
+      @venue = venue
     end
 
     def call
@@ -22,7 +23,8 @@ module BookingRequests
       )
       return nil unless is_booking
 
-      raw = LlmExtractor.new(account:).call(
+      venue_chunks = retrieve_venue_chunks(subject: inbox_message.subject, body_text: stripped_body)
+      raw = LlmExtractor.new(account:, venue_chunks:).call(
         subject: inbox_message.subject,
         body_text: stripped_body
       )
@@ -32,7 +34,16 @@ module BookingRequests
 
     private
 
-    attr_reader :inbox_message
+    attr_reader :inbox_message, :venue
+
+    def retrieve_venue_chunks(subject:, body_text:)
+      return [] if venue.nil?
+
+      VenueRagRetriever.call(
+        venue: venue,
+        query: "#{subject} #{body_text}"
+      )
+    end
 
     def persist(account:, raw:)
       attempts = 0

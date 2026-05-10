@@ -77,5 +77,35 @@ RSpec.describe BookingRequests::Extract do
         expect(BookingRequest.count).to eq(0)
       end
     end
+
+    context "when venue is provided" do
+      let(:venue) { create(:venue, account:) }
+
+      before do
+        allow(BookingRequests::VenueRagRetriever).to receive(:call).and_return([ "The Rooftop holds 150 guests." ])
+      end
+
+      it "calls VenueRagRetriever with the venue and query" do
+        described_class.call(inbox_message: inbox_message, venue: venue)
+        expect(BookingRequests::VenueRagRetriever).to have_received(:call).with(
+          venue: venue,
+          query: a_string_including("Party inquiry")
+        )
+      end
+
+      it "passes retrieved chunks to LlmExtractor via rag_chunk_count on AiRun" do
+        described_class.call(inbox_message: inbox_message, venue: venue)
+        extraction_run = AiRun.where(run_type: "extraction").last
+        expect(extraction_run.rag_chunk_count).to eq(1)
+      end
+    end
+
+    context "when no venue is provided" do
+      it "does not call VenueRagRetriever" do
+        allow(BookingRequests::VenueRagRetriever).to receive(:call)
+        described_class.call(inbox_message: inbox_message)
+        expect(BookingRequests::VenueRagRetriever).not_to have_received(:call)
+      end
+    end
   end
 end

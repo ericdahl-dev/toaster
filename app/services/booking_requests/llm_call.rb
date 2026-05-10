@@ -9,19 +9,18 @@ module BookingRequests
     end
 
     module ClassMethods
-      def call(account:, booking_request: nil, subject:, body_text:)
-        new(account:, booking_request:).call(subject:, body_text:)
+      def call(account:, booking_request: nil, subject:, body_text:, client: nil)
+        new(account:, booking_request:, client:).call(subject:, body_text:)
       end
     end
 
-    def initialize(account:, booking_request: nil)
+    def initialize(account:, booking_request: nil, client: nil)
       @account = account
       @booking_request = booking_request
+      @client = client || build_client
     end
 
     def call(subject:, body_text:)
-      raise ConfigurationError, "OPENAI_API_KEY is not set" if ENV["OPENAI_API_KEY"].blank?
-
       prompt = build_prompt(subject:, body_text:)
       started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       raw = call_openai(prompt)
@@ -34,7 +33,13 @@ module BookingRequests
 
     private
 
-    attr_reader :account, :booking_request
+    attr_reader :account, :booking_request, :client
+
+    def build_client
+      raise ConfigurationError, "OPENAI_API_KEY is not set" if ENV["OPENAI_API_KEY"].blank?
+
+      OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
+    end
 
     def build_prompt(subject:, body_text:)
       "Subject: #{subject}\n\nBody:\n#{body_text}"
@@ -45,7 +50,6 @@ module BookingRequests
     end
 
     def call_openai(prompt)
-      client = OpenAI::Client.new(access_token: ENV["OPENAI_API_KEY"])
       response = client.chat(
         parameters: {
           model: self.class::MODEL,
