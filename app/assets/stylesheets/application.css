@@ -589,6 +589,8 @@ body {
   .shell {
     grid-template-columns: 1fr;
     grid-template-rows: 48px 1fr;
+    height: 100vh;
+    overflow: hidden;
   }
 
   .nav-toggle {
@@ -623,6 +625,8 @@ body {
   .main {
     padding: 16px;
     grid-column: 1;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .page-header {
@@ -641,6 +645,10 @@ body {
 
   .data-table {
     min-width: 520px;
+  }
+
+  body.nav-open {
+    overflow: hidden;
   }
 
   .detail-grid {

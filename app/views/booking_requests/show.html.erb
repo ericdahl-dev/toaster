@@ -125,6 +125,7 @@
 <% if (ai_runs = @booking_request.ai_runs.order(created_at: :desc)).any? %>
   <div class="section-heading" style="margin-top:28px">AI runs</div>
   <div class="card" style="margin-bottom:24px">
+    <div class="table-scroll">
     <table class="data-table">
       <thead>
         <tr><th>Type</th><th>Model</th><th>Version</th><th>Latency</th><th>RAG chunks</th><th>Time</th><th></th></tr>
@@ -143,6 +144,7 @@
         <% end %>
       </tbody>
     </table>
+    </div>
   </div>
 <% end %>
 
@@ -153,6 +155,7 @@
 <% if event_logs.any? %>
   <div class="section-heading">Event log</div>
   <div class="card">
+    <div class="table-scroll">
     <table class="data-table">
       <thead>
         <tr>
@@ -175,5 +178,6 @@
         <% end %>
       </tbody>
     </table>
+    </div>
   </div>
 <% end %>
