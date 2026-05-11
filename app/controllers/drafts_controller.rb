@@ -5,6 +5,7 @@ class DraftsController < ApplicationController
   before_action :set_draft
 
   def approve
+    @draft.update!(status: "approved")
     SendDraftJob.perform_later(@draft.id)
 
     Telemetry.capture(
@@ -13,7 +14,10 @@ class DraftsController < ApplicationController
       properties: { draft_id: @draft.id, booking_request_id: @draft.booking_request_id }
     )
 
-    redirect_to booking_request_path(@draft.booking_request), notice: "Draft approved — sending now."
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to booking_request_path(@draft.booking_request), notice: "Draft approved — sending now." }
+    end
   end
 
   def reject
@@ -25,7 +29,10 @@ class DraftsController < ApplicationController
       properties: { draft_id: @draft.id, booking_request_id: @draft.booking_request_id }
     )
 
-    redirect_to booking_request_path(@draft.booking_request), notice: "Draft rejected."
+    respond_to do |format|
+      format.turbo_stream
+      format.html { redirect_to booking_request_path(@draft.booking_request), notice: "Draft rejected." }
+    end
   end
 
   private

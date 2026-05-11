@@ -1,0 +1,16 @@
+<% booking_request = draft.booking_request %>
+<div id="draft-<%= draft.id %>" class="thread-row thread-row--pending">
+  <div class="thread-bubble thread-bubble--pending">
+    <div class="thread-bubble-meta">
+      <span class="thread-sender thread-sender--pending">AI Draft</span>
+      <span class="badge badge-pending" style="font-size:10px;padding:1px 6px">Pending review</span>
+      <span class="thread-timestamp dim"><%= draft.created_at.strftime("%-d %b %Y %H:%M") %></span>
+    </div>
+    <div class="thread-bubble-body"><%= draft.body %></div>
+    <div class="draft-card-actions">
+      <%= button_to "✓ Approve", approve_booking_request_draft_path(booking_request, draft), method: :post, class: "btn btn-success" %>
+      <%= button_to "✕ Reject",  reject_booking_request_draft_path(booking_request, draft),  method: :post, class: "btn btn-danger" %>
+    </div>
+  </div>
+  <div class="thread-avatar thread-avatar--venue">AI</div>
+</div>

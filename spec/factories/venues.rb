@@ -4,5 +4,6 @@ FactoryBot.define do
     name { "Test Venue" }
     address { "123 Main St" }
     capacity { 100 }
+    features { [] }
   end
 end

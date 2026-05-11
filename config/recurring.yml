@@ -1,9 +1,9 @@
 sync_all_imap_connections:
   class: SyncAllImapConnectionsJob
-  schedule: every 5 minutes
+  schedule: every 2 minutes
   queue: webhooks
 
 reconcile_all_drafts:
   class: ReconcileAllDraftsJob
-  schedule: every 5 minutes
+  schedule: every 2 minutes
   queue: mailers

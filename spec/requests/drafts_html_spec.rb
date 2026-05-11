@@ -29,9 +29,9 @@ RSpec.describe "Draft approval UI", type: :request do
       expect(response).to have_http_status(:redirect)
     end
 
-    it "keeps draft in pending_review (job does the sending)" do
+    it "immediately transitions draft to approved status" do
       post "/booking_requests/#{booking_request.id}/drafts/#{draft.id}/approve"
-      expect(draft.reload.status).to eq("pending_review")
+      expect(draft.reload.status).to eq("approved")
     end
 
     it "returns 404 for another account's draft" do

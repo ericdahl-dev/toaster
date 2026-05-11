@@ -8,7 +8,7 @@ class SendDraftJob < ApplicationJob
 
   def perform(draft_id)
     draft = Draft.find(draft_id)
-    return unless draft.pending_review?
+    return unless draft.pending_review? || draft.approved?
 
     imap_connection = draft.account.imap_connections.active_connections.first
     return unless imap_connection

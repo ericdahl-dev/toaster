@@ -26,10 +26,10 @@ A persisted row derived from an **inbox message** for venue/event intake; extrac
 When a booking request's status is **confirmed**, **rejected**, or **cancelled**, further **inbox ingestion** does not re-run extraction on that message—human workflow outcomes stay authoritative until someone changes status again via **transition**.
 
 **Venue**:
-A bookable location managed by an **Account**. **Booking requests** may reference a venue (`venue_id` optional). Venues are not tied to a single mail **connection** in the schema today.
+A bookable location managed by an **Account**. **Booking requests** may reference a venue (`venue_id` optional). Venues are not tied to a single mail **connection** in the schema today. Venues carry a `features` jsonb array (e.g. `["karaoke", "coat_check", "parking"]`) listing venue-wide amenities — operator-defined free-form strings used by the AI to ask relevant questions.
 
 **Venue space**:
-A named bookable area within a **Venue** (e.g. "East Room", "Rooftop", "Full Buyout"). Stores structured capacity and pricing data used by the AI pipeline for fit routing: `capacity_seated`, `capacity_reception`, `min_guests`, `pricing_floor_cents`. One venue has many spaces. Space names are operator-defined free text — no standard set enforced.
+A named bookable area within a **Venue** (e.g. "East Room", "Rooftop", "Full Buyout"). Stores structured capacity and pricing data used by the AI pipeline for fit routing: `capacity_seated`, `capacity_reception`, `min_guests`, `max_guests`, `pricing_floor_cents`. Also carries intake metadata: `duration_options` (jsonb array of offered durations, e.g. `["2_hours", "all_night"]`), `private` (boolean, default false — whether the space is fully private), `features` (jsonb array of space-specific amenities, e.g. `["private_bar", "stage"]`). One venue has many spaces. Space and feature strings are operator-defined free text — no standard set enforced.
 
 **Venue knowledge**:
 Two-layer model. Layer 1 (structured): `VenueSpace` DB fields for headcount fit and pricing floor checks — queryable, used by AI decisioning. Layer 2 (unstructured): the full event guide (pricing matrices, bar tiers, package inclusions, policies) embedded into a per-venue PGVector store via Unstructured.io. The AI uses RAG against Layer 2 for detailed question answering and quote drafting.

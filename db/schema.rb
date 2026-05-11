@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_10_201940) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_11_180420) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -44,18 +44,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_10_201940) do
 
   create_table "booking_requests", force: :cascade do |t|
     t.bigint "account_id", null: false
+    t.string "beverage_format"
+    t.string "booking_type"
     t.decimal "budget", precision: 10, scale: 2
     t.string "celebration_type"
     t.bigint "contact_id", null: false
     t.bigint "conversation_thread_id", null: false
     t.datetime "created_at", null: false
+    t.string "duration"
     t.date "event_date"
     t.date "event_end_date"
     t.jsonb "extraction_snapshot", default: {}, null: false
     t.string "fit_status"
     t.integer "headcount"
+    t.text "lead_recap"
     t.jsonb "missing_fields", default: [], null: false
     t.text "notes"
+    t.string "private_space_preference"
+    t.string "recommended_package"
     t.jsonb "review_reasons", default: [], null: false
     t.bigint "source_inbox_message_id"
     t.text "staff_summary"
@@ -350,9 +356,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_10_201940) do
     t.integer "capacity_reception"
     t.integer "capacity_seated"
     t.datetime "created_at", null: false
+    t.jsonb "duration_options", default: [], null: false
+    t.jsonb "features", default: [], null: false
+    t.integer "max_guests"
     t.integer "min_guests"
     t.string "name", null: false
     t.integer "pricing_floor_cents"
+    t.boolean "private", default: false, null: false
     t.datetime "updated_at", null: false
     t.bigint "venue_id", null: false
     t.index ["venue_id"], name: "index_venue_spaces_on_venue_id"
@@ -363,6 +373,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_10_201940) do
     t.string "address"
     t.integer "capacity"
     t.datetime "created_at", null: false
+    t.jsonb "features", default: [], null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_venues_on_account_id"

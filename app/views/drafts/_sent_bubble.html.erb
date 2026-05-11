@@ -1,0 +1,11 @@
+<div id="draft-<%= draft.id %>" class="thread-row thread-row--outbound">
+  <div class="thread-bubble thread-bubble--outbound">
+    <div class="thread-bubble-meta">
+      <span class="thread-sender thread-sender--venue">Venue</span>
+      <span class="badge badge-sent" style="font-size:10px;padding:1px 6px">Sent</span>
+      <span class="thread-timestamp dim"><%= draft.created_at.strftime("%-d %b %Y %H:%M") %></span>
+    </div>
+    <div class="thread-bubble-body thread-bubble-body--outbound"><%= draft.body %></div>
+  </div>
+  <div class="thread-avatar thread-avatar--venue">V</div>
+</div>

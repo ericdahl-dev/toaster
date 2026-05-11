@@ -17,6 +17,7 @@ module Drafts
     def call
       create_outbound_message
       confirm_booking_request
+      broadcast_sent
     end
 
     private
@@ -39,6 +40,19 @@ module Drafts
         booking_request: booking_request,
         to: "confirmed",
         metadata: { actor: actor }
+      )
+    end
+
+    def broadcast_sent
+      booking_request = draft.booking_request
+      html = ApplicationController.renderer.render(
+        partial: "drafts/sent_bubble",
+        locals: { draft: draft }
+      )
+      Turbo::StreamsChannel.broadcast_replace_to(
+        booking_request,
+        target: "draft-#{draft.id}",
+        html: html
       )
     end
   end
