@@ -5,19 +5,23 @@ module BookingRequests
     include LlmCall
 
     MODEL = "gpt-4o-mini"
-    PROMPT_VERSION = "draft-writer-v1"
-    SYSTEM_PROMPT = <<~PROMPT
+    PROMPT_VERSION = "draft-writer-v2"
+    BASE_SYSTEM_PROMPT = <<~PROMPT
       You are a professional venue coordinator writing a warm, concise reply to a booking inquiry.
       Your reply should:
         - Thank the guest for their interest
         - Acknowledge the key details they provided (date, headcount, occasion, budget if mentioned)
-        - Ask for any missing key details naturally (date, headcount, occasion type, budget if not provided)
-        - Briefly mention the venue's availability check will follow
-        - Be friendly and professional — 3 to 5 sentences, plain text, no markdown, no subject line
+        - Be friendly and professional — 2 to 4 short paragraphs, plain text, no markdown, no subject line
+        - Separate paragraphs with a single blank line (use \n\n between them)
       Respond with a single JSON field: { "body": "<reply text>" }
     PROMPT
+    MISSING_FIELDS_ADDENDUM = <<~ADDENDUM
+      Still need: %<fields>s
+      Ask for the most important missing detail naturally — one or two questions at most, woven into the reply.
+    ADDENDUM
+    ALL_FIELDS_ADDENDUM = "All required details have been collected. Do not ask for more information.\n"
     RUN_TYPE = "draft_writer"
-    TEMPERATURE = 0.7
+    TEMPERATURE = 0.2
 
     def initialize(account:, booking_request: nil, client: nil, venue_chunks: [])
       super(account:, booking_request:, client:)
@@ -41,10 +45,20 @@ module BookingRequests
 
     attr_reader :venue_chunks
 
+    def system_prompt
+      base = self.class::BASE_SYSTEM_PROMPT.dup
+      missing = booking_request&.missing_fields.presence
+      if missing
+        base + format(self.class::MISSING_FIELDS_ADDENDUM, fields: missing.join(", "))
+      else
+        base + self.class::ALL_FIELDS_ADDENDUM
+      end
+    end
+
     def build_thread_messages(subject:, body_text:, thread_history:)
       final_user_content = build_prompt(subject:, body_text:)
       [
-        { role: "system", content: self.class::SYSTEM_PROMPT },
+        { role: "system", content: system_prompt },
         *thread_history,
         { role: "user", content: final_user_content }
       ]
@@ -52,7 +66,7 @@ module BookingRequests
 
     def call_openai(prompt)
       messages = @pending_messages || [
-        { role: "system", content: self.class::SYSTEM_PROMPT },
+        { role: "system", content: system_prompt },
         { role: "user", content: prompt }
       ]
 
