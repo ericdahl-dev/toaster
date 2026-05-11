@@ -11,7 +11,21 @@ class Message < ApplicationRecord
   validate :conversation_thread_belongs_to_account
   validate :booking_request_belongs_to_account
 
+  after_create_commit :broadcast_inbound_to_timeline, if: -> { inbound? && booking_request_id? }
+
   private
+
+  def broadcast_inbound_to_timeline
+    html = ApplicationController.renderer.render(
+      partial: "messages/inbound_bubble",
+      locals: { message: self }
+    )
+    Turbo::StreamsChannel.broadcast_append_to(
+      booking_request,
+      target: "thread-timeline",
+      html: html
+    )
+  end
 
   def conversation_thread_belongs_to_account
     return unless conversation_thread && account

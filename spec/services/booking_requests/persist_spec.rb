@@ -99,5 +99,36 @@ RSpec.describe BookingRequests::Persist do
         }.not_to change(BookingRequest, :count)
       end
     end
+
+    context "when a follow-up message arrives on the same thread" do
+      let(:follow_up_message) do
+        create(:inbox_message,
+          account:,
+          from_email: "guest@example.com",
+          from_name: "Guest User",
+          subject: "Re: Party inquiry",
+          body_text: "Actually we need 50 guests.",
+          provider_thread_id: inbox_message.provider_thread_id)
+      end
+
+      before { described_class.call(inbox_message:, raw:, account:) }
+
+      it "reuses the existing BookingRequest rather than creating a new one" do
+        expect {
+          described_class.call(inbox_message: follow_up_message, raw:, account:)
+        }.not_to change(BookingRequest, :count)
+      end
+
+      it "attaches the follow-up Message to the existing BookingRequest" do
+        result = described_class.call(inbox_message: follow_up_message, raw:, account:)
+        expect(result.booking_request.messages.count).to eq(2)
+      end
+
+      it "does not create a duplicate ConversationThread" do
+        expect {
+          described_class.call(inbox_message: follow_up_message, raw:, account:)
+        }.not_to change(ConversationThread, :count)
+      end
+    end
   end
 end

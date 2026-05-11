@@ -15,17 +15,16 @@ module BookingRequests
 
     def call
       ActiveRecord::Base.transaction do
-        is_new = !BookingRequest.exists?(source_inbox_message: inbox_message)
-
         extract_result = BookingRequests::Extract.call(inbox_message: inbox_message)
         return nil if extract_result.nil?
 
         booking_request = extract_result.booking_request
+        is_new = booking_request.previous_changes.key?("id")
 
         assign_venue(booking_request)
         log_reconciliation(booking_request, is_new: is_new)
         create_review_task(booking_request) if booking_request.reviewing?
-        draft_created = is_new && generate_draft(booking_request)
+        draft_created = generate_draft(booking_request)
 
         Result.new(booking_request: booking_request, draft_created: draft_created)
       end
@@ -68,7 +67,7 @@ module BookingRequests
     end
 
     def generate_draft(booking_request)
-      return false if booking_request.drafts.exists?
+      return false if booking_request.drafts.pending_review.exists?
 
       venue_chunks = venue.present? ? VenueRagRetriever.call(venue: venue, query: "#{inbox_message.subject} #{inbox_message.body_text}") : []
       thread_history = build_thread_history(booking_request)

@@ -1,0 +1,12 @@
+<% sender_name = message.booking_request&.contact&.name || "Customer" %>
+<% initials = sender_name.split.first(2).map { |w| w[0] }.join.upcase %>
+<div id="message-<%= message.id %>" class="thread-row thread-row--inbound">
+  <div class="thread-avatar thread-avatar--customer"><%= initials %></div>
+  <div class="thread-bubble thread-bubble--inbound">
+    <div class="thread-bubble-meta">
+      <span class="thread-sender"><%= sender_name %></span>
+      <span class="thread-timestamp dim"><%= message.sent_at&.strftime("%-d %b %Y %H:%M") %></span>
+    </div>
+    <div class="thread-bubble-body"><%= message.body_text.presence || strip_tags(message.body_html.to_s) %></div>
+  </div>
+</div>

@@ -226,6 +226,67 @@ RSpec.describe BookingRequests::Reconcile do
       end
     end
 
+    context "when a follow-up message arrives on the same thread" do
+      let(:first_message) { build_inbox_message }
+      let(:follow_up_message) do
+        create(
+          :inbox_message,
+          account: account,
+          from_name: "Jamie Lead",
+          from_email: "jamie@example.com",
+          subject: "Re: Wedding for 120 guests on June 14, 2026",
+          body_text: "Actually we only need 80 guests.",
+          received_at: Time.zone.parse("2026-04-02 10:00:00 UTC"),
+          provider_thread_id: first_message.provider_thread_id
+        )
+      end
+
+      before { described_class.call(inbox_message: first_message) }
+
+      it "does not create a new BookingRequest for the follow-up" do
+        expect {
+          described_class.call(inbox_message: follow_up_message)
+        }.not_to change(BookingRequest, :count)
+      end
+
+      it "creates a new draft for the follow-up reply after the pending draft is approved" do
+        first_result = described_class.call(inbox_message: first_message)
+        first_result.booking_request.drafts.pending_review.update_all(status: "sent")
+
+        expect {
+          described_class.call(inbox_message: follow_up_message)
+        }.to change(Draft, :count).by(1)
+      end
+
+      it "does not create a duplicate draft when a pending_review draft already exists" do
+        result = described_class.call(inbox_message: follow_up_message)
+        pending_draft = result.booking_request.drafts.pending_review.last
+
+        expect(pending_draft).not_to be_nil
+
+        expect {
+          described_class.call(inbox_message: follow_up_message)
+        }.not_to change(Draft, :count)
+      end
+
+      it "logs booking_request.updated for the follow-up" do
+        described_class.call(inbox_message: follow_up_message)
+        log = EventLog.last
+        expect(log.event_type).to eq("booking_request.updated")
+      end
+
+      it "includes prior outbound draft in thread history for the AI" do
+        first_result = described_class.call(inbox_message: first_message)
+        first_result.booking_request.drafts.last.update!(status: "sent")
+
+        reconciler = described_class.new(inbox_message: follow_up_message)
+        history = reconciler.send(:build_thread_history, first_result.booking_request)
+
+        roles = history.map { |h| h[:role] }
+        expect(roles).to include("assistant")
+      end
+    end
+
     context "when extraction raises an error" do
       it "rolls back the transaction and propagates the error" do
         inbox_message = build_inbox_message

@@ -5,7 +5,7 @@ class BookingRequestsController < ApplicationController
   before_action :set_booking_request, only: [ :show, :transition ]
 
   def index
-    @booking_requests = current_user.account.booking_requests.order(created_at: :desc)
+    @booking_requests = current_user.account.booking_requests.order(updated_at: :desc)
   end
 
   def show

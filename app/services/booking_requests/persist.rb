@@ -24,7 +24,7 @@ module BookingRequests
           thread = find_or_build_thread(contact)
           thread.save!
 
-          booking_request = BookingRequest.find_or_initialize_by(source_inbox_message: inbox_message)
+          booking_request = find_or_build_booking_request(thread, inbox_message)
           booking_request.account = account
           booking_request.contact = contact
           booking_request.conversation_thread = thread
@@ -112,6 +112,11 @@ module BookingRequests
 
         message
       end
+    end
+
+    def find_or_build_booking_request(thread, inbox_message)
+      thread.booking_requests.first ||
+        BookingRequest.new(source_inbox_message: inbox_message)
     end
 
     def find_or_build_thread(contact)

@@ -20,6 +20,18 @@ RSpec.describe Venue, type: :model do
     end
   end
 
+  describe "features field" do
+    it "defaults to empty array" do
+      venue = create(:venue)
+      expect(venue.features).to eq([])
+    end
+
+    it "stores features array" do
+      venue = create(:venue, features: [ "karaoke", "coat_check" ])
+      expect(venue.reload.features).to eq([ "karaoke", "coat_check" ])
+    end
+  end
+
   describe "associations" do
     it "belongs to account" do
       venue = create(:venue)

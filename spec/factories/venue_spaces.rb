@@ -8,5 +8,9 @@ FactoryBot.define do
     capacity_reception { 100 }
     min_guests { nil }
     pricing_floor_cents { nil }
+    duration_options { [] }
+    private { false }
+    max_guests { nil }
+    features { [] }
   end
 end
