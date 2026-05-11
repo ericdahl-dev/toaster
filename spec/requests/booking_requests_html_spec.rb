@@ -73,6 +73,33 @@ RSpec.describe "BookingRequests HTML", type: :request do
         expect(response.body).not_to include("Conversation")
       end
 
+      it "shows qualification panel with fit_status badge and missing fields" do
+        booking_request.update!(fit_status: "in_progress", missing_fields: %w[event_date headcount])
+
+        get "/booking_requests/#{booking_request.id}"
+
+        expect(response.body).to include("badge-in_progress")
+        expect(response.body).to include("event_date")
+        expect(response.body).to include("headcount")
+      end
+
+      it "shows all-collected indicator when missing_fields is empty and fit_status present" do
+        booking_request.update!(fit_status: "qualified", missing_fields: [])
+
+        get "/booking_requests/#{booking_request.id}"
+
+        expect(response.body).to include("badge-qualified")
+        expect(response.body).to include("All required info collected")
+      end
+
+      it "omits qualification panel when both fit_status and missing_fields are nil/empty" do
+        booking_request.update!(fit_status: nil, missing_fields: [])
+
+        get "/booking_requests/#{booking_request.id}"
+
+        expect(response.body).not_to include("qualification-panel")
+      end
+
       it "returns 404 for another account's request" do
         other = create(:booking_request)
         get "/booking_requests/#{other.id}"

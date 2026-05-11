@@ -1,3 +1,4 @@
+<%= turbo_stream_from @booking_request %>
 <%= link_to "← All requests", booking_requests_path, class: "back-link" %>
 
 <div class="page-header">
@@ -48,6 +49,29 @@
 <%
   allowed = BookingRequests::Transition::ALLOWED_TRANSITIONS[@booking_request.status] || []
 %>
+
+<% show_qual_panel = @booking_request.fit_status.present? %>
+<% if show_qual_panel %>
+  <div class="qualification-panel" style="margin-top:20px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px;display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap">
+    <div>
+      <div class="detail-label" style="margin-bottom:6px">Qualification</div>
+      <span class="badge badge-<%= @booking_request.fit_status %>"><%= @booking_request.fit_status.humanize %></span>
+    </div>
+    <div>
+      <div class="detail-label" style="margin-bottom:6px">Required fields</div>
+      <% if @booking_request.missing_fields.present? %>
+        <ul style="margin:0;padding-left:16px;list-style:disc;font-size:13px;color:var(--amber)">
+          <% @booking_request.missing_fields.each do |field| %>
+            <li><%= field %></li>
+          <% end %>
+        </ul>
+      <% else %>
+        <span style="font-size:13px;color:var(--green)">✓ All required info collected</span>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
 <% if allowed.any? %>
   <div class="section-heading" style="margin-top:28px">Actions</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px">
@@ -118,61 +142,58 @@
 
 <% if thread_items.any? || pending_drafts.any? %>
   <div class="section-heading" style="margin-top:28px">Conversation</div>
-  <div class="thread-timeline">
+  <div id="thread-timeline" class="thread-timeline">
 
     <% thread_items.each do |item| %>
       <% if item[:type] == :inbound_email || item[:type] == :inbound_message %>
-        <div class="thread-bubble thread-bubble--inbound">
-          <div class="thread-bubble-meta">
-            <% if item[:from_name].present? %>
-              <span class="thread-sender"><%= item[:from_name] %></span>
-              <span class="dim" style="font-size:11px">&lt;<%= item[:from_email] %>&gt;</span>
-            <% else %>
-              <span class="thread-sender"><%= @booking_request.contact.name %></span>
-            <% end %>
-            <span class="thread-timestamp dim"><%= item[:timestamp]&.strftime("%-d %b %Y %H:%M") %></span>
-          </div>
-          <% if item[:subject].present? %>
-            <div class="thread-subject dim" style="font-size:11px;margin-bottom:8px">
-              Subject: <span style="color:var(--text)"><%= item[:subject] %></span>
+        <% sender_name = item[:from_name].presence || @booking_request.contact&.name || "Customer" %>
+        <% initials = sender_name.split.first(2).map { |w| w[0] }.join.upcase %>
+        <div class="thread-row thread-row--inbound">
+          <div class="thread-avatar thread-avatar--customer"><%= initials %></div>
+          <div class="thread-bubble thread-bubble--inbound">
+            <div class="thread-bubble-meta">
+              <span class="thread-sender"><%= sender_name %></span>
+              <% if item[:from_email].present? %>
+                <span class="dim" style="font-size:10px">&lt;<%= item[:from_email] %>&gt;</span>
+              <% end %>
+              <span class="thread-timestamp dim"><%= item[:timestamp]&.strftime("%-d %b %Y %H:%M") %></span>
             </div>
-          <% end %>
-          <div class="thread-bubble-body">
-            <% if item[:body_html].present? %>
-              <iframe srcdoc="<%= h(item[:body_html]) %>" sandbox="" style="width:100%;min-height:120px;border:none;background:#fff;border-radius:3px" title="Email body"></iframe>
-            <% else %>
-              <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:var(--text);margin:0"><%= item[:body_text] %></pre>
+            <% if item[:subject].present? %>
+              <div class="thread-subject">Subject: <span style="color:var(--text)"><%= item[:subject] %></span></div>
             <% end %>
+            <div class="thread-bubble-body"><%= item[:body_text].presence || strip_tags(item[:body_html].to_s) %></div>
           </div>
         </div>
       <% elsif item[:type] == :outbound_draft %>
-        <div class="thread-bubble thread-bubble--outbound">
-          <div class="thread-bubble-meta">
-            <span class="thread-sender" style="color:var(--blue)">Venue</span>
-            <span class="badge badge-<%= item[:status] %>" style="font-size:10px;padding:1px 6px"><%= item[:status].humanize %></span>
-            <span class="thread-timestamp dim"><%= item[:timestamp]&.strftime("%-d %b %Y %H:%M") %></span>
+        <div class="thread-row thread-row--outbound">
+          <div class="thread-bubble thread-bubble--outbound">
+            <div class="thread-bubble-meta">
+              <span class="thread-sender thread-sender--venue">Venue</span>
+              <span class="badge badge-<%= item[:status] %>" style="font-size:10px;padding:1px 6px"><%= item[:status].humanize %></span>
+              <span class="thread-timestamp dim"><%= item[:timestamp]&.strftime("%-d %b %Y %H:%M") %></span>
+            </div>
+            <div class="thread-bubble-body thread-bubble-body--outbound"><%= item[:body] %></div>
           </div>
-          <div class="thread-bubble-body">
-            <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:var(--text-hi);margin:0"><%= item[:body] %></pre>
-          </div>
+          <div class="thread-avatar thread-avatar--venue">V</div>
         </div>
       <% end %>
     <% end %>
 
     <% pending_drafts.each do |draft| %>
-      <div class="thread-bubble thread-bubble--pending">
-        <div class="thread-bubble-meta">
-          <span class="thread-sender" style="color:var(--amber)">AI Draft</span>
-          <span class="badge badge-pending" style="font-size:10px;padding:1px 6px">Pending review</span>
-          <span class="thread-timestamp dim"><%= draft.created_at.strftime("%-d %b %Y %H:%M") %></span>
+      <div id="draft-<%= draft.id %>" class="thread-row thread-row--pending">
+        <div class="thread-bubble thread-bubble--pending">
+          <div class="thread-bubble-meta">
+            <span class="thread-sender thread-sender--pending">AI Draft</span>
+            <span class="badge badge-pending" style="font-size:10px;padding:1px 6px">Pending review</span>
+            <span class="thread-timestamp dim"><%= draft.created_at.strftime("%-d %b %Y %H:%M") %></span>
+          </div>
+          <div class="thread-bubble-body"><%= draft.body %></div>
+          <div class="draft-card-actions">
+            <%= button_to "✓ Approve", approve_booking_request_draft_path(@booking_request, draft), method: :post, class: "btn btn-success" %>
+            <%= button_to "✕ Reject",  reject_booking_request_draft_path(@booking_request, draft),  method: :post, class: "btn btn-danger" %>
+          </div>
         </div>
-        <div class="thread-bubble-body" style="margin-bottom:12px">
-          <pre style="white-space:pre-wrap;font-family:inherit;font-size:13px;color:var(--text-hi);margin:0"><%= draft.body %></pre>
-        </div>
-        <div class="draft-card-actions">
-          <%= button_to "✓ Approve", approve_booking_request_draft_path(@booking_request, draft), method: :post, class: "btn btn-success" %>
-          <%= button_to "✕ Reject",  reject_booking_request_draft_path(@booking_request, draft),  method: :post, class: "btn btn-danger" %>
-        </div>
+        <div class="thread-avatar thread-avatar--venue">AI</div>
       </div>
     <% end %>
 
