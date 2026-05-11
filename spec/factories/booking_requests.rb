@@ -6,6 +6,7 @@ FactoryBot.define do
     extraction_snapshot { {} }
     missing_fields { [] }
     review_reasons { [] }
+    feature_preferences { [] }
 
     after(:build) do |br|
       br.contact ||= build(:contact, account: br.account)
