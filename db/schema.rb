@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_11_180420) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_11_181033) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -55,6 +55,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_11_180420) do
     t.date "event_date"
     t.date "event_end_date"
     t.jsonb "extraction_snapshot", default: {}, null: false
+    t.jsonb "feature_preferences", default: [], null: false
     t.string "fit_status"
     t.integer "headcount"
     t.text "lead_recap"
@@ -62,6 +63,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_11_180420) do
     t.text "notes"
     t.string "private_space_preference"
     t.string "recommended_package"
+    t.bigint "recommended_venue_space_id"
     t.jsonb "review_reasons", default: [], null: false
     t.bigint "source_inbox_message_id"
     t.text "staff_summary"
@@ -72,6 +74,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_11_180420) do
     t.index ["account_id"], name: "index_booking_requests_on_account_id"
     t.index ["contact_id"], name: "index_booking_requests_on_contact_id"
     t.index ["conversation_thread_id"], name: "index_booking_requests_on_conversation_thread_id"
+    t.index ["recommended_venue_space_id"], name: "index_booking_requests_on_recommended_venue_space_id"
     t.index ["source_inbox_message_id"], name: "index_booking_requests_on_source_inbox_message_id", unique: true
     t.index ["status"], name: "index_booking_requests_on_status"
     t.index ["venue_id"], name: "index_booking_requests_on_venue_id"
@@ -395,6 +398,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_11_180420) do
   add_foreign_key "booking_requests", "contacts"
   add_foreign_key "booking_requests", "conversation_threads"
   add_foreign_key "booking_requests", "inbox_messages", column: "source_inbox_message_id"
+  add_foreign_key "booking_requests", "venue_spaces", column: "recommended_venue_space_id"
   add_foreign_key "booking_requests", "venues"
   add_foreign_key "contacts", "accounts"
   add_foreign_key "conversation_threads", "accounts"

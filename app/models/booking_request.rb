@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 class BookingRequest < ApplicationRecord
   belongs_to :account
   belongs_to :conversation_thread
   belongs_to :contact
   belongs_to :venue, optional: true
   belongs_to :source_inbox_message, class_name: "InboxMessage", optional: true
+  belongs_to :recommended_venue_space, class_name: "VenueSpace", optional: true
 
   has_many :messages, dependent: :nullify
   has_many :drafts, dependent: :destroy
@@ -16,6 +19,27 @@ class BookingRequest < ApplicationRecord
     confirmed: "confirmed",
     cancelled: "cancelled"
   }
+
+  enum :duration, {
+    "2_hours": "2_hours",
+    "2_5_hours": "2_5_hours",
+    "3_hours": "3_hours",
+    all_night: "all_night"
+  }, prefix: :duration
+
+  enum :private_space_preference, {
+    private: "private",
+    semi_private: "semi_private",
+    flexible: "flexible",
+    not_sure: "not_sure"
+  }, prefix: :space
+
+  enum :beverage_format, {
+    cash_bar: "cash_bar",
+    hosted_tab: "hosted_tab",
+    drink_tickets: "drink_tickets",
+    timed_package: "timed_package"
+  }, prefix: :beverage
 
   validates :status, presence: true
   validates :headcount, numericality: { greater_than: 0, allow_nil: true }

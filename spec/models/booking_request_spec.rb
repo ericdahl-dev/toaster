@@ -102,4 +102,66 @@ RSpec.describe BookingRequest, type: :model do
       expect(br.tasks).to include(task)
     end
   end
+
+  describe "intake fields" do
+    let(:br) { create(:booking_request, account: account, contact: contact, conversation_thread: thread) }
+
+    it "stores booking_type free text" do
+      br.update!(booking_type: "east room")
+      expect(br.reload.booking_type).to eq("east room")
+    end
+
+    it "stores lead_recap free text" do
+      br.update!(lead_recap: "Birthday party for 40 guests on a Saturday night")
+      expect(br.reload.lead_recap).to eq("Birthday party for 40 guests on a Saturday night")
+    end
+
+    it "stores feature_preferences as array" do
+      br.update!(feature_preferences: [ "karaoke", "private_bar" ])
+      expect(br.reload.feature_preferences).to eq([ "karaoke", "private_bar" ])
+    end
+
+    it "accepts valid duration values" do
+      %w[2_hours 2_5_hours 3_hours all_night].each do |val|
+        br.duration = val
+        expect(br).to be_valid
+      end
+    end
+
+    it "rejects invalid duration values" do
+      expect { br.duration = "forever" }.to raise_error(ArgumentError)
+    end
+
+    it "accepts valid private_space_preference values" do
+      %w[private semi_private flexible not_sure].each do |val|
+        br.private_space_preference = val
+        expect(br).to be_valid
+      end
+    end
+
+    it "rejects invalid private_space_preference values" do
+      expect { br.private_space_preference = "secret" }.to raise_error(ArgumentError)
+    end
+
+    it "accepts valid beverage_format values" do
+      %w[cash_bar hosted_tab drink_tickets timed_package].each do |val|
+        br.beverage_format = val
+        expect(br).to be_valid
+      end
+    end
+
+    it "rejects invalid beverage_format values" do
+      expect { br.beverage_format = "byo" }.to raise_error(ArgumentError)
+    end
+
+    it "belongs_to recommended_venue_space optionally" do
+      space = create(:venue_space, venue: create(:venue, account: account))
+      br.update!(recommended_venue_space: space)
+      expect(br.reload.recommended_venue_space).to eq(space)
+    end
+
+    it "allows nil recommended_venue_space" do
+      expect(br.recommended_venue_space).to be_nil
+    end
+  end
 end
