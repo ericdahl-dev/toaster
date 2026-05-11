@@ -46,7 +46,7 @@ RSpec.describe BookingRequests::DraftWriter do
         expect(run.llm_model).to eq("gpt-4o-mini")
         expect(run.account).to eq(account)
         expect(run.booking_request).to eq(booking_request)
-        expect(run.prompt_version).to eq("draft-writer-v1")
+        expect(run.prompt_version).to eq("draft-writer-v2")
       end
 
       context "with venue chunks" do
@@ -107,6 +107,48 @@ RSpec.describe BookingRequests::DraftWriter do
           expect {
             draft_writer.call(subject: "Re: inquiry", body_text: "Wedding reception.", thread_history: history)
           }.to change(AiRun, :count).by(1)
+        end
+      end
+
+      context "with missing fields on the booking request" do
+        let(:booking_request) { create(:booking_request, account:, missing_fields: %w[event_date headcount]) }
+
+        let(:draft_writer) do
+          described_class.new(account:, booking_request:, client: build_client(body: "Please share the date!"))
+        end
+
+        it "includes missing fields in the system prompt" do
+          sent_messages = nil
+          allow(draft_writer.__send__(:client)).to receive(:chat) do |params|
+            sent_messages = params[:parameters][:messages]
+            { "choices" => [ { "message" => { "content" => { body: "Please share the date!" }.to_json } } ] }
+          end
+
+          draft_writer.call(subject: "Inquiry", body_text: "Hi!")
+
+          system_msg = sent_messages.find { |m| m[:role] == "system" }
+          expect(system_msg[:content]).to include("event_date", "headcount")
+        end
+      end
+
+      context "when no fields are missing" do
+        let(:booking_request) { create(:booking_request, account:, missing_fields: []) }
+
+        let(:draft_writer) do
+          described_class.new(account:, booking_request:, client: build_client(body: "All set!"))
+        end
+
+        it "does not include a missing fields list in the system prompt" do
+          sent_messages = nil
+          allow(draft_writer.__send__(:client)).to receive(:chat) do |params|
+            sent_messages = params[:parameters][:messages]
+            { "choices" => [ { "message" => { "content" => { body: "All set!" }.to_json } } ] }
+          end
+
+          draft_writer.call(subject: "Inquiry", body_text: "Hi!")
+
+          system_msg = sent_messages.find { |m| m[:role] == "system" }
+          expect(system_msg[:content]).not_to include("Still need:")
         end
       end
 
