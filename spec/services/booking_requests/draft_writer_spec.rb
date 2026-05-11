@@ -46,7 +46,7 @@ RSpec.describe BookingRequests::DraftWriter do
         expect(run.llm_model).to eq("gpt-4o-mini")
         expect(run.account).to eq(account)
         expect(run.booking_request).to eq(booking_request)
-        expect(run.prompt_version).to eq("draft-writer-v2")
+        expect(run.prompt_version).to eq("draft-writer-v3")
       end
 
       context "with venue chunks" do
@@ -131,11 +131,24 @@ RSpec.describe BookingRequests::DraftWriter do
         end
       end
 
-      context "when no fields are missing" do
+      context "when no fields are missing (confirming mode)" do
         let(:booking_request) { create(:booking_request, account:, missing_fields: []) }
 
         let(:draft_writer) do
           described_class.new(account:, booking_request:, client: build_client(body: "All set!"))
+        end
+
+        it "uses the confirming system prompt" do
+          sent_messages = nil
+          allow(draft_writer.__send__(:client)).to receive(:chat) do |params|
+            sent_messages = params[:parameters][:messages]
+            { "choices" => [ { "message" => { "content" => { body: "All set!" }.to_json } } ] }
+          end
+
+          draft_writer.call(subject: "Inquiry", body_text: "Hi!")
+
+          system_msg = sent_messages.find { |m| m[:role] == "system" }
+          expect(system_msg[:content]).to include("quote").or include("recommend").or include("confirm")
         end
 
         it "does not include a missing fields list in the system prompt" do
