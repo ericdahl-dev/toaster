@@ -10,13 +10,15 @@ module BookingRequests
 
     def call(extractor_result)
       missing = compute_missing_fields(extractor_result)
-      fit = compute_fit_status(extractor_result, missing)
+      recommended_space = recommend_venue_space(extractor_result)
+      fit = compute_fit_status(extractor_result, missing, recommended_space)
       summary = compute_staff_summary(extractor_result, fit, missing)
 
       extractor_result.merge(
         fit_status: fit,
         missing_fields: missing,
-        staff_summary: summary
+        staff_summary: summary,
+        recommended_venue_space_id: recommended_space&.id
       )
     end
 
@@ -32,7 +34,54 @@ module BookingRequests
       TRACKED_FIELDS.select { |f| result[f].nil? }.map(&:to_s)
     end
 
-    def compute_fit_status(result, missing)
+    def recommend_venue_space(result)
+      return nil if booking_request.venue.nil?
+      return nil if spaces.empty?
+
+      headcount = result[:headcount]
+      candidates = headcount ? spaces.select { |s| headcount_within_range?(s, headcount) } : spaces
+
+      return nil if candidates.empty?
+
+      scored = candidates.map { |s| [ s, score_space(s, result) ] }
+      best_score = scored.map(&:last).max
+      finalists = scored.select { |_, score| score == best_score }.map(&:first)
+
+      finalists.min_by { |s| s.pricing_floor_cents || 0 }
+    end
+
+    def headcount_within_range?(space, headcount)
+      min_ok = space.min_guests.nil? || headcount >= space.min_guests
+      max_ok = space.max_guests.nil? || headcount <= space.max_guests
+      cap = space.capacity_reception || space.capacity_seated
+      cap_ok = cap.nil? || headcount <= cap
+      min_ok && max_ok && cap_ok
+    end
+
+    def score_space(space, result)
+      score = 0
+
+      privacy_pref = result[:private_space_preference]
+      if privacy_pref == "private" && space.private
+        score += 1
+      elsif privacy_pref == "semi_private" && !space.private
+        score += 1
+      end
+
+      duration = result[:duration]
+      score += 1 if duration && space.duration_options.include?(duration)
+
+      feature_prefs = result[:feature_preferences] || []
+      unless feature_prefs.empty?
+        venue_features = booking_request.venue&.features || []
+        all_features = (venue_features + (space.features || [])).uniq
+        score += (feature_prefs & all_features).size
+      end
+
+      score
+    end
+
+    def compute_fit_status(result, missing, recommended_space)
       return nil if booking_request.venue.nil?
       return nil if spaces.empty?
       return "in_progress" if missing.include?("headcount")
@@ -44,17 +93,21 @@ module BookingRequests
         headcount_ok?(space, headcount) && budget_ok?(space, budget_dollars)
       end
 
-      fits_any ? "qualified" : "not_a_fit"
+      return "not_a_fit" unless fits_any
+
+      recommended_space ? "qualified" : "in_progress"
     end
 
     def headcount_ok?(space, headcount)
       max = space.capacity_reception || space.capacity_seated
       min = space.min_guests
+      max_guests = space.max_guests
 
       above_min = min.nil? || headcount >= min
-      below_max = max.nil? || headcount <= max
+      below_cap = max.nil? || headcount <= max
+      below_max_guests = max_guests.nil? || headcount <= max_guests
 
-      above_min && below_max
+      above_min && below_cap && below_max_guests
     end
 
     def budget_ok?(space, budget_dollars)
