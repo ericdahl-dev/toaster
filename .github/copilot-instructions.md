@@ -36,7 +36,7 @@ Dockerfile  # Production image
 
 ### Stack
 
-- **Language / Framework:** Ruby 3.3.7, Rails 7.2
+- **Language / Framework:** Ruby 3.4.9, Rails 8.x
 - **Database:** PostgreSQL (Neon in production; use `DATABASE_URL` for pooled connection,
   direct URL for migrations)
 - **Job queue:** GoodJob; job dashboard at `/jobs`
@@ -70,13 +70,24 @@ bundle exec rspec spec/models/           # models only
 bundle exec rspec spec/requests/         # request specs
 ```
 
+## Secrets
+
+All secrets are managed in **Doppler** (project `toaster`). Never hardcode secrets or commit `.env`
+files with real values.
+
+```bash
+doppler secrets get SECRET_NAME --plain   # read a single secret
+doppler run -- bundle exec rails ...      # inject all secrets into a command
+```
+
+Key secrets: `RAILS_MASTER_KEY`, `OPENAI_API_KEY`, `UNSTRUCTURED_API_KEY`, `DATABASE_URL`.
+
 ## Development Setup
 
 ```bash
-rvm use .
-bundle install
-bin/rails db:prepare
-bin/rails s            # starts on :3000
+mise exec -- bundle install
+mise exec -- bin/rails db:prepare
+mise exec -- bin/rails s            # starts on :3000
 ```
 
 ## CI

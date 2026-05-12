@@ -14,15 +14,33 @@ Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `
 
 Single-context repo: one `CONTEXT.md` + `docs/adr/` at the root. See `docs/agents/domain.md`.
 
+## Secrets (Doppler)
+
+All secrets are managed in **Doppler** (project `toaster`). To read a secret:
+
+```bash
+doppler secrets get SECRET_NAME --plain
+```
+
+To run a command with all secrets injected:
+
+```bash
+doppler run -- bundle exec rails ...
+```
+
+Key secrets: `RAILS_MASTER_KEY`, `OPENAI_API_KEY`, `UNSTRUCTURED_API_KEY`, `DATABASE_URL`.
+
+Do **not** hardcode secrets or write them to files. Never commit `.env` files with real values.
+
 ## Build & Test
 
 ```bash
-rvm use . && bundle exec rspec
+mise exec -- bundle exec rspec
 ```
 
 ## Learned User Preferences
 
-- Use RVM to match the pinned Ruby (`rvm use .` from repo root) before `bundle`, `rspec`, or other gem commands so native extensions match the active interpreter.
+- Use `mise exec --` (from repo root) before `bundle`, `rspec`, or other gem commands so native extensions match the pinned Ruby interpreter (`mise.toml` pins the version).
 - Issue tracking is **GitHub Issues only** — use `gh issue` commands. Do not use `bd`, beads, or any other issue tracker.
 - Prefer local test coverage only (SimpleCov); do not add Codecov or other remote coverage upload unless asked.
 - Keep `parallel_rspec` usage local-only unless explicitly asked; CI should continue to run serial `bundle exec rspec`.

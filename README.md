@@ -64,7 +64,9 @@ bin/dev                    # starts web + worker via Procfile.dev
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and fill in values before starting:
+Secrets are managed with [Doppler](https://doppler.com). Run `doppler setup` in the repo root to link your local environment, then use `bin/dev` or `doppler run -- <command>` to inject secrets at runtime.
+
+For reference, `.env.example` lists the variables the app expects:
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
@@ -152,8 +154,7 @@ GoodJob's web UI is mounted at `/jobs`.
 **GSS/Kerberos segfault on macOS (Solid Queue / GoodJob fork)**
 
 libpq's GSS probe is unsafe in fork children on macOS. Set `PGGSSENCMODE=disable` in your
-`.env` (already included in `.env.example`). The app sets this automatically when the variable
-is unset, but setting it explicitly avoids surprises.
+Doppler `dev` config (already included in `.env.example` for reference). The app sets this automatically when the variable is unset, but setting it explicitly avoids surprises.
 
 **`/jobs` dashboard returns 404**
 
@@ -162,5 +163,4 @@ Confirm that the app booted with the GoodJob gem installed and that `/jobs` is m
 
 **Database connection refused**
 
-Make sure Postgres is running locally. For a Neon connection, set `DATABASE_URL` in `.env` with
-`?sslmode=require`. In test, `DATABASE_URL` is ignored — tests always hit local Postgres.
+Make sure Postgres is running locally. For a Neon connection, set `DATABASE_URL` in Doppler with `?sslmode=require`. In test, `DATABASE_URL` is ignored — tests always hit local Postgres.
