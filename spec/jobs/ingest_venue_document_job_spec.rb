@@ -126,5 +126,40 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
         expect(doc.reload.error_message).to include("UNSTRUCTURED_API_KEY")
       end
     end
+
+    context "when UnstructuredClient raises ApiTimeoutError" do
+      before do
+        allow(UnstructuredClient).to receive(:extract).and_raise(IngestVenueDocumentJob::ApiTimeoutError, "API timeout")
+      end
+
+      it "marks doc as failed" do
+        described_class.perform_now(doc.id)
+
+        expect(doc.reload.status).to eq("failed")
+      end
+
+      it "records error message on doc" do
+        described_class.perform_now(doc.id)
+
+        expect(doc.reload.error_message).to eq("API timeout")
+      end
+    end
+
+    context "when retries are exhausted after ApiTimeoutError" do
+      let(:account) { doc.venue.account }
+
+      it "records failure in EventLog" do
+        job = described_class.new
+        job.arguments = [doc.id]
+        error = IngestVenueDocumentJob::ApiTimeoutError.new("API timeout")
+
+        job.discard_with_event_log(doc.id, error)
+
+        log = EventLog.where(account: account).last
+        expect(log).not_to be_nil
+        expect(log.event_type).to eq("ingest_venue_document.timeout_exhausted")
+        expect(log.payload["error"]).to include("API timeout")
+      end
+    end
   end
 end
