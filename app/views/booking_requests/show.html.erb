@@ -72,6 +72,57 @@
   </div>
 <% end %>
 
+<%
+  show_intake_panel = [
+    @booking_request.booking_type,
+    @booking_request.duration,
+    @booking_request.private_space_preference,
+    @booking_request.beverage_format,
+    @booking_request.recommended_venue_space_id,
+    @booking_request.lead_recap
+  ].any?(&:present?)
+%>
+<% if show_intake_panel %>
+  <div class="intake-panel" style="margin-top:20px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px">
+    <div class="detail-label" style="margin-bottom:12px">Intake</div>
+    <div class="detail-grid">
+      <% if @booking_request.booking_type.present? %>
+        <div class="detail-cell">
+          <div class="detail-label">Booking type</div>
+          <div class="detail-value"><%= @booking_request.booking_type %></div>
+        </div>
+      <% end %>
+      <% if @booking_request.duration.present? %>
+        <div class="detail-cell">
+          <div class="detail-label">Duration</div>
+          <div class="detail-value"><%= @booking_request.duration.humanize %></div>
+        </div>
+      <% end %>
+      <% if @booking_request.private_space_preference.present? %>
+        <div class="detail-cell">
+          <div class="detail-label">Space preference</div>
+          <div class="detail-value"><%= @booking_request.private_space_preference.humanize %></div>
+        </div>
+      <% end %>
+      <% if @booking_request.beverage_format.present? %>
+        <div class="detail-cell">
+          <div class="detail-label">Beverage format</div>
+          <div class="detail-value"><%= @booking_request.beverage_format.humanize %></div>
+        </div>
+      <% end %>
+      <% if @booking_request.recommended_venue_space.present? %>
+        <div class="detail-cell">
+          <div class="detail-label">Recommended space</div>
+          <div class="detail-value"><%= @booking_request.recommended_venue_space.name %></div>
+        </div>
+      <% end %>
+    </div>
+    <% if @booking_request.lead_recap.present? %>
+      <div style="margin-top:12px;font-size:13px;color:var(--text);font-style:italic"><%= @booking_request.lead_recap %></div>
+    <% end %>
+  </div>
+<% end %>
+
 <% if allowed.any? %>
   <div class="section-heading" style="margin-top:28px">Actions</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px">

@@ -106,6 +106,51 @@ RSpec.describe "BookingRequests HTML", type: :request do
 
         expect(response).to have_http_status(:not_found)
       end
+
+      context "intake panel" do
+        it "renders intake panel when any intake field is present" do
+          venue_space = create(:venue_space, venue: create(:venue, account: account))
+          booking_request.update!(
+            booking_type: "birthday party",
+            duration: "2_hours",
+            private_space_preference: "private",
+            beverage_format: "hosted_tab",
+            lead_recap: "Wants rooftop for 50 guests.",
+            recommended_venue_space: venue_space
+          )
+
+          get "/booking_requests/#{booking_request.id}"
+
+          expect(response.body).to include("intake-panel")
+          expect(response.body).to include("birthday party")
+          expect(response.body).to include(venue_space.name)
+          expect(response.body).to include("Wants rooftop for 50 guests.")
+        end
+
+        it "omits intake panel when all intake fields are nil" do
+          booking_request.update!(
+            booking_type: nil,
+            duration: nil,
+            private_space_preference: nil,
+            beverage_format: nil,
+            lead_recap: nil,
+            recommended_venue_space_id: nil
+          )
+
+          get "/booking_requests/#{booking_request.id}"
+
+          expect(response.body).not_to include("intake-panel")
+        end
+
+        it "shows venue space name not ID" do
+          venue_space = create(:venue_space, venue: create(:venue, account: account), name: "Rooftop Terrace")
+          booking_request.update!(recommended_venue_space: venue_space)
+
+          get "/booking_requests/#{booking_request.id}"
+
+          expect(response.body).to include("Rooftop Terrace")
+        end
+      end
     end
 
     context "when signed out" do
