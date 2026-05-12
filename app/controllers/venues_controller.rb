@@ -57,9 +57,26 @@ class VenuesController < ApplicationController
   end
 
   def venue_params
-    params.require(:venue).permit(
-      :name, :address, :capacity,
-      venue_spaces_attributes: [ :id, :name, :min_guests, :capacity_seated, :capacity_reception, :pricing_floor_cents, :_destroy ]
+    raw = params.require(:venue).permit(
+      :name, :address, :capacity, :features,
+      venue_spaces_attributes: [
+        :id, :name, :min_guests, :max_guests, :capacity_seated, :capacity_reception,
+        :pricing_floor_cents, :private, :duration_options, :features, :_destroy
+      ]
     )
+
+    raw[:features] = normalize_csv(raw[:features]) if raw.key?(:features)
+
+    raw[:venue_spaces_attributes]&.each do |attrs|
+      attrs[:duration_options] = normalize_csv(attrs[:duration_options]) if attrs.key?(:duration_options)
+      attrs[:features] = normalize_csv(attrs[:features]) if attrs.key?(:features)
+    end
+
+    raw
+  end
+
+  def normalize_csv(value)
+    return value if value.is_a?(Array)
+    value.to_s.split(",").map(&:strip).reject(&:blank?)
   end
 end

@@ -135,11 +135,39 @@ RSpec.describe "Venues HTML", type: :request do
         space = create(:venue_space, venue: venue, name: "Rooftop")
         patch "/venues/#{venue.id}", params: {
           venue: {
-            venue_spaces_attributes: [ { id: space.id, _destroy: "1" } ]
+            venue_spaces_attributes: [{id: space.id, _destroy: "1"}]
           }
         }
 
         expect(VenueSpace.find_by(id: space.id)).to be_nil
+      end
+
+      it "saves venue-level features as an array from comma-separated input" do
+        patch "/venues/#{venue.id}", params: {
+          venue: {features: "karaoke, coat check, parking"}
+        }
+
+        expect(venue.reload.features).to eq(["karaoke", "coat check", "parking"])
+      end
+
+      it "saves space max_guests, private, duration_options, and features" do
+        patch "/venues/#{venue.id}", params: {
+          venue: {
+            venue_spaces_attributes: [{
+              name: "Skybox",
+              max_guests: 80,
+              private: "1",
+              duration_options: "2_hours, all_night",
+              features: "private_bar, stage"
+            }]
+          }
+        }
+
+        space = venue.venue_spaces.reload.find_by!(name: "Skybox")
+        expect(space.max_guests).to eq(80)
+        expect(space.private).to be(true)
+        expect(space.duration_options).to eq(["2_hours", "all_night"])
+        expect(space.features).to eq(["private_bar", "stage"])
       end
     end
   end
