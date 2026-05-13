@@ -2,6 +2,8 @@
 
 module Telemetry
   def self.configured?
+    return false if Rails.env.test?
+
     ENV["POSTHOG_PROJECT_TOKEN"].present?
   end
 
