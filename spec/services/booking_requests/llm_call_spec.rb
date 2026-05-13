@@ -25,7 +25,10 @@ RSpec.describe BookingRequests::LlmCall do
   def build_client(response)
     client = double("OpenAI::Client")
     allow(client).to receive(:chat).and_return(
-      { "choices" => [ { "message" => { "content" => response.to_json } } ] }
+      {
+        "choices" => [{"message" => {"content" => response.to_json}}],
+        "usage" => {"prompt_tokens" => 10, "completion_tokens" => 5}
+      }
     )
     client
   end
