@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_11_181033) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_13_033418) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -27,10 +27,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_11_181033) do
     t.bigint "account_id", null: false
     t.bigint "booking_request_id"
     t.datetime "created_at", null: false
+    t.integer "estimated_cost_cents"
     t.integer "input_tokens"
     t.integer "latency_ms"
     t.string "llm_model", null: false
     t.integer "output_tokens"
+    t.integer "page_count"
     t.text "prompt", null: false
     t.string "prompt_version"
     t.integer "rag_chunk_count", default: 0, null: false
@@ -39,7 +41,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_11_181033) do
     t.datetime "updated_at", null: false
     t.index ["account_id"], name: "index_ai_runs_on_account_id"
     t.index ["booking_request_id"], name: "index_ai_runs_on_booking_request_id"
-    t.check_constraint "run_type::text = ANY (ARRAY['classifier'::character varying::text, 'extraction'::character varying::text, 'draft_writer'::character varying::text])", name: "ai_runs_run_type_check"
+    t.check_constraint "run_type::text = ANY (ARRAY['classifier'::character varying::text, 'extraction'::character varying::text, 'draft_writer'::character varying::text, 'embedding'::character varying::text, 'unstructured'::character varying::text])", name: "ai_runs_run_type_check"
   end
 
   create_table "booking_requests", force: :cascade do |t|
