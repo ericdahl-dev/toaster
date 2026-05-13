@@ -4,6 +4,16 @@
     <title><%= content_for(:title) || "Toaster" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <script>
+      (function () {
+        try {
+          var k = "toaster-theme";
+          var s = localStorage.getItem(k);
+          var t = (s === "light" || s === "dark") ? s : (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+          document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
@@ -26,7 +36,7 @@
     <% end %>
   </head>
 
-  <body>
+  <body data-controller="theme">
     <% if content_for?(:fullpage) %>
       <%= yield :fullpage %>
     <% else %>
@@ -43,11 +53,12 @@
             <div class="toast-icon"><%= render "shared/toast_icon" %></div>
             Toaster
           </a>
+          <%= render "shared/theme_toggle" %>
           <div class="topbar-sep"></div>
           <% if current_user %>
             <div class="topbar-user">
               <span class="topbar-email"><%= current_user.email %></span>
-              <%= button_to "sign out", logout_path, method: :delete, class: "btn btn-ghost", style: "padding: 3px 9px; font-size: 11px;" %>
+              <%= button_to "sign out", logout_path, method: :delete, class: "btn btn-ghost btn-topbar-signout" %>
             </div>
           <% end %>
         </header>

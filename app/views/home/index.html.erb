@@ -15,7 +15,10 @@
       <div class="lp-nav-icon"><%= render "shared/toast_icon" %></div>
       <span>Toaster</span>
     </a>
-    <%= link_to "Sign in", login_path, class: "btn btn-ghost lp-nav-signin" %>
+    <div class="lp-nav-actions">
+      <%= render "shared/theme_toggle" %>
+      <%= link_to "Sign in", login_path, class: "btn btn-ghost lp-nav-signin" %>
+    </div>
   </header>
 
   <%# ── Hero ── %>
