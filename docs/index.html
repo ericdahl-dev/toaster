@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Toaster — Release Notes</title>
+  <meta name="description" content="What's new in Toaster, the AI booking assistant for venue inquiries." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0f0f;
+      --surface: #161818;
+      --border: #252626;
+      --text: #f0f2f2;
+      --muted: #6b7280;
+      --amber: #f59e0b;
+      --amber-dim: #92400e;
+      --green: #16a34a;
+      --red: #dc2626;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--amber);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-sub {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 32px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 48px;
+    }
+
+    .entry {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 0 32px;
+      margin-bottom: 48px;
+      padding-bottom: 48px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .entry:last-child {
+      border-bottom: none;
+    }
+
+    .entry-date {
+      font-size: 12px;
+      color: var(--muted);
+      padding-top: 4px;
+      white-space: nowrap;
+    }
+
+    .entry-content h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      line-height: 1.3;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+
+    .tag-feat    { background: #1e3a2f; color: #4ade80; }
+    .tag-fix     { background: #3b1f1f; color: #f87171; }
+    .tag-perf    { background: #1e2a40; color: #60a5fa; }
+    .tag-refactor { background: #2d1f3d; color: #c4b5fd; }
+    .tag-chore   { background: #1f2937; color: #9ca3af; }
+
+    .entry-content p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .entry-content ul {
+      margin: 10px 0 0 16px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .entry-content ul li::marker { color: var(--amber); }
+
+    .pr-link {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .pr-link:hover { color: var(--amber); }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 600px) {
+      .entry { grid-template-columns: 1fr; gap: 4px; }
+      header { padding: 16px; }
+      main { padding: 32px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">🍞 Toaster</div>
+    <div class="logo-sub">AI booking assistant for venue inquiries</div>
+  </div>
+</header>
+
+<main>
+  <h1>Release Notes</h1>
+  <p class="subtitle">What's been shipped — written for operators, venue managers, and the curious.</p>
+
+  <!-- ── May 12, 2026 ───────────────────────────────────────── -->
+
+  <div class="entry">
+    <div class="entry-date">May 12, 2026</div>
+    <div class="entry-content">
+      <h2>Booking request detail now shows intake info &amp; recommended space</h2>
+      <div class="tags">
+        <span class="tag tag-feat">Feature</span>
+      </div>
+      <p>The booking request detail page now surfaces the structured intake data the AI collects during a conversation — all in one place so you never have to dig through the email thread.</p>
+      <ul>
+        <li><strong>Booking type</strong> — the lead's stated space preference in their own words</li>
+        <li><strong>Duration</strong> — how long they need the space</li>
+        <li><strong>Space preference</strong> — private, semi-private, or flexible</li>
+        <li><strong>Beverage format</strong> — open bar, hosted tab, cash bar, etc.</li>
+        <li><strong>Recommended space</strong> — the venue space the AI matched to this lead</li>
+        <li><strong>Lead recap</strong> — a one-sentence AI summary of the inquiry</li>
+      </ul>
+      <p style="margin-top:10px">The panel only appears once at least one field has been collected — no empty boxes cluttering the screen.</p>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/318" target="_blank">→ PR #318</a>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-date">May 12, 2026</div>
+    <div class="entry-content">
+      <h2>Venue edit form now exposes all space metadata fields</h2>
+      <div class="tags">
+        <span class="tag tag-feat">Feature</span>
+      </div>
+      <p>You can now configure every field the AI uses to match leads to spaces — directly from the venue edit screen. No more manual database edits.</p>
+      <ul>
+        <li><strong>Max guests</strong> — upper capacity limit per space</li>
+        <li><strong>Private</strong> — checkbox to mark a space as exclusively bookable</li>
+        <li><strong>Duration options</strong> — which time slots the space supports (e.g. 2 hrs, all night)</li>
+        <li><strong>Space amenities</strong> — comma-separated features like <code>private_bar</code>, <code>stage</code></li>
+        <li><strong>Venue amenities</strong> — venue-wide features shared across all spaces</li>
+      </ul>
+      <p style="margin-top:10px">Values are entered as plain comma-separated text and stored as structured arrays — no JSON editing required.</p>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/317" target="_blank">→ PR #317</a>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-date">May 12, 2026</div>
+    <div class="entry-content">
+      <h2>AI recommends a venue space based on guest count &amp; preferences</h2>
+      <div class="tags">
+        <span class="tag tag-feat">Feature</span>
+      </div>
+      <p>After extracting intake fields, Toaster now scores every venue space against the lead's requirements and picks the best fit automatically.</p>
+      <ul>
+        <li>Filters spaces by headcount range (min/max guests)</li>
+        <li>Scores by privacy preference, duration match, and feature overlap</li>
+        <li>Tiebreaks on lowest pricing floor</li>
+        <li>Sets <code>fit_status: not_a_fit</code> when no space qualifies — prompting you to review</li>
+      </ul>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/311" target="_blank">→ PR #311</a>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-date">May 12, 2026</div>
+    <div class="entry-content">
+      <h2>AI draft switches to quote mode once all fields are collected</h2>
+      <div class="tags">
+        <span class="tag tag-feat">Feature</span>
+      </div>
+      <p>Previously the AI always replied with a generic "we'll check availability" template. Now it detects when it has everything it needs and shifts into a confirmation tone — summarising the event details and moving toward a quote.</p>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/302" target="_blank">→ PR #302</a>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-date">May 12, 2026</div>
+    <div class="entry-content">
+      <h2>Document ingestion retries automatically on API timeout</h2>
+      <div class="tags">
+        <span class="tag tag-fix">Fix</span>
+        <span class="tag tag-perf">Reliability</span>
+      </div>
+      <p>Uploading a venue knowledge document would sometimes fail permanently when the Unstructured API timed out under load. Those jobs now retry up to 5 times with exponential backoff. If all retries are exhausted, the failure is recorded in the event log for review.</p>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/316" target="_blank">→ PR #316</a>
+    </div>
+  </div>
+
+  <!-- ── May 11, 2026 ───────────────────────────────────────── -->
+
+  <div class="entry">
+    <div class="entry-date">May 11, 2026</div>
+    <div class="entry-content">
+      <h2>Qualification status &amp; missing fields shown on booking detail</h2>
+      <div class="tags">
+        <span class="tag tag-feat">Feature</span>
+      </div>
+      <p>A new qualification panel on the booking request detail page shows the AI's fit assessment and lists exactly which fields are still missing — so you know at a glance whether a lead is ready to quote or still needs follow-up.</p>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/303" target="_blank">→ PR #303</a>
+    </div>
+  </div>
+
+  <!-- ── May 10, 2026 ───────────────────────────────────────── -->
+
+  <div class="entry">
+    <div class="entry-date">May 10, 2026</div>
+    <div class="entry-content">
+      <h2>AI drafts now read the full conversation, not just the first email</h2>
+      <div class="tags">
+        <span class="tag tag-feat">Feature</span>
+      </div>
+      <p>The AI draft writer now receives the complete back-and-forth — every inbound message and every sent reply — as context when composing a response. The booking detail page also gained a unified chronological thread view to match.</p>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/295" target="_blank">→ PR #295</a>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-date">May 10, 2026</div>
+    <div class="entry-content">
+      <h2>AI draft reply generated automatically when a booking request arrives</h2>
+      <div class="tags">
+        <span class="tag tag-feat">Feature</span>
+      </div>
+      <p>Every new booking request now gets an AI-drafted reply ready for your review — no manual trigger needed. The draft waits in a <em>Pending review</em> state and is only sent after you approve it.</p>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/283" target="_blank">→ PR #283</a>
+    </div>
+  </div>
+
+  <div class="entry">
+    <div class="entry-date">May 10, 2026</div>
+    <div class="entry-content">
+      <h2>Emails only marked as read after a draft is created</h2>
+      <div class="tags">
+        <span class="tag tag-fix">Fix</span>
+      </div>
+      <p>Previously every synced email was marked as read in your inbox, making it hard to tell which ones had actually been processed. Now an email is only marked seen when Toaster has successfully created a booking request <em>and</em> a draft reply.</p>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/285" target="_blank">→ PR #285</a>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Toaster · <a href="https://github.com/ericdahl-dev/toaster" style="color:var(--muted)">github.com/ericdahl-dev/toaster</a></p>
+</footer>
+
+</body>
+</html>

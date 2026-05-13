@@ -8,8 +8,8 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
 
   before do
     stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
-    allow(VenueEmbedder).to receive(:embed).and_return(fake_embedding)
-    allow(UnstructuredClient).to receive(:extract).and_return(fixture_text)
+    allow(VenueEmbedder).to receive(:embed).with(anything, account: anything).and_return(fake_embedding)
+    allow(UnstructuredClient).to receive(:extract).and_return({text: fixture_text, page_count: 3})
   end
 
   describe "#perform" do

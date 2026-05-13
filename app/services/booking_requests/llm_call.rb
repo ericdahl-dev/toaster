@@ -53,18 +53,27 @@ module BookingRequests
       response = client.chat(
         parameters: {
           model: self.class::MODEL,
-          response_format: { type: "json_object" },
+          response_format: {type: "json_object"},
           messages: [
-            { role: "system", content: self.class::SYSTEM_PROMPT },
-            { role: "user", content: prompt }
+            {role: "system", content: self.class::SYSTEM_PROMPT},
+            {role: "user", content: prompt}
           ],
           temperature: self.class::TEMPERATURE
         }
       )
+      @last_usage = response["usage"]
       JSON.parse(response.dig("choices", 0, "message", "content"))
     end
 
     def persist_run(prompt:, result:, latency_ms:, extra_attrs: {})
+      input_tokens = @last_usage&.dig("prompt_tokens")
+      output_tokens = @last_usage&.dig("completion_tokens")
+      cost = AiCostCalculator.openai_cost_cents(
+        model: self.class::MODEL,
+        input_tokens: input_tokens || 0,
+        output_tokens: output_tokens || 0
+      )
+
       AiRun.create!(
         account:,
         booking_request:,
@@ -74,6 +83,9 @@ module BookingRequests
         prompt:,
         response: result.to_json,
         latency_ms:,
+        input_tokens:,
+        output_tokens:,
+        estimated_cost_cents: cost,
         **extra_attrs
       )
     end

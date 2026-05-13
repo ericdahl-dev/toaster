@@ -18,7 +18,22 @@ class IngestVenueDocumentJob < ApplicationJob
     raise ConfigurationError, "OPENAI_API_KEY is not configured" if ENV["OPENAI_API_KEY"].blank?
 
     text = begin
-      UnstructuredClient.extract(doc.file_path)
+      result = UnstructuredClient.extract(doc.file_path)
+      page_count = result[:page_count]
+
+      AiRun.create!(
+        account: doc.venue.account,
+        run_type: "unstructured",
+        llm_model: "unstructured",
+        prompt_version: "1",
+        prompt: doc.source_filename,
+        response: "",
+        latency_ms: 0,
+        page_count: page_count,
+        estimated_cost_cents: AiCostCalculator.unstructured_cost_cents(page_count: page_count)
+      )
+
+      result[:text]
     rescue Net::ReadTimeout, Net::OpenTimeout, Errno::ETIMEDOUT => e
       raise ApiTimeoutError, e.message
     end
@@ -28,7 +43,7 @@ class IngestVenueDocumentJob < ApplicationJob
     doc.venue_chunks.delete_all
 
     chunks.each do |chunk_text|
-      embedding = VenueEmbedder.embed(chunk_text)
+      embedding = VenueEmbedder.embed(chunk_text, account: doc.venue.account)
       raise "OpenAI returned no embedding (check OPENAI_API_KEY and model access)" if embedding.nil?
 
       doc.venue_chunks.create!(content: chunk_text, embedding: embedding)
