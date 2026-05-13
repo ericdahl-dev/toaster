@@ -3,8 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Toaster — Release Notes</title>
+  <title>Toaster Changelog — What's New</title>
   <meta name="description" content="What's new in Toaster, the AI booking assistant for venue inquiries." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Toaster Changelog" />
+  <meta property="og:description" content="What's new in Toaster — the AI booking assistant for venue inquiries." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ericdahl-dev.github.io/toaster/" />
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -35,14 +42,18 @@
       padding: 24px 32px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: 16px;
     }
+
+    .header-left { display: flex; align-items: center; gap: 16px; }
 
     .logo {
       font-size: 22px;
       font-weight: 700;
       color: var(--amber);
       letter-spacing: -0.5px;
+      text-decoration: none;
     }
 
     .logo-sub {
@@ -50,10 +61,27 @@
       color: var(--muted);
     }
 
+    .header-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .header-links a {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .header-links a:hover { color: var(--amber); }
+
     main {
       max-width: 760px;
       margin: 0 auto;
       padding: 48px 32px;
+    }
+
+    .page-header {
+      margin-bottom: 48px;
     }
 
     h1 {
@@ -66,7 +94,6 @@
     .subtitle {
       font-size: 15px;
       color: var(--muted);
-      margin-bottom: 48px;
     }
 
     .entry {
@@ -113,11 +140,11 @@
       text-transform: uppercase;
     }
 
-    .tag-feat    { background: #1e3a2f; color: #4ade80; }
-    .tag-fix     { background: #3b1f1f; color: #f87171; }
-    .tag-perf    { background: #1e2a40; color: #60a5fa; }
+    .tag-feat     { background: #1e3a2f; color: #4ade80; }
+    .tag-fix      { background: #3b1f1f; color: #f87171; }
+    .tag-perf     { background: #1e2a40; color: #60a5fa; }
     .tag-refactor { background: #2d1f3d; color: #c4b5fd; }
-    .tag-chore   { background: #1f2937; color: #9ca3af; }
+    .tag-chore    { background: #1f2937; color: #9ca3af; }
 
     .entry-content p {
       font-size: 14px;
@@ -143,6 +170,26 @@
     }
     .pr-link:hover { color: var(--amber); }
 
+    /* Pagination */
+    .entry.hidden { display: none; }
+
+    .load-more-wrap {
+      text-align: center;
+      padding: 8px 0 48px;
+    }
+
+    #load-more-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13px;
+      padding: 10px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+    #load-more-btn:hover { border-color: var(--amber); color: var(--amber); }
+
     footer {
       border-top: 1px solid var(--border);
       padding: 24px 32px;
@@ -150,26 +197,56 @@
       font-size: 12px;
       color: var(--muted);
     }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--amber); }
 
     @media (max-width: 600px) {
       .entry { grid-template-columns: 1fr; gap: 4px; }
-      header { padding: 16px; }
+      header { padding: 16px; flex-wrap: wrap; }
       main { padding: 32px 16px; }
+      .header-links { display: none; }
     }
   </style>
 </head>
 <body>
 
 <header>
-  <div>
-    <div class="logo">🍞 Toaster</div>
-    <div class="logo-sub">AI booking assistant for venue inquiries</div>
+  <div class="header-left">
+    <div>
+      <a class="logo" href="https://ericdahl-dev.github.io/toaster/">🍞 Toaster</a>
+      <div class="logo-sub">AI booking assistant for venue inquiries</div>
+    </div>
   </div>
+  <nav class="header-links">
+    <a href="https://github.com/ericdahl-dev/toaster" target="_blank">GitHub</a>
+  </nav>
 </header>
 
 <main>
-  <h1>Release Notes</h1>
-  <p class="subtitle">What's been shipped — written for operators, venue managers, and the curious.</p>
+  <div class="page-header">
+    <h1>Changelog</h1>
+    <p class="subtitle">What's been shipped — written for operators, venue managers, and the curious.</p>
+  </div>
+
+  <!-- ── May 13, 2026 ───────────────────────────────────────── -->
+
+  <div class="entry">
+    <div class="entry-date">May 13, 2026</div>
+    <div class="entry-content">
+      <h2>AI and document processing spend is now tracked</h2>
+      <div class="tags">
+        <span class="tag tag-feat">Feature</span>
+      </div>
+      <p>Every AI call — classification, extraction, draft writing, embeddings, and document parsing — now records its token count and estimated cost. Costs are calculated using current OpenAI and Unstructured.io pricing and stored per run so you can see exactly where your spend is going.</p>
+      <ul>
+        <li>Token counts (input + output) stored on every OpenAI call</li>
+        <li>Page count tracked for every document ingested via Unstructured.io</li>
+        <li>Estimated cost in cents stored per run, summed in the ops dashboard</li>
+        <li>PostHog dashboard shows 30-day spend, daily trend by run type, and cost by model</li>
+      </ul>
+      <a class="pr-link" href="https://github.com/ericdahl-dev/toaster/pull/326" target="_blank">→ PR #326</a>
+    </div>
+  </div>
 
   <!-- ── May 12, 2026 ───────────────────────────────────────── -->
 
@@ -259,7 +336,7 @@
 
   <!-- ── May 11, 2026 ───────────────────────────────────────── -->
 
-  <div class="entry">
+  <div class="entry hidden">
     <div class="entry-date">May 11, 2026</div>
     <div class="entry-content">
       <h2>Qualification status &amp; missing fields shown on booking detail</h2>
@@ -273,7 +350,7 @@
 
   <!-- ── May 10, 2026 ───────────────────────────────────────── -->
 
-  <div class="entry">
+  <div class="entry hidden">
     <div class="entry-date">May 10, 2026</div>
     <div class="entry-content">
       <h2>AI drafts now read the full conversation, not just the first email</h2>
@@ -285,7 +362,7 @@
     </div>
   </div>
 
-  <div class="entry">
+  <div class="entry hidden">
     <div class="entry-date">May 10, 2026</div>
     <div class="entry-content">
       <h2>AI draft reply generated automatically when a booking request arrives</h2>
@@ -297,7 +374,7 @@
     </div>
   </div>
 
-  <div class="entry">
+  <div class="entry hidden">
     <div class="entry-date">May 10, 2026</div>
     <div class="entry-content">
       <h2>Emails only marked as read after a draft is created</h2>
@@ -309,11 +386,36 @@
     </div>
   </div>
 
+  <div class="load-more-wrap" id="load-more-wrap">
+    <button id="load-more-btn">Load older entries</button>
+  </div>
+
 </main>
 
 <footer>
-  <p>Toaster · <a href="https://github.com/ericdahl-dev/toaster" style="color:var(--muted)">github.com/ericdahl-dev/toaster</a></p>
+  <p>Toaster · <a href="https://github.com/ericdahl-dev/toaster" target="_blank">github.com/ericdahl-dev/toaster</a></p>
 </footer>
+
+<script>
+  const btn = document.getElementById('load-more-btn');
+  const wrap = document.getElementById('load-more-wrap');
+  const PAGE_SIZE = 5;
+
+  function showNext() {
+    const hidden = [...document.querySelectorAll('.entry.hidden')];
+    hidden.slice(0, PAGE_SIZE).forEach(el => el.classList.remove('hidden'));
+    if (document.querySelectorAll('.entry.hidden').length === 0) {
+      wrap.style.display = 'none';
+    }
+  }
+
+  btn.addEventListener('click', showNext);
+
+  // Hide button entirely if nothing is paginated
+  if (document.querySelectorAll('.entry.hidden').length === 0) {
+    wrap.style.display = 'none';
+  }
+</script>
 
 </body>
 </html>
