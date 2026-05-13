@@ -6,6 +6,7 @@ class SyncImapJob < ApplicationJob
 
   def perform(imap_connection_id)
     connection = ImapConnection.find(imap_connection_id)
+    account_id = connection.account_id
     result = InboxIngestion::Sync.call(
       adapter: InboxIngestion::ImapAdapter.new(imap_connection: connection)
     )
@@ -17,5 +18,12 @@ class SyncImapJob < ApplicationJob
       last_synced_uid: connection.reload.last_synced_uid
     )
     result
+  rescue => e
+    Telemetry.capture(
+      distinct_id: "account_#{account_id || imap_connection_id}",
+      event: "mail_sync_failed",
+      properties: {connection_id: imap_connection_id, error: e.message, error_class: e.class.name}
+    )
+    raise
   end
 end
