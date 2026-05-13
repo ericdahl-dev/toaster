@@ -1,6 +1,7 @@
 <% floating = local_assigns.fetch(:floating, false) %>
 <button type="button"
   class="theme-toggle<%= " theme-toggle--floating" if floating %>"
-  data-theme-target="icon"
   data-action="theme#toggle"
-  aria-label="Toggle color theme">☀</button>
+  aria-label="Toggle color theme">
+  <span class="theme-toggle__svg" data-theme-target="icon" aria-hidden="true"></span>
+</button>

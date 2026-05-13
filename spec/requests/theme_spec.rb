@@ -34,6 +34,7 @@ RSpec.describe "Color theme (GH-325)", type: :request do
       get "/"
 
       expect(response.body).to include('class="theme-toggle"')
+      expect(response.body).to include("theme-toggle__svg")
       expect(response.body).not_to include("theme-toggle--floating")
     end
 
