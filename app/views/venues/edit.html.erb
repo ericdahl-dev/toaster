@@ -208,11 +208,17 @@
               <% end %>
             </div>
           </div>
-          <%= button_to venue_document_path(@venue, doc), method: :delete,
-                data: {confirm: "Delete this document and all its chunks?"},
-                style: "background:none;border:none;color:#6b7280;cursor:pointer;font-size:12px;padding:4px 8px;white-space:nowrap" do %>
-            Delete
-          <% end %>
+          <div style="display:flex;align-items:center;gap:8px">
+            <%= form_with url: venue_document_path(@venue, doc), method: :patch, multipart: true, style: "display:flex;align-items:center;gap:4px" do |f| %>
+              <%= f.file_field :file, name: "document[file]", style: "font-size:11px;color:#9ca3af;width:160px" %>
+              <%= f.submit "Replace", style: "background:none;border:1px solid #4b5563;color:#9ca3af;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:4px;white-space:nowrap" %>
+            <% end %>
+            <%= button_to venue_document_path(@venue, doc), method: :delete,
+                  data: {confirm: "Delete this document and all its chunks?"},
+                  style: "background:none;border:none;color:#6b7280;cursor:pointer;font-size:12px;padding:4px 8px;white-space:nowrap" do %>
+              Delete
+            <% end %>
+          </div>
         </div>
       <% end %>
     </div>
