@@ -50,6 +50,15 @@ RSpec.describe "Admin::Accounts", type: :request do
         expect(response).to redirect_to(new_admin_account_path)
         expect(flash[:notice]).to be_present
       end
+
+      it "does not fire admin_account_created to PostHog in the test environment" do
+        sign_in_as(admin)
+        expect(PostHog).not_to receive(:capture)
+        post admin_accounts_path, params: {
+          account: { name: "New Venue Co" },
+          user: { name: "Owner Name", email: "owner@example.com", password: "password123" }
+        }
+      end
     end
 
     context "when signed in as admin with invalid params" do
