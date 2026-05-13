@@ -38,4 +38,17 @@ RSpec.describe SyncImapJob, type: :job do
       expect(Rails.logger).to have_received(:info).with(include("last_synced_uid"))
     end
   end
+
+  describe "failure telemetry" do
+    it "fires mail_sync_failed when InboxIngestion::Sync raises" do
+      connection = create(:imap_connection)
+      allow(InboxIngestion::Sync).to receive(:call).and_raise(StandardError, "IMAP boom")
+
+      expect(Telemetry).to receive(:capture).with(
+        hash_including(event: "mail_sync_failed", distinct_id: "account_#{connection.account_id}")
+      )
+
+      described_class.perform_now(connection.id)
+    end
+  end
 end
