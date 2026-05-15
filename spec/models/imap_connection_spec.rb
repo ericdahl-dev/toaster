@@ -60,4 +60,30 @@ RSpec.describe ImapConnection, type: :model do
       expect(results).not_to include(inactive)
     end
   end
+
+  describe "password encryption" do
+    it "encrypts the password at rest" do
+      connection = create(:imap_connection, password: "s3cr3t")
+      raw = ActiveRecord::Base.connection.execute(
+        "SELECT password FROM imap_connections WHERE id = #{connection.id}"
+      ).first["password"]
+
+      expect(raw).not_to eq("s3cr3t")
+      expect(raw).not_to be_nil
+    end
+
+    it "decrypts the password on read" do
+      connection = create(:imap_connection, password: "s3cr3t")
+      expect(connection.reload.password).to eq("s3cr3t")
+    end
+
+    it "does not expose the plaintext password in the raw column" do
+      connection = create(:imap_connection, password: "plaintext-password")
+      raw = ActiveRecord::Base.connection.execute(
+        "SELECT password FROM imap_connections WHERE id = #{connection.id}"
+      ).first["password"]
+
+      expect(raw).not_to include("plaintext-password")
+    end
+  end
 end
