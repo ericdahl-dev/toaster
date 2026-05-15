@@ -84,6 +84,16 @@ RSpec.describe Ops::ActivityFeed do
       expect(row.last_activity_at).to be_within(1.second).of(draft.created_at)
     end
 
+    it "executes at most 3 queries regardless of message volume" do
+      10.times { |i| make_thread_message(provider_thread_id: "t#{i}") }
+      count = 0
+      counter = ->(*) { count += 1 }
+      ActiveSupport::Notifications.subscribed(counter, "sql.active_record") do
+        described_class.call
+      end
+      expect(count).to be <= 3
+    end
+
     it "respects the limit parameter" do
       6.times { |i| make_thread_message(provider_thread_id: "t#{i}") }
       rows = described_class.call(limit: 3)

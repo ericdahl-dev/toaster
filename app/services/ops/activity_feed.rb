@@ -4,8 +4,6 @@ module Ops
   class ActivityFeed
     Row = Data.define(:account_id, :provider, :kind, :provider_thread_id, :anchor_inbox_message_id, :last_activity_at)
 
-    MESSAGE_SCAN_LIMIT = 400
-
     def self.call(limit: 50)
       new(limit: limit).call
     end
@@ -15,54 +13,56 @@ module Ops
     end
 
     def call
-      recent = InboxMessage
-        .order(Arel.sql("COALESCE(received_at, created_at) DESC"))
-        .limit(MESSAGE_SCAN_LIMIT)
-        .to_a
-
-      buckets = Hash.new { |h, k| h[k] = [] }
-      recent.each { |m| buckets[thread_key_for(m)] << m }
-
       activity = {}
-      buckets.each_key do |key|
-        msgs = buckets[key]
-        activity[key] = msgs.map { |m| message_activity_ts(m) }.max
+
+      connection.select_all(message_peaks_sql).each do |row|
+        key = build_key(row)
+        peak = parse_sql_time(row["peak"])
+        activity[key] = peak
       end
 
       merge_draft_peaks!(activity)
 
       sorted_keys = activity.sort_by { |_, t| -t.to_f }.first(@limit).map(&:first)
-
       sorted_keys.map { |key| build_row(key, activity[key]) }
     end
 
     private
 
-    def thread_key_for(message)
-      if message.provider_thread_id.present?
-        [ :thread, message.account_id, message.provider, message.provider_thread_id ]
-      else
-        [ :singleton, message.account_id, message.provider, message.id ]
-      end
+    def connection
+      ActiveRecord::Base.connection
     end
 
-    def message_activity_ts(message)
-      message.received_at || message.created_at
+    def message_peaks_sql
+      <<~SQL.squish
+        SELECT
+          account_id,
+          provider,
+          CASE WHEN provider_thread_id IS NOT NULL THEN 'thread' ELSE 'singleton' END AS kind,
+          provider_thread_id,
+          CASE WHEN provider_thread_id IS NULL THEN id ELSE NULL END AS anchor_inbox_message_id,
+          MAX(COALESCE(received_at, created_at)) AS peak
+        FROM inbox_messages
+        GROUP BY
+          account_id,
+          provider,
+          kind,
+          provider_thread_id,
+          anchor_inbox_message_id
+      SQL
     end
 
     def merge_draft_peaks!(activity)
-      connection = ActiveRecord::Base.connection
-
       connection.select_all(draft_peaks_thread_sql).each do |row|
-        key = [ :thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"] ]
+        key = [:thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"]]
         peak = parse_sql_time(row["peak"])
-        activity[key] = [ activity[key], peak ].compact.max
+        activity[key] = [activity[key], peak].compact.max
       end
 
       connection.select_all(draft_peaks_singleton_sql).each do |row|
-        key = [ :singleton, row["account_id"].to_i, row["provider"], row["anchor_id"].to_i ]
+        key = [:singleton, row["account_id"].to_i, row["provider"], row["anchor_id"].to_i]
         peak = parse_sql_time(row["peak"])
-        activity[key] = [ activity[key], peak ].compact.max
+        activity[key] = [activity[key], peak].compact.max
       end
     end
 
@@ -99,6 +99,15 @@ module Ops
         WHERE inbox_messages.provider_thread_id IS NULL
         GROUP BY booking_requests.account_id, inbox_messages.provider, inbox_messages.id
       SQL
+    end
+
+    def build_key(row)
+      kind = row["kind"]
+      if kind == "thread"
+        [:thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"]]
+      else
+        [:singleton, row["account_id"].to_i, row["provider"], row["anchor_inbox_message_id"].to_i]
+      end
     end
 
     def parse_sql_time(value)
