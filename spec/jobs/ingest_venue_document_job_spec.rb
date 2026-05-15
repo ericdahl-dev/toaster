@@ -9,6 +9,9 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
   before do
     stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
     allow(VenueEmbedder).to receive(:embed).with(anything, account: anything).and_return(fake_embedding)
+    allow(VenueEmbedder).to receive(:embed_batch).with(anything, account: anything).and_wrap_original do |_m, texts, account:|
+      texts.map { fake_embedding }
+    end
     allow(UnstructuredClient).to receive(:extract).and_return({text: fixture_text, page_count: 3})
   end
 
@@ -48,10 +51,20 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
       expect(UnstructuredClient).to have_received(:extract).with(doc.file_path)
     end
 
-    it "requests embeddings for each chunk" do
+    it "requests embeddings via a single batch call" do
       described_class.perform_now(doc.id)
 
-      expect(VenueEmbedder).to have_received(:embed).at_least(:once)
+      expect(VenueEmbedder).to have_received(:embed_batch).once
+      expect(VenueEmbedder).not_to have_received(:embed)
+    end
+
+    it "calls embed_batch exactly once regardless of chunk count" do
+      long_text = "paragraph content. " * 200
+      allow(UnstructuredClient).to receive(:extract).and_return({text: long_text, page_count: 1})
+
+      described_class.perform_now(doc.id)
+
+      expect(VenueEmbedder).to have_received(:embed_batch).once
     end
 
     context "when UnstructuredClient raises" do
@@ -76,9 +89,9 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
       end
     end
 
-    context "when VenueEmbedder raises" do
+    context "when VenueEmbedder.embed_batch raises" do
       before do
-        allow(VenueEmbedder).to receive(:embed).and_raise(RuntimeError, "OpenAI error")
+        allow(VenueEmbedder).to receive(:embed_batch).and_raise(RuntimeError, "OpenAI error")
       end
 
       it "transitions the doc to failed and re-raises" do

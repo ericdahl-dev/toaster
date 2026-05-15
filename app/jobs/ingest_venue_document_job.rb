@@ -42,12 +42,13 @@ class IngestVenueDocumentJob < ApplicationJob
 
     doc.venue_chunks.delete_all
 
-    chunks.each do |chunk_text|
-      embedding = VenueEmbedder.embed(chunk_text, account: doc.venue.account)
-      raise "OpenAI returned no embedding (check OPENAI_API_KEY and model access)" if embedding.nil?
+    embeddings = VenueEmbedder.embed_batch(chunks, account: doc.venue.account)
+    raise "OpenAI returned no embeddings (check OPENAI_API_KEY and model access)" if embeddings.any?(&:nil?)
 
-      doc.venue_chunks.create!(content: chunk_text, embedding: embedding)
+    records = chunks.zip(embeddings).map do |chunk_text, embedding|
+      {content: chunk_text, embedding: embedding}
     end
+    doc.venue_chunks.create!(records)
 
     doc.update!(status: :ready, chunk_count: chunks.size)
   rescue ApiTimeoutError => e
