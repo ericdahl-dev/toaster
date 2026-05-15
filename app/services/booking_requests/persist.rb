@@ -54,10 +54,27 @@ module BookingRequests
             message:
           )
         end
-      rescue ActiveRecord::RecordNotUnique
+      rescue ActiveRecord::RecordNotUnique => e
         attempts += 1
-        retry if attempts <= 3
-        raise
+        if attempts <= 3
+          Rails.logger.warn({
+            "event" => "booking_request_persist_retry",
+            "attempts" => attempts,
+            "error_class" => e.class.name,
+            "error_message" => e.message,
+            "inbox_message_id" => inbox_message.id
+          })
+          retry
+        else
+          Rails.logger.error({
+            "event" => "booking_request_persist_failed",
+            "attempts" => attempts,
+            "error_class" => e.class.name,
+            "error_message" => e.message,
+            "inbox_message_id" => inbox_message.id
+          })
+          raise
+        end
       end
     end
 
@@ -98,7 +115,7 @@ module BookingRequests
         message.sent_at = inbox_message.received_at
         message.save!
         message
-      rescue ActiveRecord::RecordNotUnique
+      rescue ActiveRecord::RecordNotUnique => e
         attempts += 1
 
         message = Message.find_by(
@@ -107,7 +124,17 @@ module BookingRequests
           provider_message_id: canonical_message_id
         )
 
-        retry if message.nil? && attempts <= 3
+        if message.nil? && attempts <= 3
+          Rails.logger.warn({
+            "event" => "canonical_message_persist_retry",
+            "attempts" => attempts,
+            "error_class" => e.class.name,
+            "error_message" => e.message,
+            "inbox_message_id" => inbox_message.id
+          })
+          retry
+        end
+
         raise if message.nil?
 
         message
