@@ -5,10 +5,13 @@ class InboxFiltersController < ApplicationController
   before_action :set_connection
 
   def create
+    venue = current_user.account.venues.find_by(id: inbox_filter_params[:venue_id])
+    return render plain: "Not Found", status: :not_found unless venue
+
     position = @connection.inbox_filters.count
     filter = @connection.inbox_filters.build(
-      keyword: params[:inbox_filter][:keyword],
-      venue_id: params[:inbox_filter][:venue_id],
+      keyword: inbox_filter_params[:keyword],
+      venue: venue,
       position: position
     )
     if filter.save
@@ -29,5 +32,9 @@ class InboxFiltersController < ApplicationController
   def set_connection
     @connection = current_user.account.imap_connections.find_by(id: params[:mail_connection_id])
     render plain: "Not Found", status: :not_found unless @connection
+  end
+
+  def inbox_filter_params
+    params.require(:inbox_filter).permit(:keyword, :venue_id)
   end
 end
