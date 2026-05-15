@@ -1,4 +1,6 @@
 class ImapConnection < ApplicationRecord
+  encrypts :password
+
   belongs_to :account
 
   has_many :inbox_filters, dependent: :destroy
