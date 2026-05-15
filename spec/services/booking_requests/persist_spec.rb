@@ -91,6 +91,29 @@ RSpec.describe BookingRequests::Persist do
       end
     end
 
+    context "when a RecordNotUnique race triggers the outer retry" do
+      it "logs a warning on each retry attempt" do
+        service = described_class.new(inbox_message:, account:)
+        call_count = 0
+        allow(ActiveRecord::Base).to receive(:transaction).and_wrap_original do |orig, *args, **kwargs, &block|
+          call_count += 1
+          raise ActiveRecord::RecordNotUnique, "duplicate" if call_count == 1
+          orig.call(*args, **kwargs, &block)
+        end
+
+        expect(Rails.logger).to receive(:warn).with(hash_including("attempts", "error_class", "inbox_message_id")).at_least(:once)
+        service.call(raw)
+      end
+
+      it "logs an error before re-raising when retries exhausted" do
+        service = described_class.new(inbox_message:, account:)
+        allow(ActiveRecord::Base).to receive(:transaction).and_raise(ActiveRecord::RecordNotUnique, "duplicate")
+
+        expect(Rails.logger).to receive(:error).with(hash_including("attempts", "error_class", "inbox_message_id"))
+        expect { service.call(raw) }.to raise_error(ActiveRecord::RecordNotUnique)
+      end
+    end
+
     context "when called twice with the same inbox_message" do
       it "does not create a duplicate BookingRequest" do
         described_class.call(inbox_message:, raw:, account:)
