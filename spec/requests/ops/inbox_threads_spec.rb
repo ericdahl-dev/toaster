@@ -15,6 +15,13 @@ RSpec.describe "Ops inbox threads", type: :request do
     end
   end
 
+  def count_queries(&block)
+    count = 0
+    counter = ->(*, **) { count += 1 }
+    ActiveSupport::Notifications.subscribed(counter, "sql.active_record", &block)
+    count
+  end
+
   describe "GET /ops/inbox_threads" do
     it "returns 401 when the token header is missing" do
       get "/ops/inbox_threads"
@@ -61,6 +68,42 @@ RSpec.describe "Ops inbox threads", type: :request do
         "anchor_inbox_message_id" => nil
       )
       expect(threads.first.fetch("last_activity_at")).to be_present
+    end
+
+    it "executes a bounded number of queries regardless of thread count" do
+      account = create(:account)
+      5.times do |i|
+        create(
+          :inbox_message,
+          account: account,
+          provider: "imap",
+          provider_thread_id: "thread-#{i}",
+          provider_message_id: "msg-#{i}",
+          received_at: i.days.ago
+        )
+      end
+
+      baseline_queries = count_queries do
+        get "/ops/inbox_threads", headers: {"X-Ops-Token" => "secret-token"}
+      end
+
+      account2 = create(:account)
+      10.times do |i|
+        create(
+          :inbox_message,
+          account: account2,
+          provider: "imap",
+          provider_thread_id: "thread-#{i}",
+          provider_message_id: "msg2-#{i}",
+          received_at: i.days.ago
+        )
+      end
+
+      scaled_queries = count_queries do
+        get "/ops/inbox_threads", headers: {"X-Ops-Token" => "secret-token"}
+      end
+
+      expect(scaled_queries).to be <= baseline_queries + 2
     end
   end
 
