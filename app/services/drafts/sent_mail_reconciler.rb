@@ -14,6 +14,7 @@ module Drafts
   # sufficient for short email bodies without introducing gem dependencies.
   class SentMailReconciler
     MODIFIED_THRESHOLD = 0.50
+    MAX_COMPARE_CHARS = 4000
 
     Result = Struct.new(:outcome, :sent_body, :similarity, keyword_init: true)
 
@@ -126,8 +127,8 @@ module Drafts
     end
 
     def body_similarity(original, sent)
-      a = normalize(original)
-      b = normalize(sent)
+      a = normalize(original)[0, MAX_COMPARE_CHARS]
+      b = normalize(sent)[0, MAX_COMPARE_CHARS]
       return 1.0 if a == b
       return 0.0 if a.empty? && b.empty?
       return 0.0 if a.empty? || b.empty?
