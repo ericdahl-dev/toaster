@@ -75,3 +75,33 @@ mise exec -- bundle exec rspec
 - Work is NOT complete until `git push` succeeds
 - NEVER stop before pushing
 - NEVER say "ready to push when you are" — YOU must push
+
+## Cursor Cloud specific instructions
+
+### Services
+
+| Service | Start command | Notes |
+|---------|--------------|-------|
+| PostgreSQL 16 | `sudo pg_ctlcluster 16 main start` | Must be running before any Rails command. pgvector extension installed. |
+| Rails (Puma) | `mise exec -- bin/rails server -b 0.0.0.0 -p 3000` | GoodJob runs async inside Puma in dev (no separate worker needed). |
+
+### Environment variables
+
+The following env vars are set in `~/.bashrc` and required for tests/dev:
+
+- `PGGSSENCMODE=disable` — prevents libpq GSS segfaults in forked workers
+- `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY` / `ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY` / `ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT` — required by tests that touch encrypted columns (e.g. `ImapConnection`). CI gets these from GitHub Secrets; locally, any 12+ char strings work.
+
+### Key commands
+
+- **Tests:** `mise exec -- bundle exec rspec` (see README for scoped runs)
+- **Lint:** `mise exec -- bundle exec rubocop` (pre-existing offenses exist; use `-a` to auto-fix)
+- **Tailwind build:** `mise exec -- bundle exec rails tailwindcss:build` (needed before first server start)
+- **DB prepare:** `mise exec -- bin/rails db:prepare` (creates dev + test DBs, runs migrations)
+- **DB seed:** `mise exec -- bin/rails db:seed` (creates Account id=1, dev user `dev@toaster.local` / `password123`)
+
+### Gotchas
+
+- Doppler is **not available** in Cloud Agent VMs. Do not use `bin/dev` (it wraps `doppler run`). Start Rails directly with `mise exec -- bin/rails server`.
+- Sign-up (`/users/sign_up`) is disabled; use `db:seed` to create dev user, or Rails runner/console.
+- `DATABASE_URL` is not needed when PostgreSQL runs locally via Unix socket (the default in `config/database.yml`).
