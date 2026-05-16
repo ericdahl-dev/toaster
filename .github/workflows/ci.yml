@@ -7,6 +7,26 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: RuboCop
+        run: bundle exec rubocop --format github
+
+      - name: Brakeman
+        run: bundle exec brakeman -q --no-pager
+
   backend:
     name: Backend test suite
     runs-on: ubuntu-latest
@@ -41,14 +61,25 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.4.9
+          ruby-version: .ruby-version
           bundler-cache: true
 
       - name: Prepare database
         run: bundle exec rails db:prepare
+
+      - name: Check schema drift
+        run: git diff --exit-code db/schema.rb
 
       - name: Build Tailwind CSS
         run: bundle exec rails tailwindcss:build
 
       - name: Run backend specs
         run: bundle exec rspec
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7

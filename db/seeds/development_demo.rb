@@ -139,6 +139,4 @@ class DevelopmentDemoSeeds
       m.save!
     end
   end
-
-
 end

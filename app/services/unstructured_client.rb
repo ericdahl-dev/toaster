@@ -32,6 +32,6 @@ class UnstructuredClient
     elements = JSON.parse(response.body)
     text = elements.map { |el| el["text"] }.compact.join("\n\n")
     page_count = elements.filter_map { |el| el.dig("metadata", "page_number") }.max || 1
-    {text: text, page_count: page_count}
+    { text: text, page_count: page_count }
   end
 end

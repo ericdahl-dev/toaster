@@ -46,7 +46,7 @@ class IngestVenueDocumentJob < ApplicationJob
     raise "OpenAI returned no embeddings (check OPENAI_API_KEY and model access)" if embeddings.any?(&:nil?)
 
     records = chunks.zip(embeddings).map do |chunk_text, embedding|
-      {content: chunk_text, embedding: embedding}
+      { content: chunk_text, embedding: embedding }
     end
     doc.venue_chunks.create!(records)
 

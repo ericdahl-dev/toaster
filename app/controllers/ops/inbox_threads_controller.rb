@@ -24,9 +24,9 @@ module Ops
         provider_thread_id: params[:provider_thread_id],
         anchor_inbox_message_id: params[:anchor_inbox_message_id]&.to_i
       )
-      render json: {inbox_thread: result}
+      render json: { inbox_thread: result }
     rescue ActiveRecord::RecordNotFound
-      render json: {error: "Inbox thread not found"}, status: :not_found
+      render json: { error: "Inbox thread not found" }, status: :not_found
     end
 
     private
@@ -50,7 +50,7 @@ module Ops
       InboxMessage
         .where(provider_thread_id: thread_ids)
         .to_a
-        .group_by { |m| [m.account_id, m.provider, m.provider_thread_id] }
+        .group_by { |m| [ m.account_id, m.provider, m.provider_thread_id ] }
     end
 
     def load_singleton_messages(singleton_rows)
@@ -66,7 +66,7 @@ module Ops
       thread_ids = thread_rows.map(&:provider_thread_id).compact.uniq
       BookingRequest
         .joins(:conversation_thread)
-        .where(conversation_threads: {provider_thread_id: thread_ids})
+        .where(conversation_threads: { provider_thread_id: thread_ids })
         .includes(:conversation_thread)
         .to_a
         .group_by { |br| br.conversation_thread.provider_thread_id }
@@ -85,9 +85,9 @@ module Ops
 
     def build_thread_list_row(row, messages_by_thread, messages_by_id, bookings_by_thread, bookings_by_message)
       messages = if row.kind == "thread"
-        messages_by_thread[[row.account_id, row.provider, row.provider_thread_id]] || []
+        messages_by_thread[[ row.account_id, row.provider, row.provider_thread_id ]] || []
       else
-        [messages_by_id[row.anchor_inbox_message_id]].compact
+        [ messages_by_id[row.anchor_inbox_message_id] ].compact
       end
 
       preview = preview_message(messages)

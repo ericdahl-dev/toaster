@@ -8,8 +8,8 @@
 module AiCostCalculator
   # USD per 1M tokens
   OPENAI_RATES = {
-    "gpt-4o-mini" => {input: 0.15, output: 0.60},
-    "text-embedding-3-large" => {input: 0.13, output: 0.0}
+    "gpt-4o-mini" => { input: 0.15, output: 0.60 },
+    "text-embedding-3-large" => { input: 0.13, output: 0.0 }
   }.freeze
 
   # USD per page

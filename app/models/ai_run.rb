@@ -6,7 +6,7 @@ class AiRun < ApplicationRecord
 
   validates :llm_model, presence: true
   validates :prompt, presence: true
-  validates :run_type, presence: true, inclusion: {in: RUN_TYPES}
+  validates :run_type, presence: true, inclusion: { in: RUN_TYPES }
 
   validate :booking_request_belongs_to_account
 

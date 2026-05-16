@@ -22,7 +22,7 @@ class SyncImapJob < ApplicationJob
     Telemetry.capture(
       distinct_id: "account_#{account_id || imap_connection_id}",
       event: "mail_sync_failed",
-      properties: {connection_id: imap_connection_id, error: e.message, error_class: e.class.name}
+      properties: { connection_id: imap_connection_id, error: e.message, error_class: e.class.name }
     )
     raise
   end

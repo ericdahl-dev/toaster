@@ -9,15 +9,15 @@ class UpController < ApplicationController
     healthy = checks.values.all? { |c| c[:ok] }
     status = healthy ? :ok : :service_unavailable
 
-    render json: {status: healthy ? "ok" : "degraded", service: "toaster-backend", checks: checks}, status: status
+    render json: { status: healthy ? "ok" : "degraded", service: "toaster-backend", checks: checks }, status: status
   end
 
   private
 
   def database_check
     ActiveRecord::Base.connection.execute("SELECT 1")
-    {ok: true}
+    { ok: true }
   rescue => e
-    {ok: false, error: e.message}
+    { ok: false, error: e.message }
   end
 end

@@ -54,15 +54,15 @@ module Ops
 
     def merge_draft_peaks!(activity)
       connection.select_all(draft_peaks_thread_sql).each do |row|
-        key = [:thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"]]
+        key = [ :thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"] ]
         peak = parse_sql_time(row["peak"])
-        activity[key] = [activity[key], peak].compact.max
+        activity[key] = [ activity[key], peak ].compact.max
       end
 
       connection.select_all(draft_peaks_singleton_sql).each do |row|
-        key = [:singleton, row["account_id"].to_i, row["provider"], row["anchor_id"].to_i]
+        key = [ :singleton, row["account_id"].to_i, row["provider"], row["anchor_id"].to_i ]
         peak = parse_sql_time(row["peak"])
-        activity[key] = [activity[key], peak].compact.max
+        activity[key] = [ activity[key], peak ].compact.max
       end
     end
 
@@ -104,9 +104,9 @@ module Ops
     def build_key(row)
       kind = row["kind"]
       if kind == "thread"
-        [:thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"]]
+        [ :thread, row["account_id"].to_i, row["provider"], row["provider_thread_id"] ]
       else
-        [:singleton, row["account_id"].to_i, row["provider"], row["anchor_inbox_message_id"].to_i]
+        [ :singleton, row["account_id"].to_i, row["provider"], row["anchor_inbox_message_id"].to_i ]
       end
     end
 

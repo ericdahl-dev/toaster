@@ -134,7 +134,7 @@ RSpec.describe Drafts::SentMailReconciler do
   describe "body_similarity (private — tested via outcomes)" do
     it "treats whitespace-normalised identical bodies as 1.0" do
       draft.update!(original_body: "Hello   world")
-      stub_sent_search([1])
+      stub_sent_search([ 1 ])
       stub_sent_message("Hello world")
       result = described_class.call(draft: draft, imap_connection: imap_connection)
       expect(result.similarity).to eq(1.0)
@@ -143,7 +143,7 @@ RSpec.describe Drafts::SentMailReconciler do
     it "caps input at MAX_COMPARE_CHARS before LCS to bound runtime" do
       long_body = "a" * 10_000
       draft.update!(original_body: long_body)
-      stub_sent_search([1])
+      stub_sent_search([ 1 ])
       stub_sent_message(long_body)
       result = described_class.call(draft: draft, imap_connection: imap_connection)
       expect(result.similarity).to eq(1.0)
@@ -155,7 +155,7 @@ RSpec.describe Drafts::SentMailReconciler do
       base = "x" * (cap - 50)
       draft.update!(original_body: base)
       sent = ("x" * (cap - 50)) + ("y" * 50)
-      stub_sent_search([1])
+      stub_sent_search([ 1 ])
       stub_sent_message(sent)
       result = described_class.call(draft: draft, imap_connection: imap_connection)
       expect(result.outcome).to eq(:modified)
