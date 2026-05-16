@@ -1,8 +1,12 @@
 {
   "ignored_warnings": [
     {
+      "fingerprint": "c3097ab4427a3e80c1c0813d3d2b84683f0c67d2d11f00800aab3686660662a4",
+      "note": "update action: file_path is scoped to current_user.account venues and validated against a safe directory prefix via File.expand_path + start_with? before deletion"
+    },
+    {
       "fingerprint": "46e556215496bbce2a2e6f31fbaeb3c10096609b0ac620b1df865991c21559f9",
-      "note": "file_path is scoped to current_user.account venues and validated against a safe directory prefix via File.expand_path + start_with? before deletion"
+      "note": "destroy action: file_path is scoped to current_user.account venues and validated against a safe directory prefix via File.expand_path + start_with? before deletion"
     }
   ]
 }
