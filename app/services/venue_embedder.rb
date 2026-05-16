@@ -10,7 +10,7 @@ class VenueEmbedder
     return nil if api_key.nil?
 
     client = OpenAI::Client.new(access_token: api_key)
-    response = client.embeddings(parameters: {model: EMBEDDING_MODEL, input: text})
+    response = client.embeddings(parameters: { model: EMBEDDING_MODEL, input: text })
 
     if account
       input_tokens = response.dig("usage", "total_tokens")
@@ -40,7 +40,7 @@ class VenueEmbedder
     return texts.map { nil } if api_key.nil?
 
     client = OpenAI::Client.new(access_token: api_key)
-    response = client.embeddings(parameters: {model: EMBEDDING_MODEL, input: texts})
+    response = client.embeddings(parameters: { model: EMBEDDING_MODEL, input: texts })
 
     if account
       input_tokens = response.dig("usage", "total_tokens")

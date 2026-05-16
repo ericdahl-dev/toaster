@@ -15,7 +15,7 @@ RSpec.describe "InboxFilters", type: :request do
       it "creates a filter when venue belongs to the current account" do
         expect {
           post "/mail_connections/#{connection.id}/inbox_filters",
-            params: {inbox_filter: {keyword: "wedding", venue_id: venue.id}}
+            params: { inbox_filter: { keyword: "wedding", venue_id: venue.id } }
         }.to change(InboxFilter, :count).by(1)
 
         expect(response).to have_http_status(:redirect)
@@ -26,7 +26,7 @@ RSpec.describe "InboxFilters", type: :request do
 
         expect {
           post "/mail_connections/#{connection.id}/inbox_filters",
-            params: {inbox_filter: {keyword: "wedding", venue_id: other_venue.id}}
+            params: { inbox_filter: { keyword: "wedding", venue_id: other_venue.id } }
         }.not_to change(InboxFilter, :count)
 
         expect(response).to have_http_status(:not_found)
@@ -35,7 +35,7 @@ RSpec.describe "InboxFilters", type: :request do
       it "returns 404 when venue_id is absent" do
         expect {
           post "/mail_connections/#{connection.id}/inbox_filters",
-            params: {inbox_filter: {keyword: "wedding"}}
+            params: { inbox_filter: { keyword: "wedding" } }
         }.not_to change(InboxFilter, :count)
 
         expect(response).to have_http_status(:not_found)
@@ -45,7 +45,7 @@ RSpec.describe "InboxFilters", type: :request do
     context "when signed out" do
       it "redirects to login" do
         post "/mail_connections/#{connection.id}/inbox_filters",
-          params: {inbox_filter: {keyword: "wedding", venue_id: venue.id}}
+          params: { inbox_filter: { keyword: "wedding", venue_id: venue.id } }
 
         expect(response).to have_http_status(:redirect)
         expect(response.location).to include("/login")

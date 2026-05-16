@@ -84,7 +84,7 @@ RSpec.describe "Ops inbox threads", type: :request do
       end
 
       baseline_queries = count_queries do
-        get "/ops/inbox_threads", headers: {"X-Ops-Token" => "secret-token"}
+        get "/ops/inbox_threads", headers: { "X-Ops-Token" => "secret-token" }
       end
 
       account2 = create(:account)
@@ -100,7 +100,7 @@ RSpec.describe "Ops inbox threads", type: :request do
       end
 
       scaled_queries = count_queries do
-        get "/ops/inbox_threads", headers: {"X-Ops-Token" => "secret-token"}
+        get "/ops/inbox_threads", headers: { "X-Ops-Token" => "secret-token" }
       end
 
       expect(scaled_queries).to be <= baseline_queries + 2

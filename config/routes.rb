@@ -71,7 +71,7 @@ Rails.application.routes.draw do
     resources :inbox_filters, only: [ :create, :destroy ]
   end
   resources :venues, only: [ :index, :new, :create, :edit, :update, :destroy ] do
-    resources :documents, only: [:create, :update, :destroy], controller: "venue_documents"
+    resources :documents, only: [ :create, :update, :destroy ], controller: "venue_documents"
   end
   resources :inbox_threads, only: [ :index, :show ]
 end

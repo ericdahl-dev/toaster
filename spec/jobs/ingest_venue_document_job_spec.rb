@@ -12,7 +12,7 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
     allow(VenueEmbedder).to receive(:embed_batch).with(anything, account: anything).and_wrap_original do |_m, texts, account:|
       texts.map { fake_embedding }
     end
-    allow(UnstructuredClient).to receive(:extract).and_return({text: fixture_text, page_count: 3})
+    allow(UnstructuredClient).to receive(:extract).and_return({ text: fixture_text, page_count: 3 })
   end
 
   describe "#perform" do
@@ -60,7 +60,7 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
 
     it "calls embed_batch exactly once regardless of chunk count" do
       long_text = "paragraph content. " * 200
-      allow(UnstructuredClient).to receive(:extract).and_return({text: long_text, page_count: 1})
+      allow(UnstructuredClient).to receive(:extract).and_return({ text: long_text, page_count: 1 })
 
       described_class.perform_now(doc.id)
 
@@ -163,7 +163,7 @@ RSpec.describe IngestVenueDocumentJob, type: :job do
 
       it "records failure in EventLog" do
         job = described_class.new
-        job.arguments = [doc.id]
+        job.arguments = [ doc.id ]
         error = IngestVenueDocumentJob::ApiTimeoutError.new("API timeout")
 
         job.discard_with_event_log(doc.id, error)

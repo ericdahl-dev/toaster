@@ -77,7 +77,7 @@ RSpec.describe "VenueDocuments", type: :request do
         create(:venue_chunk, venue_document: doc)
 
         expect {
-          patch venue_document_path(venue, doc), params: {document: {file: new_file}}
+          patch venue_document_path(venue, doc), params: { document: { file: new_file } }
         }.to have_enqueued_job(IngestVenueDocumentJob).with(doc.id)
 
         doc.reload
@@ -89,20 +89,20 @@ RSpec.describe "VenueDocuments", type: :request do
       end
 
       it "returns unprocessable when no file given" do
-        patch venue_document_path(venue, doc), params: {document: {file: nil}}
+        patch venue_document_path(venue, doc), params: { document: { file: nil } }
         expect(response).to have_http_status(:unprocessable_content)
       end
 
       it "rejects replace for another account's venue" do
         other_venue = create(:venue)
-        patch venue_document_path(other_venue, doc), params: {document: {file: new_file}}
+        patch venue_document_path(other_venue, doc), params: { document: { file: new_file } }
         expect(response).to have_http_status(:not_found)
       end
     end
 
     context "when signed out" do
       it "redirects to login" do
-        patch venue_document_path(venue, doc), params: {document: {file: new_file}}
+        patch venue_document_path(venue, doc), params: { document: { file: new_file } }
         expect(response).to have_http_status(:redirect)
         expect(response.location).to include("/login")
       end
