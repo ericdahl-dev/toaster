@@ -2,10 +2,15 @@ module Ops
   class InboxMessagesController < ApplicationController
     skip_forgery_protection
     include Ops::RequireToken
+    include Ops::AccountScope
     include Ops::BookingPayload
 
+    before_action :require_ops_account!
+
     def index
-      messages = InboxMessage
+      return if performed?
+
+      messages = ops_account.inbox_messages
         .inbound
         .includes(:booking_request)
         .order(received_at: :desc, created_at: :desc)
@@ -30,7 +35,9 @@ module Ops
     end
 
     def show
-      message = InboxMessage.inbound.includes(:booking_request).find(params[:id])
+      return if performed?
+
+      message = ops_account.inbox_messages.inbound.includes(:booking_request).find(params[:id])
 
       render json: {
         inbox_message: {

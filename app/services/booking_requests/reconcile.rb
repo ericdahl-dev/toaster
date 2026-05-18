@@ -69,8 +69,9 @@ module BookingRequests
     def assign_venue(booking_request)
       return if venue.nil?
       return if booking_request.venue_id.present?
+      return unless venue.account_id == booking_request.account_id
 
-      booking_request.update_column(:venue_id, venue.id)
+      booking_request.update!(venue_id: venue.id)
     end
 
     def log_inbound_recorded(booking_request)

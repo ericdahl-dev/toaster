@@ -126,7 +126,7 @@ RSpec.describe InboxIngestion::Sync do
       expect(EventLog.where(event_type: "booking_request.created", subject_type: "BookingRequest").count).to eq(1)
     end
 
-    context "with an adapter that has imap_connection and inbox filters" do
+    context "with ImapAdapter and inbox filters" do
       it "resolves venue via FilterMatcher and passes it to Reconcile" do
         account = create(:account)
         venue = create(:venue, account: account)
@@ -139,19 +139,15 @@ RSpec.describe InboxIngestion::Sync do
           nil
         end
 
-        adapter = Object.new
-        adapter.define_singleton_method(:account) { account }
-        adapter.define_singleton_method(:imap_connection) { imap_connection }
-        adapter.define_singleton_method(:each_normalized_message) do |&block|
-          block.call(
-            provider: "imap",
-            provider_message_id: "<w@example.com>",
-            direction: "inbound",
-            subject: "Wedding inquiry",
-            raw_payload: {}
-          )
-        end
-        adapter.define_singleton_method(:write_checkpoint_after_batch) { |**| nil }
+        payload = {
+          provider: "imap",
+          provider_message_id: "<w@example.com>",
+          direction: "inbound",
+          subject: "Wedding inquiry",
+          raw_payload: {}
+        }
+        fetcher = instance_double(Imap::Fetcher, fetch_messages: [ payload ], mailbox_peak_uid: nil)
+        adapter = InboxIngestion::ImapAdapter.new(imap_connection: imap_connection, fetcher: fetcher)
 
         described_class.call(adapter: adapter)
 
@@ -168,19 +164,15 @@ RSpec.describe InboxIngestion::Sync do
           nil
         end
 
-        adapter = Object.new
-        adapter.define_singleton_method(:account) { account }
-        adapter.define_singleton_method(:imap_connection) { imap_connection }
-        adapter.define_singleton_method(:each_normalized_message) do |&block|
-          block.call(
-            provider: "imap",
-            provider_message_id: "<x@example.com>",
-            direction: "inbound",
-            subject: "Unrelated",
-            raw_payload: {}
-          )
-        end
-        adapter.define_singleton_method(:write_checkpoint_after_batch) { |**| nil }
+        payload = {
+          provider: "imap",
+          provider_message_id: "<x@example.com>",
+          direction: "inbound",
+          subject: "Unrelated",
+          raw_payload: {}
+        }
+        fetcher = instance_double(Imap::Fetcher, fetch_messages: [ payload ], mailbox_peak_uid: nil)
+        adapter = InboxIngestion::ImapAdapter.new(imap_connection: imap_connection, fetcher: fetcher)
 
         described_class.call(adapter: adapter)
 
@@ -189,19 +181,17 @@ RSpec.describe InboxIngestion::Sync do
     end
 
     context "mark_seen behaviour" do
-      def build_adapter(account:, reconcile_result:, uid: 42)
-        adapter = Object.new
-        adapter.define_singleton_method(:account) { account }
-        adapter.define_singleton_method(:each_normalized_message) do |&block|
-          block.call(
-            provider: "imap",
-            provider_message_id: "<msg@example.com>",
-            direction: "inbound",
-            subject: "Test",
-            raw_payload: { "uid" => uid }
-          )
-        end
-        adapter.define_singleton_method(:write_checkpoint_after_batch) { |**| nil }
+      def build_imap_adapter(account:, reconcile_result:, uid: 42)
+        imap_connection = create(:imap_connection, account: account)
+        payload = {
+          provider: "imap",
+          provider_message_id: "<msg@example.com>",
+          direction: "inbound",
+          subject: "Test",
+          raw_payload: { "uid" => uid }
+        }
+        fetcher = instance_double(Imap::Fetcher, fetch_messages: [ payload ], mailbox_peak_uid: nil)
+        adapter = InboxIngestion::ImapAdapter.new(imap_connection: imap_connection, fetcher: fetcher)
         allow(BookingRequests::Reconcile).to receive(:call).and_return(reconcile_result)
         adapter
       end
@@ -212,13 +202,10 @@ RSpec.describe InboxIngestion::Sync do
           booking_request: build(:booking_request, account: account),
           draft_created: true
         )
-        adapter = build_adapter(account: account, reconcile_result: result, uid: 99)
-        seen_uids = nil
-        adapter.define_singleton_method(:mark_seen) { |uids| seen_uids = uids }
+        adapter = build_imap_adapter(account: account, reconcile_result: result, uid: 99)
+        expect(adapter).to receive(:mark_seen).with([ 99 ])
 
         described_class.call(adapter: adapter)
-
-        expect(seen_uids).to eq([ 99 ])
       end
 
       it "does not call mark_seen when Reconcile returns draft_created: false" do
@@ -227,33 +214,39 @@ RSpec.describe InboxIngestion::Sync do
           booking_request: build(:booking_request, account: account),
           draft_created: false
         )
-        adapter = build_adapter(account: account, reconcile_result: result, uid: 55)
-        mark_seen_called = false
-        adapter.define_singleton_method(:mark_seen) { |_uids| mark_seen_called = true }
+        adapter = build_imap_adapter(account: account, reconcile_result: result, uid: 55)
+        expect(adapter).not_to receive(:mark_seen)
 
         described_class.call(adapter: adapter)
-
-        expect(mark_seen_called).to be(false)
       end
 
       it "does not call mark_seen when Reconcile returns nil (not a booking request)" do
         account = create(:account)
-        adapter = build_adapter(account: account, reconcile_result: nil, uid: 7)
-        mark_seen_called = false
-        adapter.define_singleton_method(:mark_seen) { |_uids| mark_seen_called = true }
+        adapter = build_imap_adapter(account: account, reconcile_result: nil, uid: 7)
+        expect(adapter).not_to receive(:mark_seen)
 
         described_class.call(adapter: adapter)
-
-        expect(mark_seen_called).to be(false)
       end
 
-      it "does not call mark_seen when adapter does not respond to it" do
+      it "does not mark seen when adapter lacks after_message_reconciled" do
         account = create(:account)
         result = BookingRequests::Reconcile::Result.new(
           booking_request: build(:booking_request, account: account),
           draft_created: true
         )
-        adapter = build_adapter(account: account, reconcile_result: result, uid: 3)
+        adapter = Object.new
+        adapter.define_singleton_method(:account) { account }
+        adapter.define_singleton_method(:each_normalized_message) do |&block|
+          block.call(
+            provider: "imap",
+            provider_message_id: "<msg@example.com>",
+            direction: "inbound",
+            subject: "Test",
+            raw_payload: { "uid" => 3 }
+          )
+        end
+        adapter.define_singleton_method(:write_checkpoint_after_batch) { |**| nil }
+        allow(BookingRequests::Reconcile).to receive(:call).and_return(result)
 
         expect { described_class.call(adapter: adapter) }.not_to raise_error
       end

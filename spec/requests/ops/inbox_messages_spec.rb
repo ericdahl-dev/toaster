@@ -30,7 +30,9 @@ RSpec.describe "Ops inbox messages", type: :request do
         status: "reviewing"
       )
 
-      get "/ops/inbox_messages", headers: { "X-Ops-Token" => "secret-token" }
+      get "/ops/inbox_messages",
+        params: { account_id: account.id },
+        headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
@@ -46,8 +48,27 @@ RSpec.describe "Ops inbox messages", type: :request do
       )
     end
 
+    it "returns 400 when account_id is missing" do
+      get "/ops/inbox_messages", headers: { "X-Ops-Token" => "secret-token" }
+
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it "does not return inbox messages from other accounts" do
+      account = create(:account)
+      create(:inbox_message, account: account, subject: "Mine")
+      create(:inbox_message, account: create(:account), subject: "Theirs")
+
+      get "/ops/inbox_messages",
+        params: { account_id: account.id },
+        headers: { "X-Ops-Token" => "secret-token" }
+
+      subjects = response.parsed_body.fetch("inbox_messages").map { |m| m["subject"] }
+      expect(subjects).to eq([ "Mine" ])
+    end
+
     it "returns 401 when the token header is missing" do
-      get "/ops/inbox_messages"
+      get "/ops/inbox_messages", params: { account_id: 1 }
 
       expect(response).to have_http_status(:unauthorized)
       expect(response.parsed_body).to include("error" => "Unauthorized")
@@ -105,7 +126,9 @@ RSpec.describe "Ops inbox messages", type: :request do
         review_reasons: []
       )
 
-      get "/ops/inbox_messages/#{inbox_message.id}", headers: { "X-Ops-Token" => "secret-token" }
+      get "/ops/inbox_messages/#{inbox_message.id}",
+        params: { account_id: account.id },
+        headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       detail = response.parsed_body.fetch("inbox_message")
@@ -142,7 +165,9 @@ RSpec.describe "Ops inbox messages", type: :request do
       )
       draft = create(:draft, account: account, booking_request: booking_request, body: "Thank you for your inquiry!", status: "pending_review")
 
-      get "/ops/inbox_messages/#{inbox_message.id}", headers: { "X-Ops-Token" => "secret-token" }
+      get "/ops/inbox_messages/#{inbox_message.id}",
+        params: { account_id: account.id },
+        headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       booking = response.parsed_body.dig("inbox_message", "booking_request")
@@ -162,7 +187,9 @@ RSpec.describe "Ops inbox messages", type: :request do
         status: "pending"
       )
 
-      get "/ops/inbox_messages/#{inbox_message.id}", headers: { "X-Ops-Token" => "secret-token" }
+      get "/ops/inbox_messages/#{inbox_message.id}",
+        params: { account_id: account.id },
+        headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:ok)
       booking = response.parsed_body.dig("inbox_message", "booking_request")
@@ -170,7 +197,10 @@ RSpec.describe "Ops inbox messages", type: :request do
     end
 
     it "returns 404 for an unknown inbox message" do
-      get "/ops/inbox_messages/999999", headers: { "X-Ops-Token" => "secret-token" }
+      account = create(:account)
+      get "/ops/inbox_messages/999999",
+        params: { account_id: account.id },
+        headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:not_found)
       expect(response.parsed_body).to include("error" => "Inbox message not found")
@@ -180,10 +210,23 @@ RSpec.describe "Ops inbox messages", type: :request do
       account = create(:account)
       outbound_message = create(:inbox_message, account: account, direction: "outbound")
 
-      get "/ops/inbox_messages/#{outbound_message.id}", headers: { "X-Ops-Token" => "secret-token" }
+      get "/ops/inbox_messages/#{outbound_message.id}",
+        params: { account_id: account.id },
+        headers: { "X-Ops-Token" => "secret-token" }
 
       expect(response).to have_http_status(:not_found)
       expect(response.parsed_body).to include("error" => "Inbox message not found")
+    end
+
+    it "returns 404 when the message belongs to another account" do
+      account = create(:account)
+      other_message = create(:inbox_message, account: create(:account))
+
+      get "/ops/inbox_messages/#{other_message.id}",
+        params: { account_id: account.id },
+        headers: { "X-Ops-Token" => "secret-token" }
+
+      expect(response).to have_http_status(:not_found)
     end
 
     it "returns 401 when the token header is missing" do

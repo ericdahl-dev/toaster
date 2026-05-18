@@ -10,7 +10,7 @@ Inbox sync (`InboxIngestion::Sync`) persists `InboxMessage` rows from IMAP. `Boo
 
 ## Decision
 
-1. **Integrated:** After each successful upsert in `InboxIngestion::Sync`, call `BookingRequests::PostIngestion.after_inbox_message_persisted`, which delegates to `BookingRequests::Reconcile`. All ingestion adapters share this path (`SyncImapJob`).
+1. **Integrated:** After each successful upsert in `InboxIngestion::Sync`, call `BookingRequests::Reconcile`. All ingestion adapters share this path (`SyncImapJob`).
 
 2. **Transition is out of scope for ingestion:** `BookingRequests::Transition` is only for explicit workflow (e.g. ops/API confirming or rejecting a request). It is not invoked automatically when mail lands.
 
