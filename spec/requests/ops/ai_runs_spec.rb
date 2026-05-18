@@ -16,18 +16,25 @@ RSpec.describe "Ops::AiRuns", type: :request do
   let(:booking_request) { create(:booking_request, account:) }
 
   describe "GET /ops/ai_runs" do
-    it "lists AI runs" do
-      run = create(:ai_run, account:, booking_request:, run_type: "extraction")
+    it "returns 400 when account_id is missing" do
       get "/ops/ai_runs", headers: headers
+      expect(response).to have_http_status(:bad_request)
+    end
+
+    it "lists AI runs for the given account" do
+      run = create(:ai_run, account:, booking_request:, run_type: "extraction")
+      other_run = create(:ai_run, account: create(:account), run_type: "extraction")
+      get "/ops/ai_runs", params: { account_id: account.id }, headers: headers
       expect(response).to have_http_status(:ok)
       body = response.parsed_body
       expect(body["ai_runs"].map { |r| r["id"] }).to include(run.id)
+      expect(body["ai_runs"].map { |r| r["id"] }).not_to include(other_run.id)
     end
 
     it "filters by run_type" do
       create(:ai_run, account:, booking_request:, run_type: "extraction")
       classifier_run = create(:ai_run, account:, run_type: "classifier")
-      get "/ops/ai_runs", params: { run_type: "classifier" }, headers: headers
+      get "/ops/ai_runs", params: { account_id: account.id, run_type: "classifier" }, headers: headers
       ids = response.parsed_body["ai_runs"].map { |r| r["id"] }
       expect(ids).to include(classifier_run.id)
       expect(ids.size).to eq(1)
@@ -43,7 +50,7 @@ RSpec.describe "Ops::AiRuns", type: :request do
         prompt_version: "extractor-v1",
         latency_ms: 423)
 
-      get "/ops/ai_runs/#{run.id}", headers: headers
+      get "/ops/ai_runs/#{run.id}", params: { account_id: account.id }, headers: headers
 
       expect(response).to have_http_status(:ok)
       body = response.parsed_body["ai_run"]
@@ -56,7 +63,13 @@ RSpec.describe "Ops::AiRuns", type: :request do
     end
 
     it "returns 404 for unknown id" do
-      get "/ops/ai_runs/0", headers: headers
+      get "/ops/ai_runs/0", params: { account_id: account.id }, headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns 404 when the run belongs to another account" do
+      other_run = create(:ai_run, account: create(:account), run_type: "extraction")
+      get "/ops/ai_runs/#{other_run.id}", params: { account_id: account.id }, headers: headers
       expect(response).to have_http_status(:not_found)
     end
   end

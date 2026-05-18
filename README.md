@@ -71,7 +71,7 @@ For reference, `.env.example` lists the variables the app expects:
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
 | `DATABASE_URL` | Dev/Prod | — | PostgreSQL connection string. Omit to use a local Unix socket. |
-| `OPS_AUTH_TOKEN` | Prod | `dev-ops-token` | Bearer token for ops API endpoints (`X-Ops-Token` header). |
+| `OPS_AUTH_TOKEN` | Prod | `dev-ops-token` | Bearer token for ops JSON endpoints (`X-Ops-Token` header). Requests must include `account_id` to scope data to one tenant. |
 | `JOB_CONCURRENCY` | Optional | `1` | Number of GoodJob worker threads. |
 | `PGGSSENCMODE` | macOS | `disable` | Prevents libpq GSS segfault in forked workers (set automatically on macOS). |
 | `RAILS_MASTER_KEY` | Prod | — | Decrypts `config/credentials.yml.enc`. |

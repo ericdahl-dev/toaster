@@ -4,6 +4,7 @@ module InboxIngestion
       @imap_connection = imap_connection
       @fetcher = fetcher || Imap::Fetcher.new(imap_connection: imap_connection)
       @max_uid = imap_connection.last_synced_uid
+      @uids_to_mark_seen = []
     end
 
     def account
@@ -22,14 +23,31 @@ module InboxIngestion
       end
     end
 
+    def resolve_venue(attrs)
+      subject = attrs[:subject] || attrs["subject"]
+      InboxIngestion::FilterMatcher
+        .new(imap_connection: imap_connection)
+        .match(subject: subject)
+    end
+
+    def after_message_reconciled(attrs, reconcile_result)
+      return unless reconcile_result&.draft_created
+
+      raw = attrs[:raw_payload] || attrs["raw_payload"] || {}
+      uid = raw[:uid] || raw["uid"]
+      @uids_to_mark_seen << uid.to_i if uid
+    end
+
     def write_checkpoint_after_batch(**)
       @imap_connection.reload
       advance_initial_checkpoint_if_needed
 
-      return if @max_uid.nil?
-      return if @max_uid == @imap_connection.last_synced_uid
+      if @max_uid.present? && @max_uid != @imap_connection.last_synced_uid
+        @imap_connection.update!(last_synced_uid: @max_uid)
+      end
 
-      @imap_connection.update!(last_synced_uid: @max_uid)
+      mark_seen(@uids_to_mark_seen) if @uids_to_mark_seen.any?
+      @uids_to_mark_seen.clear
     end
 
     def mark_seen(uids)
