@@ -4,13 +4,14 @@ module BookingRequests
 
     Result = Struct.new(:booking_request, :draft_created, keyword_init: true)
 
-    def self.call(inbox_message:, venue: nil)
-      new(inbox_message: inbox_message, venue: venue).call
+    def self.call(inbox_message:, venue: nil, inbox_message_created: false)
+      new(inbox_message: inbox_message, venue: venue, inbox_message_created: inbox_message_created).call
     end
 
-    def initialize(inbox_message:, venue: nil)
+    def initialize(inbox_message:, venue: nil, inbox_message_created: false)
       @inbox_message = inbox_message
       @venue = venue
+      @inbox_message_created = inbox_message_created
     end
 
     def call
@@ -20,6 +21,8 @@ module BookingRequests
 
         booking_request = extract_result.booking_request
         is_new = booking_request.previous_changes.key?("id")
+
+        unarchive_on_inbound(booking_request)
 
         assign_venue(booking_request)
         log_reconciliation(booking_request, is_new: is_new)
@@ -32,7 +35,18 @@ module BookingRequests
 
     private
 
-    attr_reader :inbox_message, :venue
+    attr_reader :inbox_message, :venue, :inbox_message_created
+
+    def unarchive_on_inbound(booking_request)
+      return unless inbox_message_created
+      return unless inbox_message.inbound?
+      return unless booking_request.archived?
+
+      BookingRequests::Unarchive.call(
+        booking_request: booking_request,
+        metadata: { source: "inbound" }
+      )
+    end
 
     def assign_venue(booking_request)
       return if venue.nil?

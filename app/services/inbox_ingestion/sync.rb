@@ -21,7 +21,11 @@ module InboxIngestion
         inbox_message, created = upsert(attrs)
         venue = resolve_venue(attrs)
         # See docs/adr/0001-post-ingestion-booking-reconcile.md
-        reconcile_result = BookingRequests::Reconcile.call(inbox_message: inbox_message, venue: venue)
+        reconcile_result = BookingRequests::Reconcile.call(
+          inbox_message: inbox_message,
+          venue: venue,
+          inbox_message_created: created
+        )
         messages << inbox_message
         if created
           created_count += 1

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_18_140000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_18_140100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -46,6 +46,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_140000) do
 
   create_table "booking_requests", force: :cascade do |t|
     t.bigint "account_id", null: false
+    t.datetime "archived_at"
     t.string "beverage_format"
     t.string "booking_type"
     t.decimal "budget", precision: 10, scale: 2
@@ -74,6 +75,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_140000) do
     t.datetime "updated_at", null: false
     t.bigint "venue_id"
     t.index ["account_id"], name: "index_booking_requests_on_account_id"
+    t.index ["archived_at"], name: "index_booking_requests_on_archived_at"
     t.index ["contact_id"], name: "index_booking_requests_on_contact_id"
     t.index ["conversation_thread_id"], name: "index_booking_requests_on_conversation_thread_id"
     t.index ["recommended_venue_space_id"], name: "index_booking_requests_on_recommended_venue_space_id"

@@ -2,18 +2,27 @@
 
 class BookingRequestsController < ApplicationController
   before_action :require_authenticated_html_user!
-  before_action :set_booking_request, only: [ :show, :transition ]
+  before_action :set_booking_request, only: [ :show, :transition, :archive, :unarchive ]
 
   def index
-    @booking_requests = current_user.account.booking_requests
-      .includes(:contact, :venue, :conversation_thread, :source_inbox_message, :messages, :drafts)
+    scope = current_user.account.booking_requests
+    scope = params[:show_archived] == "1" ? scope.archived : scope.active
+
+    @booking_requests = scope
+      .includes(:contact, :venue, :conversation_thread, :source_inbox_message, :messages, :drafts, :tasks)
       .order(updated_at: :desc)
+    @show_archived = params[:show_archived] == "1"
+
+    booking_request_ids = @booking_requests.map(&:id)
+    @pending_review_draft_ids = Draft.where(booking_request_id: booking_request_ids, status: :pending_review)
+      .pluck(:booking_request_id)
+      .to_set
+    @open_task_ids = Task.where(booking_request_id: booking_request_ids, status: :open)
+      .pluck(:booking_request_id)
+      .to_set
 
     contact_ids = @booking_requests.map(&:contact_id)
-    @requests_per_contact = current_user.account.booking_requests
-      .where(contact_id: contact_ids)
-      .group(:contact_id)
-      .count
+    @requests_per_contact = scope.where(contact_id: contact_ids).group(:contact_id).count
   end
 
   def show
@@ -27,12 +36,53 @@ class BookingRequestsController < ApplicationController
     redirect_to booking_request_path(@booking_request), alert: e.message
   end
 
+  def archive
+    BookingRequests::Archive.call(
+      booking_request: @booking_request,
+      metadata: { distinct_id: current_user.posthog_distinct_id }
+    )
+    redirect_to booking_requests_path, notice: "Booking request archived."
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to booking_request_path(@booking_request), alert: e.record.errors.full_messages.to_sentence
+  end
+
+  def unarchive
+    BookingRequests::Unarchive.call(
+      booking_request: @booking_request,
+      metadata: { distinct_id: current_user.posthog_distinct_id, source: "manual" }
+    )
+    redirect_to booking_request_path(@booking_request), notice: "Booking request restored."
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to booking_request_path(@booking_request), alert: e.record.errors.full_messages.to_sentence
+  end
+
   private
+
+  def archive_confirm_message
+    if @pending_review_draft_ids.include?(@booking_request.id) || @open_task_ids.include?(@booking_request.id)
+      "Archive anyway? This request still has an open draft or review task."
+    else
+      "Archive this booking request? It will be hidden from the main list."
+    end
+  end
+  helper_method :archive_confirm_message
 
   def set_booking_request
     @booking_request = current_user.account.booking_requests
-      .includes(:source_inbox_message, :messages, :drafts)
+      .includes(:source_inbox_message, :messages, :drafts, :tasks)
       .find_by(id: params[:id])
-    render plain: "Not Found", status: :not_found unless @booking_request
+
+    unless @booking_request
+      render plain: "Not Found", status: :not_found
+      return
+    end
+
+    booking_request_ids = [ @booking_request.id ]
+    @pending_review_draft_ids = Draft.where(booking_request_id: booking_request_ids, status: :pending_review)
+      .pluck(:booking_request_id)
+      .to_set
+    @open_task_ids = Task.where(booking_request_id: booking_request_ids, status: :open)
+      .pluck(:booking_request_id)
+      .to_set
   end
 end

@@ -287,6 +287,44 @@ RSpec.describe BookingRequests::Reconcile do
       end
     end
 
+    context "when the booking request is archived" do
+      let(:first_message) { build_inbox_message }
+      let(:follow_up_message) do
+        create(
+          :inbox_message,
+          account: account,
+          from_name: "Jamie Lead",
+          from_email: "jamie@example.com",
+          subject: "Re: Wedding for 120 guests on June 14, 2026",
+          body_text: "Following up on our date.",
+          received_at: Time.zone.parse("2026-04-02 10:00:00 UTC"),
+          provider_thread_id: first_message.provider_thread_id
+        )
+      end
+
+      before do
+        described_class.call(inbox_message: first_message)
+        BookingRequest.last.update!(archived_at: 1.hour.ago)
+      end
+
+      it "unarchives on inbound follow-up reconcile when the inbox message is newly created" do
+        described_class.call(inbox_message: follow_up_message, inbox_message_created: true)
+
+        expect(BookingRequest.last.reload.archived_at).to be_nil
+        expect(EventLog.where(event_type: "booking_request.unarchived").count).to eq(1)
+      end
+
+      it "does not unarchive on deduped re-reconcile of the same inbox message" do
+        described_class.call(inbox_message: follow_up_message, inbox_message_created: true)
+        BookingRequest.last.update!(archived_at: 1.hour.ago)
+
+        described_class.call(inbox_message: follow_up_message, inbox_message_created: false)
+
+        expect(BookingRequest.last.reload.archived_at).to be_present
+        expect(EventLog.where(event_type: "booking_request.unarchived").count).to eq(1)
+      end
+    end
+
     context "when extraction raises an error" do
       it "rolls back the transaction and propagates the error" do
         inbox_message = build_inbox_message

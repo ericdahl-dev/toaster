@@ -130,8 +130,23 @@
   </div>
 <% end %>
 
+<div class="section-heading" style="margin-top:28px">Actions</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px;<%= "margin-bottom:12px;" if allowed.any? %>">
+  <% if @booking_request.archived? %>
+    <%= button_to "Restore to list",
+          unarchive_booking_request_path(@booking_request),
+          method: :post,
+          class: "btn btn-ghost" %>
+  <% else %>
+    <%= button_to "Archive",
+          archive_booking_request_path(@booking_request),
+          method: :post,
+          class: "btn btn-ghost",
+          data: { turbo_confirm: archive_confirm_message } %>
+  <% end %>
+</div>
+
 <% if allowed.any? %>
-  <div class="section-heading" style="margin-top:28px">Actions</div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:6px">
     <% allowed.each do |target| %>
       <%

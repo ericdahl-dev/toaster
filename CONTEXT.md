@@ -23,7 +23,7 @@ The provider-owned object that implements fetch and checkpoint read/write for on
 A persisted row derived from an **inbox message** for venue/event intake; extraction fills structured fields and a status. Orchestrated by **reconcile** after each inbox message upsert (see `docs/adr/0001-post-ingestion-booking-reconcile.md`).
 
 **Extraction lock**:
-When a booking request's status is **confirmed**, **rejected**, or **cancelled**, further **inbox ingestion** does not re-run extraction on that message—human workflow outcomes stay authoritative until someone changes status again via **transition**.
+When a booking request's status is **confirmed** or **cancelled**, further **inbox ingestion** should not re-run extraction on that message—human workflow outcomes stay authoritative until someone changes status again via **transition**. (Not yet enforced in code; see flagged ambiguities.)
 
 **Venue**:
 A bookable location managed by an **Account**. **Booking requests** may reference a venue (`venue_id` optional). Venues are not tied to a single mail **connection** in the schema today. Venues carry a `features` jsonb array (e.g. `["karaoke", "coat_check", "parking"]`) listing venue-wide amenities — operator-defined free-form strings used by the AI to ask relevant questions.
@@ -43,8 +43,11 @@ A keyword→venue mapping scoped to a **mail connection**. When an inbox message
 **Transition**:
 A deliberate operator action that moves a **booking request** through its lifecycle. Valid paths: `pending → reviewing`, `pending → confirmed`, `pending → cancelled`; `reviewing → pending`, `reviewing → confirmed`, `reviewing → cancelled`; `confirmed → cancelled`. Transitions are initiated from the booking request detail page via contextual buttons that reflect the current state. Transitions outside these paths are rejected.
 
+**Archive**:
+A deliberate operator action that removes a **booking request** from the default **booking requests** list without deleting the row or changing workflow **status**. See `docs/adr/0008-booking-request-archive.md`. Operators may **archive** at any workflow **status** (open **tasks** and `pending_review` **drafts** are not cleared); from the detail page or a per-row control on the index, with a confirmation step before archive—and stronger confirmation copy when a draft or task is still open; they may **unarchive** from detail or from the index while **show archived** is on, without confirmation. Archived requests remain reachable via a **show archived** toggle on the same **booking requests** index (off by default) and can be **unarchived** manually from there or from detail. Archive is orthogonal to **transition**: any status may be archived or left visible, and `cancelled` does not imply archived (no auto-archive on cancel). **Unarchive on new inbound**: when a newly ingested inbound **inbox message** arrives on the same **conversation thread** (not a deduped re-sync), the archived **booking request** is automatically unarchived so it reappears on the default list. Any signed-in **user** on the **account** may **archive** or **unarchive** (same access as **transition**). On the **inbox threads** list, a thread whose primary **booking request** is archived remains visible; its status column shows **archived** (not only workflow **status**).
+
 **Event log**:
-An append-only audit trail of all significant state changes and external interactions on a **booking request** — including job activity (sync, reconcile, push) and human actions (transitions, draft approve/reject). Rendered read-only in chronological order on the booking request detail page.
+An append-only audit trail of all significant state changes and external interactions on a **booking request** — including job activity (sync, reconcile, push) and human actions (transitions, draft approve/reject, **archive**, **unarchive**). Manual and automatic **unarchive on new inbound** both produce log entries. Rendered read-only in chronological order on the booking request detail page.
 
 
 
@@ -93,6 +96,7 @@ Persisted record of one LLM call: `run_type` (`classifier` | `extraction`), `llm
 
 ## Flagged ambiguities
 
+- **Extraction lock** is documented above but not enforced in `BookingRequests::Extract` / `Persist` today—terminal statuses still receive reconcile updates until [#370](https://github.com/ericdahl-dev/toaster/issues/370).
 - "Sync" was used for both job enqueue and ingestion orchestration — resolved: **inbox ingestion** is the orchestrated fetch+upsert+checkpoint step; jobs remain thin schedulers.
 - Fetch and transport failures during ingestion **bubble** to the job layer so retries and monitoring stay consistent; ingestion does not convert hard failures into silent partial success.
 - **Multi-venue mail routing:** Resolved via **inbox filters**. Each `ImapConnection` carries keyword-based `InboxFilter` rules that match subject lines and assign a `venue_id`, removing the need for `To:` address or folder heuristics. See `docs/adr/0002-multi-venue-mail-routing.md`.

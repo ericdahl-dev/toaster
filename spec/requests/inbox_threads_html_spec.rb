@@ -18,6 +18,14 @@ RSpec.describe "InboxThreads HTML", type: :request do
       expect(response.body).to include("Grand Hall inquiry")
     end
 
+    it "shows archived badge when primary booking request is archived" do
+      create(:booking_request, account: account, conversation_thread: thread, archived_at: 1.hour.ago)
+
+      get "/inbox_threads"
+
+      expect(response.body).to include("archived")
+    end
+
     it "does not show other accounts' threads" do
       create(:conversation_thread, subject: "Other thread")
       get "/inbox_threads"
