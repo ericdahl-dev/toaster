@@ -41,6 +41,36 @@ class BookingRequest < ApplicationRecord
     timed_package: "timed_package"
   }, prefix: :beverage
 
+  def first_received_at
+    source_inbox_message&.received_at ||
+      messages.minimum(:sent_at) ||
+      created_at
+  end
+
+  LastActivity = Struct.new(:at, :direction, keyword_init: true)
+
+  def last_activity
+    events = activity_events
+    if events.empty?
+      return LastActivity.new(at: updated_at, direction: "system")
+    end
+
+    latest = events.max_by { |event| event[:at] || Time.at(0) }
+    LastActivity.new(at: latest[:at], direction: latest[:direction])
+  end
+
+  def last_activity_at
+    last_activity.at
+  end
+
+  def last_activity_direction_label
+    case last_activity.direction
+    when "inbound" then "From contact"
+    when "outbound" then "From venue"
+    else "System"
+    end
+  end
+
   validates :status, presence: true
   validates :headcount, numericality: { greater_than: 0, allow_nil: true }
   validates :budget, numericality: { greater_than_or_equal_to: 0, allow_nil: true }
@@ -51,6 +81,18 @@ class BookingRequest < ApplicationRecord
   validate :source_inbox_message_belongs_to_account
 
   private
+
+  def activity_events
+    message_events = messages.map do |message|
+      { at: message.sent_at || message.created_at, direction: message.direction }
+    end
+
+    draft_events = drafts
+      .where(status: %w[pending_review approved modified sent])
+      .map { |draft| { at: draft.created_at, direction: "outbound" } }
+
+    message_events + draft_events
+  end
 
   def event_date_range_valid
     return unless event_date && event_end_date

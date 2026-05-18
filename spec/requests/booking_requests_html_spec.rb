@@ -25,6 +25,38 @@ RSpec.describe "BookingRequests HTML", type: :request do
 
         expect(response.body).not_to include(other.contact.email)
       end
+
+      it "shows first received and last activity from mail timestamps, not record created_at" do
+        received = Time.zone.parse("2023-08-09 14:30")
+        inbox = create(:inbox_message, account: account, received_at: received, subject: "Rooftop birthday")
+        booking_request.update!(
+          source_inbox_message: inbox,
+          created_at: Time.zone.parse("2026-05-18 10:00"),
+          updated_at: Time.zone.parse("2026-06-02 11:00")
+        )
+        thread = booking_request.conversation_thread
+        thread.update!(subject: "Rooftop birthday")
+
+        get "/booking_requests"
+
+        expect(response.body).to include("First received")
+        expect(response.body).to include("Last activity")
+        expect(response.body).to include("9 Aug 2023")
+        expect(response.body).to include("Rooftop birthday")
+        expect(response.body).not_to include("18 May")
+      end
+
+      it "shows last activity direction on the list" do
+        create(:message, account: account,
+          conversation_thread: booking_request.conversation_thread,
+          booking_request: booking_request,
+          direction: :inbound,
+          sent_at: Time.zone.parse("2026-05-18 15:00"))
+
+        get "/booking_requests"
+
+        expect(response.body).to include("From contact")
+      end
     end
 
     context "when signed out" do

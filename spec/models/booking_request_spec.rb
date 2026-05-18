@@ -103,6 +103,47 @@ RSpec.describe BookingRequest, type: :model do
     end
   end
 
+  describe "#first_received_at" do
+    let(:br) { create(:booking_request, account: account, contact: contact, conversation_thread: thread) }
+
+    it "uses source inbox message received_at when present" do
+      received = Time.zone.parse("2023-08-09 14:30")
+      inbox = create(:inbox_message, account: account, received_at: received)
+      br.update!(source_inbox_message: inbox, created_at: Time.zone.parse("2026-05-18 10:00"))
+
+      expect(br.first_received_at).to eq(received)
+    end
+  end
+
+  describe "#last_activity" do
+    let(:br) { create(:booking_request, account: account, contact: contact, conversation_thread: thread) }
+
+    it "reports inbound when the latest message is from the contact" do
+      br.update!(updated_at: Time.zone.parse("2026-05-17 09:00"))
+      create(:message, account: account, conversation_thread: thread, booking_request: br,
+        direction: :inbound, sent_at: Time.zone.parse("2026-05-18 15:00"))
+      create(:draft, account: account, booking_request: br, status: :sent,
+        created_at: Time.zone.parse("2026-05-18 10:00"))
+
+      activity = br.last_activity
+
+      expect(activity.at).to eq(Time.zone.parse("2026-05-18 15:00"))
+      expect(activity.direction).to eq("inbound")
+    end
+
+    it "reports outbound when the latest venue draft is newer than inbound mail" do
+      create(:message, account: account, conversation_thread: thread, booking_request: br,
+        direction: :inbound, sent_at: Time.zone.parse("2026-05-18 10:00"))
+      create(:draft, account: account, booking_request: br, status: :sent,
+        created_at: Time.zone.parse("2026-05-18 16:00"))
+
+      activity = br.last_activity
+
+      expect(activity.at).to eq(Time.zone.parse("2026-05-18 16:00"))
+      expect(activity.direction).to eq("outbound")
+    end
+  end
+
   describe "intake fields" do
     let(:br) { create(:booking_request, account: account, contact: contact, conversation_thread: thread) }
 
