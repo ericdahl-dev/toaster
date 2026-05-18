@@ -170,14 +170,12 @@ module BookingRequests
     end
 
     def find_or_build_thread(contact)
-      inbox_message.account.conversation_threads.find_or_initialize_by(provider_thread_id: canonical_thread_id).tap do |thread|
+      inbox_message.account.conversation_threads.find_or_initialize_by(
+        provider_thread_id: ConversationThreading.canonical_id_for(inbox_message)
+      ).tap do |thread|
         thread.contact = contact
         thread.subject = inbox_message.subject
       end
-    end
-
-    def canonical_thread_id
-      "#{inbox_message.provider}:#{inbox_message.provider_thread_id.presence || inbox_message.provider_message_id}"
     end
 
     def canonical_message_id

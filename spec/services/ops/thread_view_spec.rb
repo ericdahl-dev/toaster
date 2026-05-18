@@ -5,7 +5,7 @@ require "rails_helper"
 RSpec.describe Ops::ThreadView do
   let(:account) { create(:account) }
   let(:contact) { create(:contact, account: account) }
-  let(:convo) { create(:conversation_thread, account: account, contact: contact, provider_thread_id: "t-view") }
+  let(:convo) { create(:conversation_thread, account: account, contact: contact, provider_thread_id: "imap:t-view") }
   let(:inbound) do
     create(:inbox_message,
       account: account,

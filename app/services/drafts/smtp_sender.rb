@@ -82,8 +82,11 @@ module Drafts
       mail.to = to_address
       mail.subject = subject_line
       mail.body = draft.body
-      mail.in_reply_to = conversation_thread.provider_thread_id if conversation_thread.provider_thread_id.present?
-      mail.references = conversation_thread.provider_thread_id if conversation_thread.provider_thread_id.present?
+      header_thread_id = ConversationThreading.inbox_thread_id_from_canonical(conversation_thread.provider_thread_id)
+      if header_thread_id.present?
+        mail.in_reply_to = header_thread_id
+        mail.references = header_thread_id
+      end
 
       mail.delivery_method :smtp, {
         address: smtp_host,

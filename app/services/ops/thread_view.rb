@@ -58,7 +58,12 @@ module Ops
       when :thread
         BookingRequest.joins(:conversation_thread).where(
           account_id: key[1],
-          conversation_threads: { provider_thread_id: key[3] }
+          conversation_threads: {
+            provider_thread_id: ConversationThreading.canonical_id_for_inbox_thread(
+              provider: key[2],
+              inbox_thread_id: key[3]
+            )
+          }
         )
       when :singleton
         BookingRequest.where(account_id: key[1], source_inbox_message_id: key[3])
