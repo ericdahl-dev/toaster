@@ -16,15 +16,17 @@ class Message < ApplicationRecord
   private
 
   def broadcast_inbound_to_timeline
-    html = ApplicationController.renderer.render(
-      partial: "messages/inbound_bubble",
-      locals: { message: self }
-    )
-    Turbo::StreamsChannel.broadcast_append_to(
-      booking_request,
-      target: "thread-timeline",
-      html: html
-    )
+    TurboTimelineBroadcast.deliver(booking_request: booking_request, operation: "append_inbound") do
+      html = ApplicationController.renderer.render(
+        partial: "messages/inbound_bubble",
+        locals: { message: self }
+      )
+      Turbo::StreamsChannel.broadcast_append_to(
+        booking_request,
+        target: "thread-timeline",
+        html: html
+      )
+    end
   end
 
   def conversation_thread_belongs_to_account
