@@ -15,4 +15,21 @@ RSpec.describe BookingRequests::ExtractionLock do
       expect(described_class.terminal?(nil)).to be(false)
     end
   end
+
+  describe ".booking_request_for" do
+    it "finds the booking request via canonical conversation thread id" do
+      account = create(:account)
+      inbox_message = create(:inbox_message, account: account, provider: "imap", provider_thread_id: "raw-1")
+      contact = create(:contact, account: account)
+      thread = create(
+        :conversation_thread,
+        account: account,
+        contact: contact,
+        provider_thread_id: ConversationThreading.canonical_id_for(inbox_message)
+      )
+      booking = create(:booking_request, account: account, conversation_thread: thread, status: :confirmed)
+
+      expect(described_class.booking_request_for(inbox_message)).to eq(booking)
+    end
+  end
 end

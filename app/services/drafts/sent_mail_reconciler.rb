@@ -86,7 +86,7 @@ module Drafts
     end
 
     def search_sent_uids(imap)
-      thread_id = conversation_thread.provider_thread_id
+      thread_id = ConversationThreading.inbox_thread_id_from_canonical(conversation_thread.provider_thread_id)
       return [] if thread_id.blank?
 
       thread_id_bare = thread_id.gsub(/[<>]/, "")

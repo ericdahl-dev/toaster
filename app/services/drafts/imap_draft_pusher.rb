@@ -59,8 +59,11 @@ module Drafts
     def build_raw_message
       mail = Mail.new
       mail["Message-ID"] = message_id
-      mail.in_reply_to = conversation_thread.provider_thread_id if conversation_thread.provider_thread_id.present?
-      mail.references = conversation_thread.provider_thread_id if conversation_thread.provider_thread_id.present?
+      header_thread_id = ConversationThreading.inbox_thread_id_from_canonical(conversation_thread.provider_thread_id)
+      if header_thread_id.present?
+        mail.in_reply_to = header_thread_id
+        mail.references = header_thread_id
+      end
       mail.from = imap_connection.username
       mail.subject = derive_subject
       mail.body = draft.body

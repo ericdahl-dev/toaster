@@ -70,6 +70,40 @@ RSpec.describe "Ops inbox threads", type: :request do
       expect(threads.first.fetch("last_activity_at")).to be_present
     end
 
+    it "includes booking_request when ConversationThread uses canonical id from Persist" do
+      account = create(:account)
+      contact = create(:contact, account: account)
+      inbound = create(
+        :inbox_message,
+        account: account,
+        provider: "imap",
+        provider_thread_id: "persist-ops-join",
+        provider_message_id: "msg-persist-1",
+        subject: "Canonical join test",
+        received_at: 1.hour.ago
+      )
+      convo = create(
+        :conversation_thread,
+        account: account,
+        contact: contact,
+        provider_thread_id: ConversationThreading.canonical_id_for(inbound)
+      )
+      booking = create(
+        :booking_request,
+        account: account,
+        contact: contact,
+        conversation_thread: convo,
+        source_inbox_message: inbound,
+        status: "reviewing"
+      )
+
+      get "/ops/inbox_threads", headers: { "X-Ops-Token" => "secret-token" }
+
+      row = response.parsed_body.fetch("inbox_threads").find { |t| t["provider_thread_id"] == "persist-ops-join" }
+      expect(row).to be_present
+      expect(row.dig("booking_request", "id")).to eq(booking.id)
+    end
+
     it "executes a bounded number of queries regardless of thread count" do
       account = create(:account)
       5.times do |i|
@@ -111,7 +145,7 @@ RSpec.describe "Ops inbox threads", type: :request do
     it "returns a chronological timeline of inbox messages and drafts" do
       account = create(:account)
       contact = create(:contact, account: account)
-      convo = create(:conversation_thread, account: account, contact: contact, provider_thread_id: "t-line")
+      convo = create(:conversation_thread, account: account, contact: contact, provider_thread_id: "imap:t-line")
       inbound = create(
         :inbox_message,
         account: account,
@@ -168,7 +202,7 @@ RSpec.describe "Ops inbox threads", type: :request do
     it "marks rejected drafts as collapsed by default in the payload" do
       account = create(:account)
       contact = create(:contact, account: account)
-      convo = create(:conversation_thread, account: account, contact: contact, provider_thread_id: "t-rej")
+      convo = create(:conversation_thread, account: account, contact: contact, provider_thread_id: "imap:t-rej")
       inbound = create(
         :inbox_message,
         account: account,
