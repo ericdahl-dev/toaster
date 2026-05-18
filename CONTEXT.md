@@ -23,7 +23,7 @@ The provider-owned object that implements fetch and checkpoint read/write for on
 A persisted row derived from an **inbox message** for venue/event intake; extraction fills structured fields and a status. Orchestrated by **reconcile** after each inbox message upsert (see `docs/adr/0001-post-ingestion-booking-reconcile.md`).
 
 **Extraction lock**:
-When a booking request's status is **confirmed** or **cancelled**, further **inbox ingestion** should not re-run extraction on that message—human workflow outcomes stay authoritative until someone changes status again via **transition**. (Not yet enforced in code; see flagged ambiguities.)
+When a booking request's status is **confirmed** or **cancelled**, further **inbox ingestion** records inbound **messages** but does not re-run the classifier, LLM extraction, draft generation, or review tasks. Human workflow outcomes via **transition** stay authoritative until status returns to **pending** or **reviewing**. Reconcile logs `booking_request.inbound_recorded` instead of `booking_request.updated`. **Archive** does not bypass the lock.
 
 **Venue**:
 A bookable location managed by an **Account**. **Booking requests** may reference a venue (`venue_id` optional). Venues are not tied to a single mail **connection** in the schema today. Venues carry a `features` jsonb array (e.g. `["karaoke", "coat_check", "parking"]`) listing venue-wide amenities — operator-defined free-form strings used by the AI to ask relevant questions.
@@ -96,7 +96,6 @@ Persisted record of one LLM call: `run_type` (`classifier` | `extraction`), `llm
 
 ## Flagged ambiguities
 
-- **Extraction lock** is documented above but not enforced in `BookingRequests::Extract` / `Persist` today—terminal statuses still receive reconcile updates until [#370](https://github.com/ericdahl-dev/toaster/issues/370).
 - "Sync" was used for both job enqueue and ingestion orchestration — resolved: **inbox ingestion** is the orchestrated fetch+upsert+checkpoint step; jobs remain thin schedulers.
 - Fetch and transport failures during ingestion **bubble** to the job layer so retries and monitoring stay consistent; ingestion does not convert hard failures into silent partial success.
 - **Multi-venue mail routing:** Resolved via **inbox filters**. Each `ImapConnection` carries keyword-based `InboxFilter` rules that match subject lines and assign a `venue_id`, removing the need for `To:` address or folder heuristics. See `docs/adr/0002-multi-venue-mail-routing.md`.

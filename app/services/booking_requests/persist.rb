@@ -8,9 +8,32 @@ module BookingRequests
       new(inbox_message:, account:).call(raw)
     end
 
+    def self.record_inbound(inbox_message:, booking_request:)
+      new(inbox_message:, account: inbox_message.account).call_inbound_only(booking_request)
+    end
+
     def initialize(inbox_message:, account:)
       @inbox_message = inbox_message
       @account = account
+    end
+
+    def call_inbound_only(booking_request)
+      ActiveRecord::Base.transaction do
+        contact = find_or_build_contact
+        contact.save!
+
+        thread = find_or_build_thread(contact)
+        thread.save!
+
+        message = find_or_build_canonical_message(booking_request, thread)
+
+        Result.new(
+          booking_request:,
+          contact:,
+          conversation_thread: thread,
+          message:
+        )
+      end
     end
 
     def call(raw)
