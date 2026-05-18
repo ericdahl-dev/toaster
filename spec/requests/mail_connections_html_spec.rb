@@ -88,6 +88,39 @@ RSpec.describe "MailConnections HTML", type: :request do
     end
   end
 
+  describe "POST /mail_connections/:id/backfill" do
+    let!(:imap_connection) { create(:imap_connection, account: account) }
+
+    context "when signed in" do
+      before { sign_in user }
+
+      it "enqueues a backfill job for 30 days" do
+        expect {
+          post backfill_mail_connection_path(imap_connection), params: { days: 30 }
+        }.to have_enqueued_job(ImapBackfillJob).with(imap_connection.id, 30)
+
+        expect(response).to redirect_to(edit_mail_connection_path(imap_connection))
+        follow_redirect!
+        expect(response.body).to include("Backfill started")
+      end
+
+      it "rejects invalid day params" do
+        post backfill_mail_connection_path(imap_connection), params: { days: 14 }
+
+        expect(response).to redirect_to(edit_mail_connection_path(imap_connection))
+        expect(enqueued_jobs.none? { |j| j[:job] == ImapBackfillJob }).to be(true)
+      end
+
+      it "shows backfill controls on edit" do
+        get edit_mail_connection_path(imap_connection)
+
+        expect(response.body).to include("Import older mail")
+        expect(response.body).to include("Import 30 days")
+        expect(response.body).to include("Import 90 days")
+      end
+    end
+  end
+
   describe "PATCH /mail_connections/:id (SMTP fields)" do
     let!(:imap_connection) { create(:imap_connection, account: account) }
 

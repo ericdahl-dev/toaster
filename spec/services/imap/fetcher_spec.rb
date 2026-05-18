@@ -91,6 +91,15 @@ RSpec.describe Imap::Fetcher do
         expect(messages).to be_empty
       end
 
+      it "searches SINCE the given date when since: is passed" do
+        since_date = 30.days.ago.to_date
+        allow(imap_double).to receive(:uid_search).with([ "SINCE", since_date ]).and_return([])
+
+        fetcher.fetch_messages(since: since_date)
+
+        expect(imap_double).to have_received(:uid_search).with([ "SINCE", since_date ])
+      end
+
       it "returns mailbox peak uid from ALL search" do
         allow(imap_double).to receive(:uid_search).with("ALL").and_return([ 10, 42, 99 ])
 
