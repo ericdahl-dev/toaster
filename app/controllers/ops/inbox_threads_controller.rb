@@ -63,20 +63,7 @@ module Ops
     def load_thread_bookings(thread_rows)
       return {} if thread_rows.empty?
 
-      canonical_ids = thread_rows.map { |row|
-        ConversationThreading.canonical_id_for_inbox_thread(
-          provider: row.provider,
-          inbox_thread_id: row.provider_thread_id
-        )
-      }.uniq
-      BookingRequest
-        .joins(:conversation_thread)
-        .where(conversation_threads: { provider_thread_id: canonical_ids })
-        .includes(:conversation_thread)
-        .to_a
-        .group_by { |br|
-          ConversationThreading.inbox_thread_id_from_canonical(br.conversation_thread.provider_thread_id)
-        }
+      InboxThreads::Read.bookings_by_inbox_thread_id(thread_rows)
     end
 
     def load_singleton_bookings(singleton_rows)
