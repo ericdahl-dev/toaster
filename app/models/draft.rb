@@ -20,15 +20,17 @@ class Draft < ApplicationRecord
   private
 
   def broadcast_pending_to_timeline
-    html = ApplicationController.renderer.render(
-      partial: "drafts/pending_bubble",
-      locals: { draft: self }
-    )
-    Turbo::StreamsChannel.broadcast_append_to(
-      booking_request,
-      target: "thread-timeline",
-      html: html
-    )
+    TurboTimelineBroadcast.deliver(booking_request: booking_request, operation: "append_pending_draft") do
+      html = ApplicationController.renderer.render(
+        partial: "drafts/pending_bubble",
+        locals: { draft: self }
+      )
+      Turbo::StreamsChannel.broadcast_append_to(
+        booking_request,
+        target: "thread-timeline",
+        html: html
+      )
+    end
   end
 
   def booking_request_belongs_to_account

@@ -34,4 +34,15 @@ RSpec.describe "Deployment scripts" do
       expect(File.read(release_script)).to include("db:migrate")
     end
   end
+
+  describe "config/cable.yml" do
+    it "uses solid_cable for production (no Redis)" do
+      production = YAML.safe_load(
+        ERB.new(Rails.root.join("config/cable.yml").read).result,
+        aliases: true
+      )["production"]
+
+      expect(production["adapter"]).to eq("solid_cable")
+    end
+  end
 end

@@ -50,5 +50,12 @@ RSpec.describe Drafts::CompleteSend do
       expect(booking_request.reload.status).to eq("confirmed")
       expect(EventLog.count).to eq(0)
     end
+
+    it "completes send when turbo broadcast fails" do
+      allow(Turbo::StreamsChannel).to receive(:broadcast_replace_to).and_raise(StandardError, "cable down")
+
+      expect { call }.to change(Message, :count).by(1)
+      expect(booking_request.reload.status).to eq("confirmed")
+    end
   end
 end

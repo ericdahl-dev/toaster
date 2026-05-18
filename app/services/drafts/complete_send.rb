@@ -45,15 +45,17 @@ module Drafts
 
     def broadcast_sent
       booking_request = draft.booking_request
-      html = ApplicationController.renderer.render(
-        partial: "drafts/sent_bubble",
-        locals: { draft: draft }
-      )
-      Turbo::StreamsChannel.broadcast_replace_to(
-        booking_request,
-        target: "draft-#{draft.id}",
-        html: html
-      )
+      TurboTimelineBroadcast.deliver(booking_request: booking_request, operation: "replace_sent_draft") do
+        html = ApplicationController.renderer.render(
+          partial: "drafts/sent_bubble",
+          locals: { draft: draft }
+        )
+        Turbo::StreamsChannel.broadcast_replace_to(
+          booking_request,
+          target: "draft-#{draft.id}",
+          html: html
+        )
+      end
     end
   end
 end

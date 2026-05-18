@@ -1,4 +1,4 @@
-<%= turbo_stream_from @booking_request %>
+<%= turbo_stream_from @booking_request, channel: Turbo::Streams::AuthorizedChannel %>
 <%= link_to "← All requests", booking_requests_path, class: "back-link" %>
 
 <div class="page-header">

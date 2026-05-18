@@ -417,6 +417,11 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.13.2)
     simplecov_json_formatter (0.1.4)
+    solid_cable (3.0.12)
+      actioncable (>= 7.2)
+      activejob (>= 7.2)
+      activerecord (>= 7.2)
+      railties (>= 7.2)
     standard (1.54.0)
       language_server-protocol (~> 3.17.0.2)
       lint_roller (~> 1.0)
@@ -508,6 +513,7 @@ DEPENDENCIES
   ruby-openai
   simplecov
   simplecov_json_formatter
+  solid_cable (~> 3.0)
   standard (>= 1.35.1)
   stimulus-rails
   tailwindcss-rails
