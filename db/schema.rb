@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_18_140100) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_18_153000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -241,6 +241,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_18_140100) do
     t.datetime "created_at", null: false
     t.string "host", null: false
     t.string "inbox_folder", default: "INBOX", null: false
+    t.datetime "last_backfill_at"
+    t.integer "last_backfill_days"
     t.integer "last_synced_uid"
     t.text "password"
     t.integer "port", default: 993, null: false

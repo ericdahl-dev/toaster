@@ -2,7 +2,7 @@
 
 class MailConnectionsController < ApplicationController
   before_action :require_authenticated_html_user!
-  before_action :set_connection, only: [ :edit, :update ]
+  before_action :set_connection, only: [ :edit, :update, :backfill ]
 
   def index
     @imap_connections = current_user.account.imap_connections.order(:username)
@@ -45,6 +45,18 @@ class MailConnectionsController < ApplicationController
       @venues = current_user.account.venues.order(:name)
       render :edit, status: :unprocessable_content
     end
+  end
+
+  def backfill
+    days = params[:days].to_i
+    unless ImapBackfillJob::VALID_DAYS.include?(days)
+      redirect_to edit_mail_connection_path(@connection), alert: "Invalid backfill window."
+      return
+    end
+
+    ImapBackfillJob.perform_later(@connection.id, days)
+    redirect_to edit_mail_connection_path(@connection),
+      notice: "Backfill started for the last #{days} days. Already-imported messages are deduped."
   end
 
   private

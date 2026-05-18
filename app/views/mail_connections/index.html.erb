@@ -25,6 +25,7 @@
           <th>Host</th>
           <th>Folder</th>
           <th>Status</th>
+          <th>Last backfill</th>
           <th>Last synced</th>
           <th></th>
         </tr>
@@ -39,6 +40,13 @@
               <span class="badge <%= conn.active? ? 'badge-active' : 'badge-inactive' %>">
                 <%= conn.active? ? "active" : "inactive" %>
               </span>
+            </td>
+            <td class="dim">
+              <% if conn.last_backfill_at.present? %>
+                <%= conn.last_backfill_days %>d · <%= time_ago_in_words(conn.last_backfill_at) %> ago
+              <% else %>
+                —
+              <% end %>
             </td>
             <td class="dim">—</td>
             <td style="text-align:right">
