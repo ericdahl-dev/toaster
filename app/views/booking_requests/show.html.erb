@@ -41,8 +41,15 @@
     </div>
   <% end %>
   <div class="detail-cell">
-    <div class="detail-label">Received</div>
-    <div class="detail-value"><%= @booking_request.created_at.strftime("%-d %b %Y") %></div>
+    <div class="detail-label">First received</div>
+    <div class="detail-value"><%= @booking_request.first_received_at.strftime("%-d %b %Y %H:%M") %></div>
+  </div>
+  <div class="detail-cell">
+    <div class="detail-label">Last activity</div>
+    <div class="detail-value">
+      <%= @booking_request.last_activity_direction_label %>
+      · <%= @booking_request.last_activity_at.strftime("%-d %b %Y %H:%M") %>
+    </div>
   </div>
 </div>
 

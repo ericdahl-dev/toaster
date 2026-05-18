@@ -5,7 +5,15 @@ class BookingRequestsController < ApplicationController
   before_action :set_booking_request, only: [ :show, :transition ]
 
   def index
-    @booking_requests = current_user.account.booking_requests.order(updated_at: :desc)
+    @booking_requests = current_user.account.booking_requests
+      .includes(:contact, :venue, :conversation_thread, :source_inbox_message, :messages, :drafts)
+      .order(updated_at: :desc)
+
+    contact_ids = @booking_requests.map(&:contact_id)
+    @requests_per_contact = current_user.account.booking_requests
+      .where(contact_id: contact_ids)
+      .group(:contact_id)
+      .count
   end
 
   def show
