@@ -37,6 +37,15 @@ RSpec.describe SendDraftJob do
       end
     end
 
+    context "when draft is already sent" do
+      before { draft.update!(status: "sent", sent_at: 1.hour.ago) }
+
+      it "does not call SmtpSender" do
+        expect(Drafts::SmtpSender).not_to receive(:call)
+        described_class.new.perform(draft.id)
+      end
+    end
+
     it "creates an outbound Message" do
       expect { described_class.new.perform(draft.id) }.to change(Message, :count).by(1)
     end
