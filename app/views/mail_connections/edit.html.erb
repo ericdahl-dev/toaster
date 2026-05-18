@@ -7,6 +7,30 @@
   </div>
 </div>
 
+<div class="card" style="margin-bottom:24px">
+  <div class="section-heading" style="margin-top:0">Import older mail</div>
+  <p class="dim" style="font-size:12px;margin:0 0 12px">
+    New connections import the last 7 days automatically. Use backfill to pull older messages (deduped; may run AI on unprocessed mail).
+  </p>
+  <% if @connection.last_backfill_at.present? %>
+    <p class="dim" style="font-size:11px;margin:0 0 12px">
+      Last backfill: <%= @connection.last_backfill_days %> days · <%= time_ago_in_words(@connection.last_backfill_at) %> ago
+    </p>
+  <% end %>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <%= button_to "Import 30 days",
+          backfill_mail_connection_path(@connection, days: 30),
+          method: :post,
+          class: "btn btn-ghost",
+          data: { turbo_confirm: "Import mail from the last 30 days? Messages already in Toaster are skipped; unprocessed mail may use AI credits." } %>
+    <%= button_to "Import 90 days",
+          backfill_mail_connection_path(@connection, days: 90),
+          method: :post,
+          class: "btn btn-ghost",
+          data: { turbo_confirm: "Import mail from the last 90 days? Messages already in Toaster are skipped; unprocessed mail may use AI credits." } %>
+  </div>
+</div>
+
 <% if @connection.errors.any? %>
   <div class="flash flash-alert" style="position:static;margin-bottom:20px;animation:none">
     <% @connection.errors.full_messages.each do |msg| %>

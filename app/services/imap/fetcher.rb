@@ -13,7 +13,7 @@ module Imap
       @imap_connection = imap_connection
     end
 
-    def fetch_messages
+    def fetch_messages(since: nil)
       validate_config!
 
       messages = []
@@ -21,7 +21,7 @@ module Imap
       Imap::Session.call(imap_connection: imap_connection) do |imap|
         imap.select(imap_connection.inbox_folder)
 
-        uids = search_uids(imap)
+        uids = since ? imap.uid_search([ "SINCE", since.to_date ]) : search_uids(imap)
         return messages if uids.empty?
 
         imap.uid_fetch(uids, FETCH_ATTRIBUTES).each do |msg|

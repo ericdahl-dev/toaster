@@ -70,6 +70,9 @@ Rails.application.routes.draw do
     end
   end
   resources :mail_connections, only: [ :index, :new, :create, :edit, :update ] do
+    member do
+      post :backfill
+    end
     resources :inbox_filters, only: [ :create, :destroy ]
   end
   resources :venues, only: [ :index, :new, :create, :edit, :update, :destroy ] do
