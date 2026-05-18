@@ -73,14 +73,8 @@ jobs:
       - name: Build Tailwind CSS
         run: bundle exec rails tailwindcss:build
 
-      - name: Set up Chrome
-        uses: browser-actions/setup-chrome@v1
-        id: setup-chrome
-
       - name: Run backend specs
         run: bundle exec rspec
-        env:
-          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v7
