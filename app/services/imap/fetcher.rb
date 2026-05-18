@@ -6,6 +6,8 @@ module Imap
     class Error < StandardError; end
 
     FETCH_ATTRIBUTES = %w[UID RFC822 ENVELOPE].freeze
+    # First sync for a new connection: import recent mail only (not full mailbox history).
+    INITIAL_SYNC_WINDOW = 7.days
 
     def initialize(imap_connection:)
       @imap_connection = imap_connection
@@ -31,6 +33,16 @@ module Imap
       messages
     end
 
+    # Highest UID in the selected folder (used to advance checkpoint when initial window is empty).
+    def mailbox_peak_uid
+      validate_config!
+
+      Imap::Session.call(imap_connection: imap_connection) do |imap|
+        imap.select(imap_connection.inbox_folder)
+        imap.uid_search("ALL").max
+      end
+    end
+
     private
 
     attr_reader :imap_connection
@@ -39,7 +51,7 @@ module Imap
       if imap_connection.last_synced_uid.present?
         imap.uid_search("UID #{imap_connection.last_synced_uid + 1}:*")
       else
-        imap.uid_search("ALL")
+        imap.uid_search([ "SINCE", INITIAL_SYNC_WINDOW.ago.to_date ])
       end
     end
 

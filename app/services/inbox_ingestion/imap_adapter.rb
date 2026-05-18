@@ -24,6 +24,9 @@ module InboxIngestion
 
     def write_checkpoint_after_batch(**)
       @imap_connection.reload
+      advance_initial_checkpoint_if_needed
+
+      return if @max_uid.nil?
       return if @max_uid == @imap_connection.last_synced_uid
 
       @imap_connection.update!(last_synced_uid: @max_uid)
@@ -36,6 +39,14 @@ module InboxIngestion
         imap.select(@imap_connection.inbox_folder)
         imap.uid_store(uids, "+FLAGS", [ :Seen ])
       end
+    end
+
+    def advance_initial_checkpoint_if_needed
+      return if @imap_connection.last_synced_uid.present?
+      return if @max_uid.present?
+
+      peak = @fetcher.mailbox_peak_uid
+      @max_uid = peak if peak.present?
     end
   end
 end

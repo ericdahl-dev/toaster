@@ -139,7 +139,7 @@ RSpec.describe "IMAP inbox ingestion" do
 
     it "returns empty result when no messages are fetched" do
       account = create(:account)
-      connection = create(:imap_connection, account: account)
+      connection = create(:imap_connection, account: account, last_synced_uid: 10)
       fetcher = instance_double(Imap::Fetcher)
       allow(fetcher).to receive(:fetch_messages).and_return([])
 
@@ -148,6 +148,18 @@ RSpec.describe "IMAP inbox ingestion" do
       expect(result.created_count).to eq(0)
       expect(result.deduped_count).to eq(0)
       expect(result.messages).to be_empty
+    end
+
+    it "advances last_synced_uid to mailbox peak when initial window is empty" do
+      account = create(:account)
+      connection = create(:imap_connection, account: account, last_synced_uid: nil)
+      fetcher = instance_double(Imap::Fetcher)
+      allow(fetcher).to receive(:fetch_messages).and_return([])
+      allow(fetcher).to receive(:mailbox_peak_uid).and_return(99)
+
+      ingest(imap_connection: connection, fetcher: fetcher)
+
+      expect(connection.reload.last_synced_uid).to eq(99)
     end
   end
 end

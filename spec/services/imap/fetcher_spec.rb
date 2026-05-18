@@ -38,10 +38,11 @@ RSpec.describe Imap::Fetcher do
         allow(imap_double).to receive(:disconnect)
       end
 
-      it "searches ALL when no last_synced_uid is set" do
-        allow(imap_double).to receive(:uid_search).with("ALL").and_return([])
+      it "searches SINCE one week ago when no last_synced_uid is set" do
+        since_date = Imap::Fetcher::INITIAL_SYNC_WINDOW.ago.to_date
+        allow(imap_double).to receive(:uid_search).with([ "SINCE", since_date ]).and_return([])
         fetcher.fetch_messages
-        expect(imap_double).to have_received(:uid_search).with("ALL")
+        expect(imap_double).to have_received(:uid_search).with([ "SINCE", since_date ])
       end
 
       it "searches by UID range when last_synced_uid is set" do
@@ -88,6 +89,12 @@ RSpec.describe Imap::Fetcher do
         allow(imap_double).to receive(:uid_search).and_return([])
         messages = fetcher.fetch_messages
         expect(messages).to be_empty
+      end
+
+      it "returns mailbox peak uid from ALL search" do
+        allow(imap_double).to receive(:uid_search).with("ALL").and_return([ 10, 42, 99 ])
+
+        expect(fetcher.mailbox_peak_uid).to eq(99)
       end
 
       it "uses uid-based fallback provider_message_id when Message-ID header is absent" do
