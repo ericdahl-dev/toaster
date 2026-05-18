@@ -11,10 +11,7 @@ module BookingRequests
     end
 
     def booking_request_for(inbox_message)
-      thread = inbox_message.account.conversation_threads.find_by(
-        provider_thread_id: ConversationThreading.canonical_id_for(inbox_message)
-      )
-      booking_request = thread&.booking_requests&.first
+      booking_request = ThreadLookup.booking_request_for(inbox_message)
       terminal?(booking_request) ? booking_request : nil
     end
   end
