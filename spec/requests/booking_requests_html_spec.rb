@@ -158,6 +158,20 @@ RSpec.describe "BookingRequests HTML", type: :request do
         expect(response).to have_http_status(:not_found)
       end
 
+      it "shows archive action when not archived" do
+        get "/booking_requests/#{booking_request.id}"
+
+        expect(response.body).to include("Archive")
+      end
+
+      it "shows restore action when archived" do
+        booking_request.update!(archived_at: 1.hour.ago)
+
+        get "/booking_requests/#{booking_request.id}"
+
+        expect(response.body).to include("Restore to list")
+      end
+
       context "intake panel" do
         it "renders intake panel when any intake field is present" do
           venue_space = create(:venue_space, venue: create(:venue, account: account))

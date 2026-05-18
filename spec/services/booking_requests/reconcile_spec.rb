@@ -396,6 +396,26 @@ RSpec.describe BookingRequests::Reconcile do
       end
     end
 
+    context "venue assignment" do
+      it "assigns venue when it belongs to the same account" do
+        inbox_message = build_inbox_message
+        venue = create(:venue, account: account)
+
+        described_class.call(inbox_message: inbox_message, venue: venue, inbox_message_created: true)
+
+        expect(BookingRequest.last.venue_id).to eq(venue.id)
+      end
+
+      it "does not assign a venue from another account" do
+        inbox_message = build_inbox_message
+        other_venue = create(:venue, account: create(:account))
+
+        described_class.call(inbox_message: inbox_message, venue: other_venue, inbox_message_created: true)
+
+        expect(BookingRequest.last.venue_id).to be_nil
+      end
+    end
+
     context "when extraction raises an error" do
       it "rolls back the transaction and propagates the error" do
         inbox_message = build_inbox_message

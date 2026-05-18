@@ -4,9 +4,14 @@ module Ops
   class AiRunsController < ApplicationController
     skip_forgery_protection
     include Ops::RequireToken
+    include Ops::AccountScope
+
+    before_action :require_ops_account!
 
     def index
-      scope = AiRun.order(created_at: :desc).limit(200)
+      return if performed?
+
+      scope = ops_account.ai_runs.order(created_at: :desc).limit(200)
       scope = scope.where(run_type: params[:run_type]) if params[:run_type].present?
       scope = scope.where(booking_request_id: params[:booking_request_id]) if params[:booking_request_id].present?
 
@@ -16,7 +21,9 @@ module Ops
     end
 
     def show
-      run = AiRun.find(params[:id])
+      return if performed?
+
+      run = ops_account.ai_runs.find(params[:id])
       render json: { ai_run: run_detail(run) }
     rescue ActiveRecord::RecordNotFound
       render json: { error: "AiRun not found" }, status: :not_found
