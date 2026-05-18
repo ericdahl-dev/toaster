@@ -59,6 +59,8 @@ Rails.application.routes.draw do
   resources :booking_requests, only: [ :index, :show ] do
     member do
       post :transition
+      post :archive
+      post :unarchive
     end
     resources :drafts, only: [] do
       member do

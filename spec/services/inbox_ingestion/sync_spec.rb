@@ -134,7 +134,7 @@ RSpec.describe InboxIngestion::Sync do
         create(:inbox_filter, imap_connection: imap_connection, venue: venue, keyword: "wedding", position: 0)
 
         called_with_venue = nil
-        allow(BookingRequests::Reconcile).to receive(:call) do |inbox_message:, venue:|
+        allow(BookingRequests::Reconcile).to receive(:call) do |inbox_message:, venue:, inbox_message_created:|
           called_with_venue = venue
           nil
         end
@@ -163,7 +163,7 @@ RSpec.describe InboxIngestion::Sync do
         imap_connection = create(:imap_connection, account: account)
 
         called_with_venue = :not_called
-        allow(BookingRequests::Reconcile).to receive(:call) do |inbox_message:, venue:|
+        allow(BookingRequests::Reconcile).to receive(:call) do |inbox_message:, venue:, inbox_message_created:|
           called_with_venue = venue
           nil
         end

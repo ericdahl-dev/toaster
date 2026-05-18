@@ -13,6 +13,9 @@ class BookingRequest < ApplicationRecord
   has_many :tasks, dependent: :destroy
   has_many :ai_runs, dependent: :destroy
 
+  scope :active, -> { where(archived_at: nil) }
+  scope :archived, -> { where.not(archived_at: nil) }
+
   enum :status, {
     pending: "pending",
     reviewing: "reviewing",
@@ -40,6 +43,10 @@ class BookingRequest < ApplicationRecord
     drink_tickets: "drink_tickets",
     timed_package: "timed_package"
   }, prefix: :beverage
+
+  def archived?
+    archived_at.present?
+  end
 
   def first_received_at
     source_inbox_message&.received_at ||

@@ -23,7 +23,7 @@ BookingRequests::Reconcile
         │  runs FieldExtractor (LLM-assisted)
         ▼
 BookingRequest  ←  system of record
-  status: pending → reviewing → confirmed / rejected / cancelled
+  status: pending → reviewing → confirmed / cancelled; archive hides from default list (ADR 0008)
         │
         ├── Draft (AI-generated reply, pending_review → sent)
         │       └── Drafts::SmtpSender  →  SMTP send
@@ -105,7 +105,7 @@ The CI suite runs automatically on every push and pull request via GitHub Action
    booking request. No match leaves `venue_id` nil.
 
 4. **Operator review** — The operator UI (Rails/Hotwire) lists booking requests. Operators
-   transition status (`pending → reviewing → confirmed / rejected / cancelled`), approve or
+   **archive** rows to hide them from the default list (reversible; auto-unarchive on new inbound mail—see ADR 0008), transition status (`pending → reviewing → confirmed / cancelled`), approve or
    reject AI-generated draft replies, and monitor the event log.
 
 5. **Draft sending** — Approving a draft enqueues `SendDraftJob`, which calls

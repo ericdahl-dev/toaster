@@ -57,6 +57,25 @@ RSpec.describe "BookingRequests HTML", type: :request do
 
         expect(response.body).to include("From contact")
       end
+
+      it "excludes archived booking requests from the default list" do
+        booking_request.update!(archived_at: 1.hour.ago)
+        other = create(:booking_request, account: account)
+
+        get "/booking_requests"
+
+        expect(response.body).to include(other.contact.email)
+        expect(response.body).not_to include(booking_request.contact.email)
+      end
+
+      it "shows archived booking requests when show_archived=1" do
+        booking_request.update!(archived_at: 1.hour.ago)
+
+        get "/booking_requests", params: { show_archived: "1" }
+
+        expect(response.body).to include(booking_request.contact.email)
+        expect(response.body).to include("Show active")
+      end
     end
 
     context "when signed out" do
@@ -191,6 +210,41 @@ RSpec.describe "BookingRequests HTML", type: :request do
 
         expect(response).to have_http_status(:redirect)
         expect(response.location).to include("/login")
+      end
+    end
+  end
+
+  describe "POST /booking_requests/:id/archive" do
+    context "when signed in" do
+      before { sign_in user }
+
+      it "archives the booking request and redirects to the list" do
+        post "/booking_requests/#{booking_request.id}/archive"
+
+        expect(response).to redirect_to(booking_requests_path)
+        expect(booking_request.reload.archived_at).to be_present
+      end
+
+      it "returns 404 for another account's request" do
+        other = create(:booking_request)
+        post "/booking_requests/#{other.id}/archive"
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
+  describe "POST /booking_requests/:id/unarchive" do
+    context "when signed in" do
+      before { sign_in user }
+
+      it "restores the booking request" do
+        booking_request.update!(archived_at: 1.hour.ago)
+
+        post "/booking_requests/#{booking_request.id}/unarchive"
+
+        expect(response).to redirect_to(booking_request_path(booking_request))
+        expect(booking_request.reload.archived_at).to be_nil
       end
     end
   end

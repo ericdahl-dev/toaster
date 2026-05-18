@@ -32,7 +32,9 @@
               <div class="dim" style="font-size:11px"><%= thread.contact.email %></div>
             </td>
             <td>
-              <% if primary_booking %>
+              <% if primary_booking&.archived? %>
+                <span class="badge badge-archived">archived</span>
+              <% elsif primary_booking %>
                 <span class="badge badge-<%= primary_booking.status %>"><%= primary_booking.status %></span>
               <% else %>
                 <span class="dim">—</span>

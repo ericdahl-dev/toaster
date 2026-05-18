@@ -1,7 +1,14 @@
 <div class="page-header">
   <div>
     <h1 class="page-title">Booking Requests</h1>
-    <p class="page-subtitle"><%= @booking_requests.size %> total</p>
+    <p class="page-subtitle"><%= @booking_requests.size %> <%= @show_archived ? "archived" : "active" %></p>
+  </div>
+  <div>
+    <% if @show_archived %>
+      <%= link_to "Show active", booking_requests_path, class: "btn btn-ghost" %>
+    <% else %>
+      <%= link_to "Show archived", booking_requests_path(show_archived: 1), class: "btn btn-ghost" %>
+    <% end %>
   </div>
 </div>
 
@@ -9,8 +16,12 @@
   <div class="card">
     <div class="empty-state">
       <div class="empty-icon">📋</div>
-      <span>No booking requests yet</span>
-      <span class="dim" style="font-size:11px">Requests appear here once mail sync runs</span>
+      <% if @show_archived %>
+        <span>No archived booking requests</span>
+      <% else %>
+        <span>No booking requests yet</span>
+        <span class="dim" style="font-size:11px">Requests appear here once mail sync runs</span>
+      <% end %>
     </div>
   </div>
 <% else %>
@@ -27,6 +38,7 @@
           <th>Status</th>
           <th>First received</th>
           <th>Last activity</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -62,6 +74,29 @@
             <td class="dim" style="font-size:11px;white-space:nowrap">
               <span title="<%= br.last_activity_direction_label %>"><%= br.last_activity_direction_label %></span>
               · <%= br.last_activity_at.strftime("%-d %b %Y %H:%M") %>
+            </td>
+            <td onclick="event.stopPropagation()">
+              <% if @show_archived %>
+                <%= button_to "Restore",
+                      unarchive_booking_request_path(br),
+                      method: :post,
+                      class: "btn btn-ghost",
+                      style: "font-size:11px;padding:4px 8px" %>
+              <% else %>
+                <%
+                  archive_confirm = if @pending_review_draft_ids.include?(br.id) || @open_task_ids.include?(br.id)
+                    "Archive anyway? This request still has an open draft or review task."
+                  else
+                    "Archive this booking request? It will be hidden from the main list."
+                  end
+                %>
+                <%= button_to "Archive",
+                      archive_booking_request_path(br),
+                      method: :post,
+                      class: "btn btn-ghost",
+                      style: "font-size:11px;padding:4px 8px",
+                      data: { turbo_confirm: archive_confirm } %>
+              <% end %>
             </td>
           </tr>
         <% end %>
