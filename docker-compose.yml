@@ -1,10 +1,20 @@
-# Backend: Puma + GoodJob worker (same image, two processes).
+# Backend: Puma + GoodJob worker + Redis (Action Cable) — same image, three services.
 # Coolify: set "Docker Compose Location" to this file and base directory to `/` (repo root). Required env at runtime:
 #   DATABASE_URL, RAILS_MASTER_KEY (must match the key for config/credentials.yml.enc in the image)
+# REDIS_URL is set below for web/worker; override only if using an external Redis instance.
 #
 # Local: from repo root run `docker compose up --build`
 
 services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   web:
     build:
       context: .
@@ -13,10 +23,14 @@ services:
     command: [ "./bin/rails", "server", "-b", "0.0.0.0" ]
     expose:
       - "3000"
+    depends_on:
+      redis:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${DATABASE_URL}
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
       RAILS_ENV: production
+      REDIS_URL: redis://redis:6379/1
       TOASTER_SEED_ACCOUNT_NAME: ${TOASTER_SEED_ACCOUNT_NAME}
       TOASTER_ADMIN_EMAIL: ${TOASTER_ADMIN_EMAIL}
       TOASTER_ADMIN_PASSWORD: ${TOASTER_ADMIN_PASSWORD}
@@ -35,8 +49,12 @@ services:
       args:
         GIT_REVISION: ${SOURCE_COMMIT:-dev}
     command: [ "bundle", "exec", "good_job", "start" ]
+    depends_on:
+      redis:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${DATABASE_URL}
       RAILS_MASTER_KEY: ${RAILS_MASTER_KEY}
       RAILS_ENV: production
+      REDIS_URL: redis://redis:6379/1
     restart: unless-stopped

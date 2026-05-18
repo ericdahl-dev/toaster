@@ -34,4 +34,16 @@ RSpec.describe "Deployment scripts" do
       expect(File.read(release_script)).to include("db:migrate")
     end
   end
+
+  describe "docker-compose.yml" do
+    let(:compose) { File.read(Rails.root.join("docker-compose.yml")) }
+
+    it "defines a Redis service for Action Cable" do
+      expect(compose).to include("redis:7-alpine")
+    end
+
+    it "sets REDIS_URL on web and worker" do
+      expect(compose).to include("REDIS_URL: redis://redis:6379/1")
+    end
+  end
 end

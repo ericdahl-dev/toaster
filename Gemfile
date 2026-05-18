@@ -23,8 +23,8 @@ gem "multipart-post"
 
 # Background jobs with dashboard [https://github.com/bensheldon/good_job]
 gem "good_job"
-# Use Redis adapter to run Action Cable in production
-# gem "redis", ">= 4.0.1"
+# Action Cable pub/sub in production (web + Good Job worker share REDIS_URL)
+gem "redis", ">= 4.0.1"
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
