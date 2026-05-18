@@ -53,6 +53,19 @@ RSpec.describe "Sessions (HTML)", type: :request do
         follow_redirect!
         expect(response).to have_http_status(:ok)
       end
+
+      context "when the account is onboarded" do
+        before { account.update_column(:onboarded_at, Time.current) }
+
+        it "lands on booking requests without error" do
+          post "/login", params: { user: { email: user.email, password: "password123" } }
+
+          expect(response).to redirect_to(booking_requests_path)
+          follow_redirect!
+          expect(response).to have_http_status(:ok)
+          expect(response.body).to include("Booking Requests")
+        end
+      end
     end
 
     context "with invalid credentials" do
