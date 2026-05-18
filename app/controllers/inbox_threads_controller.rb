@@ -16,6 +16,7 @@ class InboxThreadsController < ApplicationController
   private
 
   def set_thread
+    # Product routes use ConversationThread AR id; ops JSON uses inbox-native provider_thread_id via InboxThreads::Read (ADR 0009).
     @thread = current_user.account.conversation_threads
       .includes(:contact, :messages, booking_requests: [ :source_inbox_message, :drafts ])
       .find_by(id: params[:id])
