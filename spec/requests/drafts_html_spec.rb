@@ -34,6 +34,14 @@ RSpec.describe "Draft approval UI", type: :request do
       expect(draft.reload.status).to eq("approved")
     end
 
+    it "does not enqueue a second SendDraftJob when already approved" do
+      draft.update!(status: "approved")
+
+      expect {
+        post "/booking_requests/#{booking_request.id}/drafts/#{draft.id}/approve"
+      }.not_to have_enqueued_job(SendDraftJob)
+    end
+
     it "returns 404 for another account's draft" do
       other_draft = create(:draft, status: "pending_review")
       post "/booking_requests/#{other_draft.booking_request.id}/drafts/#{other_draft.id}/approve"

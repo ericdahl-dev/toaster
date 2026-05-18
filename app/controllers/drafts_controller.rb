@@ -5,7 +5,21 @@ class DraftsController < ApplicationController
   before_action :set_draft
 
   def approve
-    @draft.update!(status: "approved")
+    enqueued = false
+    @draft.with_lock do
+      if @draft.sent?
+        return redirect_to booking_request_path(@draft.booking_request), notice: "Draft already sent."
+      end
+      unless @draft.pending_review?
+        return redirect_to booking_request_path(@draft.booking_request), alert: "Draft is not awaiting approval."
+      end
+
+      @draft.update!(status: "approved")
+      enqueued = true
+    end
+
+    return unless enqueued
+
     SendDraftJob.perform_later(@draft.id)
 
     Telemetry.capture(
