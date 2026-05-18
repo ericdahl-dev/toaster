@@ -3,11 +3,14 @@
 require "capybara/cuprite"
 
 Capybara.register_driver(:cuprite) do |app|
-  Capybara::Cuprite::Driver.new(
-    app,
+  options = {
     window_size: [ 1400, 1400 ],
-    browser_options: { "no-sandbox" => nil }
-  )
+    browser_options: { "no-sandbox" => nil, "disable-dev-shm-usage" => nil },
+    process_timeout: ENV["CI"] ? 30 : 10
+  }
+  options[:browser_path] = ENV["CHROME_PATH"] if ENV["CHROME_PATH"].present?
+
+  Capybara::Cuprite::Driver.new(app, **options)
 end
 
 RSpec.configure do |config|
