@@ -14,7 +14,7 @@ The process of fetching new messages from a connected inbox, upserting inbox mes
 The system that holds the mailbox (currently IMAP only; see ADR 0006). Each provider has its own wire protocol and checkpoint shape.
 
 **Checkpoint**:
-Where incremental ingestion resumes for a connection. Meaning is provider-specific (for example UID versus wall-clock time); the ingestion orchestrator does not assume a single storage shape. After each ingestion run, the orchestrator always asks the adapter to commit checkpoints **even when no messages arrived**; whether that updates storage is adapter-specific (for example wall-clock cursors may advance on empty runs; UID cursors may not).
+Where incremental ingestion resumes for a connection. Meaning is provider-specific (for example UID versus wall-clock time); the ingestion orchestrator does not assume a single storage shape. After each ingestion run, the orchestrator always asks the adapter to commit checkpoints **even when no messages arrived**; whether that updates storage is adapter-specific (for example wall-clock cursors may advance on empty runs; UID cursors may not). For IMAP, the first sync on a new connection imports only the last seven days (`Imap::Fetcher::INITIAL_SYNC_WINDOW`); older mail is skipped until a deliberate backfill exists. If that window is empty, the checkpoint still advances to the mailbox’s highest UID so later syncs only fetch new mail.
 
 **Ingestion adapter**:
 The provider-owned object that implements fetch and checkpoint read/write for one connection. Adapters live alongside the shared ingestion orchestrator under `app/services/inbox_ingestion/` and delegate wire-protocol work to existing fetcher modules.
