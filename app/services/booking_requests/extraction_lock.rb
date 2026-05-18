@@ -5,7 +5,9 @@ module BookingRequests
     module_function
 
     def terminal?(booking_request)
-      booking_request&.confirmed? || booking_request&.cancelled?
+      return false if booking_request.nil?
+
+      booking_request.confirmed? || booking_request.cancelled?
     end
 
     def booking_request_for(inbox_message)
