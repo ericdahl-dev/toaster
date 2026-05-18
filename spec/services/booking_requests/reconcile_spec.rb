@@ -325,6 +325,77 @@ RSpec.describe BookingRequests::Reconcile do
       end
     end
 
+    context "when the booking request has a terminal status (extraction lock)" do
+      let(:first_message) { build_inbox_message }
+      let(:follow_up_message) do
+        create(
+          :inbox_message,
+          account: account,
+          from_name: "Jamie Lead",
+          from_email: "jamie@example.com",
+          subject: "Re: Wedding for 120 guests on June 14, 2026",
+          body_text: "Actually we only need 80 guests.",
+          received_at: Time.zone.parse("2026-04-02 10:00:00 UTC"),
+          provider_thread_id: first_message.provider_thread_id
+        )
+      end
+
+      let(:updated_extractor_response) do
+        full_extractor_response.merge("headcount" => 80)
+      end
+
+      before do
+        described_class.call(inbox_message: first_message)
+        BookingRequest.last.update!(status: :confirmed, headcount: 120)
+      end
+
+      it "does not change extraction fields on inbound mail" do
+        expect {
+          described_class.call(inbox_message: follow_up_message)
+        }.not_to change { BookingRequest.last.reload.headcount }
+      end
+
+      it "still creates a canonical Message for the inbound mail" do
+        expect {
+          described_class.call(inbox_message: follow_up_message)
+        }.to change(Message, :count).by(1)
+      end
+
+      it "does not run classifier or extraction AiRuns" do
+        expect {
+          described_class.call(inbox_message: follow_up_message)
+        }.not_to change(AiRun, :count)
+      end
+
+      it "does not create a draft or booking_request.updated log" do
+        expect {
+          described_class.call(inbox_message: follow_up_message)
+        }.not_to change(Draft, :count)
+
+        expect(EventLog.last.event_type).to eq("booking_request.inbound_recorded")
+      end
+
+      it "still unarchives when archived and inbox_message_created" do
+        BookingRequest.last.update!(archived_at: 1.hour.ago)
+
+        described_class.call(inbox_message: follow_up_message, inbox_message_created: true)
+
+        expect(BookingRequest.last.reload.archived_at).to be_nil
+        expect(BookingRequest.last.status).to eq("confirmed")
+      end
+
+      it "runs extraction again after status returns to reviewing" do
+        allow_any_instance_of(BookingRequests::LlmExtractor).to receive(:call_openai)
+          .and_return(updated_extractor_response)
+
+        BookingRequest.last.update!(status: :reviewing)
+
+        described_class.call(inbox_message: follow_up_message)
+
+        expect(BookingRequest.last.reload.headcount).to eq(80)
+      end
+    end
+
     context "when extraction raises an error" do
       it "rolls back the transaction and propagates the error" do
         inbox_message = build_inbox_message

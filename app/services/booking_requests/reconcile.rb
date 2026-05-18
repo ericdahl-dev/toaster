@@ -16,18 +16,36 @@ module BookingRequests
 
     def call
       ActiveRecord::Base.transaction do
-        extract_result = BookingRequests::Extract.call(inbox_message: inbox_message)
-        return nil if extract_result.nil?
+        locked_booking_request = BookingRequests::ExtractionLock.booking_request_for(inbox_message)
 
-        booking_request = extract_result.booking_request
-        is_new = booking_request.previous_changes.key?("id")
+        if locked_booking_request
+          BookingRequests::Persist.record_inbound(
+            inbox_message: inbox_message,
+            booking_request: locked_booking_request
+          )
+          booking_request = locked_booking_request
+          extraction_locked = true
+        else
+          extract_result = BookingRequests::Extract.call(inbox_message: inbox_message, venue: venue)
+          return nil if extract_result.nil?
+
+          booking_request = extract_result.booking_request
+          extraction_locked = false
+        end
+
+        is_new = !extraction_locked && booking_request.previous_changes.key?("id")
 
         unarchive_on_inbound(booking_request)
-
         assign_venue(booking_request)
-        log_reconciliation(booking_request, is_new: is_new)
-        create_review_task(booking_request) if booking_request.reviewing?
-        draft_created = generate_draft(booking_request)
+
+        if extraction_locked
+          log_inbound_recorded(booking_request)
+          draft_created = false
+        else
+          log_reconciliation(booking_request, is_new: is_new)
+          create_review_task(booking_request) if booking_request.reviewing?
+          draft_created = generate_draft(booking_request)
+        end
 
         Result.new(booking_request: booking_request, draft_created: draft_created)
       end
@@ -53,6 +71,20 @@ module BookingRequests
       return if booking_request.venue_id.present?
 
       booking_request.update_column(:venue_id, venue.id)
+    end
+
+    def log_inbound_recorded(booking_request)
+      EventLog.create!(
+        account: booking_request.account,
+        event_type: "booking_request.inbound_recorded",
+        subject_type: "BookingRequest",
+        subject_id: booking_request.id,
+        payload: {
+          status: booking_request.status,
+          extraction_locked: true,
+          inbox_message_id: inbox_message.id
+        }
+      )
     end
 
     def log_reconciliation(booking_request, is_new:)
