@@ -85,8 +85,11 @@ A rough dollar estimate from an inbound email — stored as a decimal on `Bookin
 **Fit status**:
 Computed by `ValidateExtraction` using the booking request's venue's `VenueSpace` records. Values: `qualified`, `not_a_fit`, `in_progress`. Nil when no venue is assigned. Stored on `BookingRequest`.
 
-**Decisioner**:
-`BookingRequests::Decisioner` — pure function that maps a validated extraction result to a `BookingRequest` status (`pending` or `reviewing`). Routes to `reviewing` on: any missing required fields, `fit_status: not_a_fit`, or `confidence < CONFIDENCE_THRESHOLD (0.8)`.
+**Extraction status**:
+`BookingRequests::ValidateExtraction.status_for` maps a validated extraction result to a `BookingRequest` status (`pending` or `reviewing`). Routes to `reviewing` on: any missing required fields, `fit_status: not_a_fit` or `in_progress`, or `confidence < CONFIDENCE_THRESHOLD (0.8)`.
+
+**Thread lookup**:
+`BookingRequests::ThreadLookup` resolves `InboxMessage` → `ConversationThread` (canonical `provider_thread_id`) → first `BookingRequest`. Shared by `Persist` and `ExtractionLock`.
 
 **Email body stripping**:
 `EmailBody::Strip` — standalone string→string service that removes quoted reply headers, original message blocks, and signatures from raw email body text before any LLM call. Called in `BookingRequests::Extract` before the classifier and extractor run.

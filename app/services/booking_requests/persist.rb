@@ -53,7 +53,7 @@ module BookingRequests
           booking_request.conversation_thread = thread
 
           validated = ValidateExtraction.new(booking_request:).call(raw)
-          status = Decisioner.call(validated)
+          status = ValidateExtraction.status_for(validated)
 
           booking_request.event_date = validated[:event_date]
           booking_request.headcount = validated[:headcount]
@@ -165,16 +165,18 @@ module BookingRequests
     end
 
     def find_or_build_booking_request(thread, inbox_message)
-      thread.booking_requests.first ||
+      ThreadLookup.booking_request_for_thread(thread) ||
         BookingRequest.new(source_inbox_message: inbox_message)
     end
 
     def find_or_build_thread(contact)
-      inbox_message.account.conversation_threads.find_or_initialize_by(
+      thread = ThreadLookup.conversation_thread_for(inbox_message)
+      thread ||= inbox_message.account.conversation_threads.new(
         provider_thread_id: ConversationThreading.canonical_id_for(inbox_message)
-      ).tap do |thread|
-        thread.contact = contact
-        thread.subject = inbox_message.subject
+      )
+      thread.tap do |t|
+        t.contact = contact
+        t.subject = inbox_message.subject
       end
     end
 

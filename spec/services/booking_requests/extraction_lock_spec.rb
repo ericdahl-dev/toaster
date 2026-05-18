@@ -17,7 +17,7 @@ RSpec.describe BookingRequests::ExtractionLock do
   end
 
   describe ".booking_request_for" do
-    it "finds the booking request via canonical conversation thread id" do
+    it "returns terminal booking request via shared thread lookup" do
       account = create(:account)
       inbox_message = create(:inbox_message, account: account, provider: "imap", provider_thread_id: "raw-1")
       contact = create(:contact, account: account)
@@ -30,6 +30,31 @@ RSpec.describe BookingRequests::ExtractionLock do
       booking = create(:booking_request, account: account, conversation_thread: thread, status: :confirmed)
 
       expect(described_class.booking_request_for(inbox_message)).to eq(booking)
+    end
+
+    it "returns nil when booking request is not terminal" do
+      account = create(:account)
+      inbox_message = create(:inbox_message, account: account, provider: "imap", provider_thread_id: "raw-1")
+      contact = create(:contact, account: account)
+      thread = create(
+        :conversation_thread,
+        account: account,
+        contact: contact,
+        provider_thread_id: ConversationThreading.canonical_id_for(inbox_message)
+      )
+      create(:booking_request, account: account, conversation_thread: thread, status: :pending)
+
+      expect(described_class.booking_request_for(inbox_message)).to be_nil
+    end
+
+    it "returns nil when thread row uses wrong provider_thread_id shape" do
+      account = create(:account)
+      inbox_message = create(:inbox_message, account: account, provider: "imap", provider_thread_id: "raw-1")
+      contact = create(:contact, account: account)
+      thread = create(:conversation_thread, account: account, contact: contact, provider_thread_id: "raw-1")
+      create(:booking_request, account: account, conversation_thread: thread, status: :confirmed)
+
+      expect(described_class.booking_request_for(inbox_message)).to be_nil
     end
   end
 end

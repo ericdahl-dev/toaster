@@ -3,6 +3,26 @@
 module BookingRequests
   class ValidateExtraction
     TRACKED_FIELDS = %i[event_date headcount budget].freeze
+    CONFIDENCE_THRESHOLD = 0.8
+
+    def self.status_for(validated_result)
+      return "reviewing" if validated_result[:missing_fields]&.any?
+      return "reviewing" if low_confidence?(validated_result)
+      return "reviewing" if not_a_fit?(validated_result)
+
+      "pending"
+    end
+
+    def self.low_confidence?(result)
+      confidence = result[:confidence]
+      confidence.nil? || confidence < CONFIDENCE_THRESHOLD
+    end
+    private_class_method :low_confidence?
+
+    def self.not_a_fit?(result)
+      %w[not_a_fit in_progress].include?(result[:fit_status])
+    end
+    private_class_method :not_a_fit?
 
     def initialize(booking_request:)
       @booking_request = booking_request
