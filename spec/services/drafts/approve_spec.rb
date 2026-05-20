@@ -67,13 +67,13 @@ RSpec.describe Drafts::Approve do
       expect(result).to eq(:ok)
     end
 
-    it "is idempotent: already-approved draft enqueues job and returns :ok" do
+    it "is idempotent: already-approved draft returns :not_pending and does not enqueue" do
       draft = make_draft(status: "approved")
-      expect(SendDraftJob).to receive(:perform_later).with(draft.id)
+      expect(SendDraftJob).not_to receive(:perform_later)
 
       result = described_class.call(draft: draft)
 
-      expect(result).to eq(:ok)
+      expect(result).to eq(:not_pending)
     end
   end
 end

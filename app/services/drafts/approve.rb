@@ -28,12 +28,12 @@ module Drafts
           next
         end
 
-        unless draft.pending_review? || draft.approved?
+        unless draft.pending_review?
           result = :not_pending
           next
         end
 
-        draft.update!(status: :approved) unless draft.approved?
+        draft.update!(status: :approved)
         result = :ok
       end
 
