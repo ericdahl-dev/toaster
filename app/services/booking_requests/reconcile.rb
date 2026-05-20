@@ -116,12 +116,13 @@ module BookingRequests
     def generate_draft(booking_request)
       return false if booking_request.drafts.pending_review.exists?
 
-      venue_chunks = venue.present? ? VenueRagRetriever.call(venue: venue, query: "#{inbox_message.subject} #{inbox_message.body_text}") : []
+      stripped_body = InboundContext.prepare_text(inbox_message)
+      venue_chunks = InboundContext.venue_chunks(venue: venue, text: stripped_body, subject: inbox_message.subject)
       thread_history = build_thread_history(booking_request)
 
       body = DraftWriter.new(account: booking_request.account, booking_request:, venue_chunks:).call(
         subject: inbox_message.subject,
-        body_text: EmailBody::Strip.call(inbox_message.body_text),
+        body_text: stripped_body,
         thread_history:
       )
 

@@ -13,7 +13,7 @@ module BookingRequests
 
     def call
       account = inbox_message.account
-      stripped_body = EmailBody::Strip.call(inbox_message.body_text)
+      stripped_body = InboundContext.prepare_text(inbox_message)
 
       is_booking = Classifier.new(account:).call(
         subject: inbox_message.subject,
@@ -21,7 +21,7 @@ module BookingRequests
       )
       return nil unless is_booking
 
-      venue_chunks = retrieve_venue_chunks(subject: inbox_message.subject, body_text: stripped_body)
+      venue_chunks = InboundContext.venue_chunks(venue: venue, text: stripped_body, subject: inbox_message.subject)
       raw = LlmExtractor.new(account:, venue_chunks:).call(
         subject: inbox_message.subject,
         body_text: stripped_body
@@ -33,14 +33,5 @@ module BookingRequests
     private
 
     attr_reader :inbox_message, :venue
-
-    def retrieve_venue_chunks(subject:, body_text:)
-      return [] if venue.nil?
-
-      VenueRagRetriever.call(
-        venue: venue,
-        query: "#{subject} #{body_text}"
-      )
-    end
   end
 end
