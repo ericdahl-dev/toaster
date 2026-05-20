@@ -79,15 +79,14 @@ RSpec.describe "BookingRequests HTML", type: :request do
 
       it "marks secondary columns for mobile collapse" do
         get "/booking_requests"
+        html = Nokogiri::HTML.parse(response.body)
+        secondary_headers = html.css("th.booking-requests-col--secondary").map { |node| node.text.strip }
 
-        expect(response.body).to include("booking-requests-table")
-        expect(response.body).to include('<th class="booking-requests-col--secondary">Venue</th>')
-        expect(response.body).to include('<th class="booking-requests-col--secondary">Headcount</th>')
-        expect(response.body).to include('<th class="booking-requests-col--secondary">First received</th>')
-        expect(response.body).to include('<th class="booking-requests-col--secondary">Last activity</th>')
-        expect(response.body).to include('booking-requests-col--secondary booking-requests-col--action')
-        expect(response.body).to include('class="dim booking-requests-col--secondary"')
-        expect(response.body).to include("booking-request-thread-link")
+        expect(html.at_css("table.booking-requests-table")).not_to be_nil
+        expect(secondary_headers).to include("Venue", "Headcount", "First received", "Last activity")
+        expect(html.at_css("th.booking-requests-col--secondary.booking-requests-col--action")).not_to be_nil
+        expect(html.at_css("td.dim.booking-requests-col--secondary")).not_to be_nil
+        expect(html.at_css("a.booking-request-thread-link")).not_to be_nil
       end
     end
 
