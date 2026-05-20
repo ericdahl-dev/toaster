@@ -754,8 +754,9 @@ body {
 }
 
 .booking-request-thread-link {
+  --booking-request-thread-font-size: 11px;
   --booking-request-thread-link-max-width: 220px;
-  font-size: 11px;
+  font-size: var(--booking-request-thread-font-size);
   display: block;
   max-width: var(--booking-request-thread-link-max-width);
   overflow: hidden;
