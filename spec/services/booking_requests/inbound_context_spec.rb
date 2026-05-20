@@ -33,7 +33,7 @@ RSpec.describe BookingRequests::InboundContext do
       venue = build_stubbed(:venue)
       query_text = "stripped body"
 
-      allow(BookingRequests::VenueRagRetriever).to receive(:call)
+      allow(BookingRequests::VenueKnowledge).to receive(:for)
         .with(venue: venue, query: "subject #{query_text}")
         .and_return(["chunk1"])
 
@@ -46,7 +46,7 @@ RSpec.describe BookingRequests::InboundContext do
       venue = build_stubbed(:venue)
       stripped = "Hello"
 
-      expect(BookingRequests::VenueRagRetriever).to receive(:call)
+      expect(BookingRequests::VenueKnowledge).to receive(:for)
         .with(venue: venue, query: include(stripped))
         .and_return([])
 

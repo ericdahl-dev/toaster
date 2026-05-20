@@ -9,7 +9,7 @@ module BookingRequests
     def self.venue_chunks(venue:, text:, subject: "")
       return [] if venue.nil?
 
-      VenueRagRetriever.call(venue: venue, query: "#{subject} #{text}")
+      VenueKnowledge.for(venue: venue, query: "#{subject} #{text}")
     end
   end
 end
