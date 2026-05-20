@@ -134,6 +134,50 @@ RSpec.describe InboxIngestion::Sync do
       expect(EventLog.where(event_type: "booking_request.created", subject_type: "BookingRequest").count).to eq(1)
     end
 
+    context "full pipeline with ImapAdapter (real Reconcile, only OpenAI stubbed)" do
+      it "creates a BookingRequest when ImapAdapter yields a booking inquiry" do
+        account = create(:account)
+        imap_connection = create(:imap_connection, account: account)
+
+        payload = {
+          provider: "imap",
+          provider_message_id: "<imap-full-pipeline@example.com>",
+          direction: "inbound",
+          from_email: "client@example.com",
+          from_name: "Test Client",
+          subject: "Birthday party for 50 guests on July 4, 2026",
+          body_text: "We need a venue for 50 guests on July 4th, budget around $8000.",
+          received_at: Time.zone.parse("2026-05-01 09:00:00 UTC"),
+          raw_payload: { "uid" => 10 }
+        }
+        fetcher = instance_double(Imap::Fetcher, fetch_messages: [ payload ], mailbox_peak_uid: nil)
+        adapter = InboxIngestion::ImapAdapter.new(imap_connection: imap_connection, fetcher: fetcher)
+
+        stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
+        allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai)
+          .and_return({ "booking_request" => true })
+        allow_any_instance_of(BookingRequests::LlmExtractor).to receive(:call_openai)
+          .and_return({
+            "event_date" => "2026-07-04",
+            "headcount" => 50,
+            "budget" => 8000.0,
+            "start_time" => nil,
+            "celebration_type" => "birthday",
+            "confidence" => 0.9,
+            "notes" => nil
+          })
+        allow_any_instance_of(BookingRequests::DraftWriter).to receive(:call_openai)
+          .and_return({ "body" => "Thanks for reaching out!" })
+
+        expect {
+          described_class.call(adapter: adapter)
+        }.to change(BookingRequest, :count).by(1)
+
+        inbox_message = InboxMessage.find_by!(account: account, provider_message_id: "<imap-full-pipeline@example.com>")
+        expect(inbox_message.booking_request).to be_present
+      end
+    end
+
     context "with ImapAdapter and inbox filters" do
       it "resolves venue via FilterMatcher and passes it to Reconcile" do
         account = create(:account)
