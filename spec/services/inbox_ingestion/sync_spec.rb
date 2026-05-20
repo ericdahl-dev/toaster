@@ -25,6 +25,8 @@ RSpec.describe InboxIngestion::Sync do
           checkpoint_calls += 1
           nil
         end
+        adapter.define_singleton_method(:resolve_venue) { |_attrs| nil }
+        adapter.define_singleton_method(:after_message_reconciled) { |_attrs, _result| nil }
 
         result = described_class.call(adapter: adapter)
 
@@ -46,6 +48,8 @@ RSpec.describe InboxIngestion::Sync do
         adapter.define_singleton_method(:write_checkpoint_after_batch) do |created_count:, deduped_count:, messages:|
           checkpoint_calls += 1
         end
+        adapter.define_singleton_method(:resolve_venue) { |_attrs| nil }
+        adapter.define_singleton_method(:after_message_reconciled) { |_attrs, _result| nil }
 
         result = described_class.call(adapter: adapter)
 
@@ -73,6 +77,8 @@ RSpec.describe InboxIngestion::Sync do
         adapter.define_singleton_method(:write_checkpoint_after_batch) do |created_count:, deduped_count:, messages:|
           nil
         end
+        adapter.define_singleton_method(:resolve_venue) { |_attrs| nil }
+        adapter.define_singleton_method(:after_message_reconciled) { |_attrs, _result| nil }
 
         result = described_class.call(adapter: adapter)
 
@@ -100,6 +106,8 @@ RSpec.describe InboxIngestion::Sync do
         )
       end
       adapter.define_singleton_method(:write_checkpoint_after_batch) { |_kwargs| nil }
+      adapter.define_singleton_method(:resolve_venue) { |_attrs| nil }
+      adapter.define_singleton_method(:after_message_reconciled) { |_attrs, _result| nil }
 
       stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
       allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai)
@@ -228,27 +236,13 @@ RSpec.describe InboxIngestion::Sync do
         described_class.call(adapter: adapter)
       end
 
-      it "does not mark seen when adapter lacks after_message_reconciled" do
-        account = create(:account)
-        result = BookingRequests::Reconcile::Result.new(
-          booking_request: build(:booking_request, account: account),
-          draft_created: true
-        )
+      it "raises ArgumentError when adapter lacks required contract methods" do
         adapter = Object.new
-        adapter.define_singleton_method(:account) { account }
-        adapter.define_singleton_method(:each_normalized_message) do |&block|
-          block.call(
-            provider: "imap",
-            provider_message_id: "<msg@example.com>",
-            direction: "inbound",
-            subject: "Test",
-            raw_payload: { "uid" => 3 }
-          )
-        end
+        adapter.define_singleton_method(:account) { create(:account) }
+        adapter.define_singleton_method(:each_normalized_message) { }
         adapter.define_singleton_method(:write_checkpoint_after_batch) { |**| nil }
-        allow(BookingRequests::Reconcile).to receive(:call).and_return(result)
 
-        expect { described_class.call(adapter: adapter) }.not_to raise_error
+        expect { described_class.call(adapter: adapter) }.to raise_error(ArgumentError, /missing/)
       end
     end
   end

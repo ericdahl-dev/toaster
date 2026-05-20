@@ -18,14 +18,14 @@ module InboxIngestion
 
       adapter.each_normalized_message do |attrs|
         inbox_message, created = upsert(attrs)
-        venue = adapter.resolve_venue(attrs) if adapter.respond_to?(:resolve_venue)
+        venue = adapter.resolve_venue(attrs)
         # See docs/adr/0001-post-ingestion-booking-reconcile.md
         reconcile_result = BookingRequests::Reconcile.call(
           inbox_message: inbox_message,
           venue: venue,
           inbox_message_created: created
         )
-        adapter.after_message_reconciled(attrs, reconcile_result) if adapter.respond_to?(:after_message_reconciled)
+        adapter.after_message_reconciled(attrs, reconcile_result)
         messages << inbox_message
         if created
           created_count += 1
