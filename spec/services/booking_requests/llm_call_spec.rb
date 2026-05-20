@@ -45,6 +45,38 @@ RSpec.describe BookingRequests::LlmCall do
       end
     end
 
+    context "when OpenAI returns non-JSON content" do
+      let(:bad_client) do
+        client = double("OpenAI::Client")
+        allow(client).to receive(:chat).and_return(
+          {
+            "choices" => [{ "message" => { "content" => "<html>Rate limit exceeded</html>" } }],
+            "usage" => { "prompt_tokens" => 0, "completion_tokens" => 0 }
+          }
+        )
+        client
+      end
+
+      subject(:bad_instance) { BookingRequests::TestLlmCall.new(account:, booking_request:, client: bad_client) }
+
+      it "raises LlmResponseError" do
+        expect { bad_instance.call(subject: "s", body_text: "b") }
+          .to raise_error(BookingRequests::LlmCall::LlmResponseError)
+      end
+
+      it "logs error with structured keys" do
+        allow(Rails.logger).to receive(:error)
+        bad_instance.call(subject: "s", body_text: "b") rescue BookingRequests::LlmCall::LlmResponseError
+        expect(Rails.logger).to have_received(:error).with(
+          hash_including(
+            run_type: "classifier",
+            model: "gpt-4o-mini",
+            raw_response: a_kind_of(String)
+          )
+        )
+      end
+    end
+
     context "with an injected client" do
       it "returns the parsed result" do
         expect(instance.call(subject: "s", body_text: "b")).to eq("parsed")

@@ -3,6 +3,7 @@
 module BookingRequests
   module LlmCall
     ConfigurationError = Class.new(StandardError)
+    LlmResponseError = Class.new(StandardError)
 
     def self.included(base)
       base.extend(ClassMethods)
@@ -62,7 +63,15 @@ module BookingRequests
         }
       )
       @last_usage = response["usage"]
-      JSON.parse(response.dig("choices", 0, "message", "content"))
+      raw_content = response.dig("choices", 0, "message", "content")
+      JSON.parse(raw_content)
+    rescue JSON::ParserError
+      Rails.logger.error(
+        run_type: self.class::RUN_TYPE,
+        model: self.class::MODEL,
+        raw_response: raw_content.to_s.truncate(500)
+      )
+      raise LlmResponseError, "Failed to parse LLM response as JSON"
     end
 
     def persist_run(prompt:, result:, latency_ms:, extra_attrs: {})
