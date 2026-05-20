@@ -47,11 +47,6 @@
             <td class="booking-requests-col--contact">
               <a href="<%= booking_request_path(br) %>">
                 <span class="hi"><%= br.contact.name %></span>
-                <% if @requests_per_contact[br.contact_id].to_i > 1 %>
-                  <span class="dim" style="font-size:10px;margin-left:6px" title="This contact has multiple booking requests">
-                    <%= @requests_per_contact[br.contact_id] %> requests
-                  </span>
-                <% end %>
                 <br><span class="dim" style="font-size:11px"><%= br.contact.email %></span>
               </a>
             </td>
