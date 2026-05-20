@@ -76,6 +76,14 @@ RSpec.describe "BookingRequests HTML", type: :request do
         expect(response.body).to include(booking_request.contact.email)
         expect(response.body).to include("Show active")
       end
+
+      it "marks secondary columns for mobile collapse" do
+        get "/booking_requests"
+
+        expect(response.body).to include("booking-requests-table")
+        expect(response.body).to include("booking-requests-col--secondary")
+        expect(response.body).to include("booking-request-thread-link")
+      end
     end
 
     context "when signed out" do
