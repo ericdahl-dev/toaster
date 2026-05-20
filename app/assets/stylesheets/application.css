@@ -754,9 +754,10 @@ body {
 }
 
 .booking-request-thread-link {
+  --booking-request-thread-link-max-width: 220px;
   font-size: 11px;
   display: block;
-  max-width: 220px;
+  max-width: var(--booking-request-thread-link-max-width);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -835,7 +836,7 @@ body {
   }
 
   .booking-requests-table .booking-request-thread-link {
-    max-width: 140px;
+    --booking-request-thread-link-max-width: 140px;
   }
 
   body.nav-open {
