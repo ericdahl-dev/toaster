@@ -152,6 +152,7 @@ RSpec.describe InboxIngestion::Sync do
         }
         fetcher = instance_double(Imap::Fetcher, fetch_messages: [ payload ], mailbox_peak_uid: nil)
         adapter = InboxIngestion::ImapAdapter.new(imap_connection: imap_connection, fetcher: fetcher)
+        allow(adapter).to receive(:mark_seen)
 
         stub_const("ENV", ENV.to_h.merge("OPENAI_API_KEY" => "test-key"))
         allow_any_instance_of(BookingRequests::Classifier).to receive(:call_openai)
