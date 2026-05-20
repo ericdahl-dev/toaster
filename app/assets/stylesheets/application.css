@@ -753,6 +753,17 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+.booking-request-thread-link {
+  --booking-request-thread-font-size: 11px;
+  --booking-request-thread-link-max-width: 220px;
+  font-size: var(--booking-request-thread-font-size);
+  display: block;
+  max-width: var(--booking-request-thread-link-max-width);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ── Mobile breakpoint ── */
 @media (max-width: 768px) {
   .shell {
@@ -815,6 +826,18 @@ body {
 
   .data-table {
     min-width: 520px;
+  }
+
+  .booking-requests-table {
+    min-width: 0;
+  }
+
+  .booking-requests-table .booking-requests-col--secondary {
+    display: none;
+  }
+
+  .booking-requests-table .booking-request-thread-link {
+    --booking-request-thread-link-max-width: 140px;
   }
 
   body.nav-open {
@@ -1512,4 +1535,3 @@ body {
     max-width: 88%;
   }
 }
-

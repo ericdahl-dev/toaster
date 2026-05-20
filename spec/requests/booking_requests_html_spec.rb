@@ -76,6 +76,17 @@ RSpec.describe "BookingRequests HTML", type: :request do
         expect(response.body).to include(booking_request.contact.email)
         expect(response.body).to include("Show active")
       end
+
+      it "marks secondary columns for mobile collapse" do
+        get "/booking_requests"
+        html = Nokogiri::HTML.parse(response.body)
+
+        expect(html.at_css("table.booking-requests-table")).not_to be_nil
+        expect(html.css("th.booking-requests-col--secondary").size).to be >= 4
+        expect(html.at_css("th.booking-requests-col--secondary.booking-requests-col--action")).not_to be_nil
+        expect(html.at_css("td.dim.booking-requests-col--secondary")).not_to be_nil
+        expect(html.at_css("a.booking-request-thread-link")).not_to be_nil
+      end
     end
 
     context "when signed out" do

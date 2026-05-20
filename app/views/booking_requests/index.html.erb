@@ -27,24 +27,24 @@
 <% else %>
   <div class="card">
     <div class="table-scroll">
-    <table class="data-table">
+    <table class="data-table booking-requests-table">
       <thead>
         <tr>
-          <th>Contact</th>
-          <th>Thread</th>
-          <th>Event date</th>
-          <th>Venue</th>
-          <th>Headcount</th>
+          <th class="booking-requests-col--contact">Contact</th>
+          <th class="booking-requests-col--thread">Thread</th>
+          <th class="booking-requests-col--date">Event date</th>
+          <th class="booking-requests-col--secondary">Venue</th>
+          <th class="booking-requests-col--secondary">Headcount</th>
           <th>Status</th>
-          <th>First received</th>
-          <th>Last activity</th>
-          <th></th>
+          <th class="booking-requests-col--secondary">First received</th>
+          <th class="booking-requests-col--secondary">Last activity</th>
+          <th class="booking-requests-col--secondary booking-requests-col--action"></th>
         </tr>
       </thead>
       <tbody>
         <% @booking_requests.each do |br| %>
           <tr onclick="location.href='<%= booking_request_path(br) %>'">
-            <td>
+            <td class="booking-requests-col--contact">
               <a href="<%= booking_request_path(br) %>">
                 <span class="hi"><%= br.contact.name %></span>
                 <% if @requests_per_contact[br.contact_id].to_i > 1 %>
@@ -55,27 +55,26 @@
                 <br><span class="dim" style="font-size:11px"><%= br.contact.email %></span>
               </a>
             </td>
-            <td>
+            <td class="booking-requests-col--thread">
               <% subject = br.conversation_thread.subject.presence || "(no subject)" %>
               <%= link_to subject, inbox_thread_path(br.conversation_thread),
-                    class: "dim",
-                    style: "font-size:11px;display:block;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap",
+                    class: "dim booking-request-thread-link",
                     onclick: "event.stopPropagation()" %>
             </td>
-            <td><%= br.event_date&.strftime("%-d %b %Y") || "—" %></td>
-            <td><%= br.venue&.name || "—" %></td>
-            <td><%= br.headcount || "—" %></td>
+            <td class="booking-requests-col--date"><%= br.event_date&.strftime("%-d %b %Y") || "—" %></td>
+            <td class="booking-requests-col--secondary"><%= br.venue&.name || "—" %></td>
+            <td class="booking-requests-col--secondary"><%= br.headcount || "—" %></td>
             <td>
               <span class="badge badge-<%= br.status %>"><%= br.status %></span>
             </td>
-            <td class="dim" style="font-size:11px;white-space:nowrap">
+            <td class="dim booking-requests-col--secondary" style="font-size:11px;white-space:nowrap">
               <%= br.first_received_at.strftime("%-d %b %Y") %>
             </td>
-            <td class="dim" style="font-size:11px;white-space:nowrap">
+            <td class="dim booking-requests-col--secondary" style="font-size:11px;white-space:nowrap">
               <span title="<%= br.last_activity_direction_label %>"><%= br.last_activity_direction_label %></span>
               · <%= br.last_activity_at.strftime("%-d %b %Y %H:%M") %>
             </td>
-            <td onclick="event.stopPropagation()">
+            <td class="booking-requests-col--secondary booking-requests-col--action" onclick="event.stopPropagation()">
               <% if @show_archived %>
                 <%= button_to "Restore",
                       unarchive_booking_request_path(br),
