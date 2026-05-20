@@ -35,11 +35,11 @@ RSpec.describe BookingRequests::InboundContext do
 
       allow(BookingRequests::VenueRagRetriever).to receive(:call)
         .with(venue: venue, query: "subject #{query_text}")
-        .and_return(["chunk1"])
+        .and_return([ "chunk1" ])
 
       result = described_class.venue_chunks(venue: venue, text: query_text, subject: "subject")
 
-      expect(result).to eq(["chunk1"])
+      expect(result).to eq([ "chunk1" ])
     end
 
     it "uses stripped text (not raw body) for the RAG query" do
