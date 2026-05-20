@@ -81,7 +81,9 @@ RSpec.describe "BookingRequests HTML", type: :request do
         get "/booking_requests"
 
         expect(response.body).to include("booking-requests-table")
-        expect(response.body).to include("booking-requests-col--secondary")
+        expect(response.body).to include('<th class="booking-requests-col--secondary">Venue</th>')
+        expect(response.body).to include('<th class="booking-requests-col--secondary">Headcount</th>')
+        expect(response.body).to include('class="dim booking-requests-col--secondary"')
         expect(response.body).to include("booking-request-thread-link")
       end
     end

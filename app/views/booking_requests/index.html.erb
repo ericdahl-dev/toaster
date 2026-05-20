@@ -58,7 +58,7 @@
             <td class="booking-requests-col--thread">
               <% subject = br.conversation_thread.subject.presence || "(no subject)" %>
               <%= link_to subject, inbox_thread_path(br.conversation_thread),
-                    class: "dim booking-request-thread-link",
+                    class: "booking-request-thread-link",
                     onclick: "event.stopPropagation()" %>
             </td>
             <td class="booking-requests-col--date"><%= br.event_date&.strftime("%-d %b %Y") || "—" %></td>
