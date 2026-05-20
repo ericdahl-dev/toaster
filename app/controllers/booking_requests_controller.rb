@@ -20,9 +20,6 @@ class BookingRequestsController < ApplicationController
     @open_task_ids = Task.where(booking_request_id: booking_request_ids, status: :open)
       .pluck(:booking_request_id)
       .to_set
-
-    contact_ids = @booking_requests.map(&:contact_id)
-    @requests_per_contact = scope.where(contact_id: contact_ids).group(:contact_id).count
   end
 
   def show
