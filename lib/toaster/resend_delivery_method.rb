@@ -21,6 +21,10 @@ module Toaster
       return response if response.is_a?(Net::HTTPSuccess)
 
       raise DeliveryError, "Resend delivery failed (#{response.code}): #{response.body}"
+    rescue DeliveryError
+      raise
+    rescue StandardError => e
+      raise DeliveryError, "Resend delivery failed: #{e.message}"
     end
 
     private
@@ -38,14 +42,18 @@ module Toaster
     def payload_for(mail)
       {
         from: settings.fetch(:from),
-        to: Array(mail.to),
-        cc: Array(mail.cc).presence,
-        bcc: Array(mail.bcc).presence,
-        reply_to: Array(mail.reply_to).presence,
+        to: recipient_list(mail.to),
+        cc: recipient_list(mail.cc),
+        bcc: recipient_list(mail.bcc),
+        reply_to: recipient_list(mail.reply_to),
         subject: mail.subject,
         html: mail.html_part&.decoded,
         text: mail.text_part&.decoded || mail.body&.decoded
       }.compact
+    end
+
+    def recipient_list(value)
+      Array(value).map { |recipient| recipient.to_s.strip }.reject(&:blank?).presence
     end
   end
 end

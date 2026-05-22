@@ -53,5 +53,23 @@ RSpec.describe Toaster::ResendDeliveryMethod do
         "Resend delivery failed (422): {\"message\":\"invalid\"}"
       )
     end
+
+    it "raises a delivery error when from is missing in settings" do
+      incomplete_delivery_method = described_class.new(api_key: "re_test_123")
+
+      expect { incomplete_delivery_method.deliver!(mail) }.to raise_error(
+        described_class::DeliveryError,
+        "Resend delivery failed: key not found: :from"
+      )
+    end
+
+    it "raises a delivery error on network failure" do
+      allow(Net::HTTP).to receive(:start).and_raise(Net::OpenTimeout.new("timeout"))
+
+      expect { delivery_method.deliver!(mail) }.to raise_error(
+        described_class::DeliveryError,
+        "Resend delivery failed: timeout"
+      )
+    end
   end
 end
