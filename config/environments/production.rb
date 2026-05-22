@@ -69,15 +69,11 @@ Rails.application.configure do
   # caching is enabled.
   config.action_mailer.perform_caching = false
 
-  # Deliver via Forward Email (SMTP)
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    address: "smtp.forwardemail.net",
-    port: 587,
-    user_name: ENV.fetch("FORWARD_EMAIL_USERNAME"),
-    password: ENV.fetch("FORWARD_EMAIL_PASSWORD"),
-    authentication: :plain,
-    enable_starttls_auto: true
+  # Deliver transactional email via Resend API
+  config.action_mailer.delivery_method = :resend_api
+  config.action_mailer.resend_api_settings = {
+    api_key: ENV.fetch("RESEND_API_KEY"),
+    from: "Toaster <toaster@ericdahl.dev>"
   }
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "toaster.app") }
