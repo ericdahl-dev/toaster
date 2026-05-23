@@ -54,6 +54,15 @@ RSpec.describe Toaster::ResendDeliveryMethod do
       )
     end
 
+    it "raises a delivery error when api_key is missing in settings" do
+      incomplete_delivery_method = described_class.new(from: "Toaster <toaster@ericdahl.dev>")
+
+      expect { incomplete_delivery_method.deliver!(mail) }.to raise_error(
+        described_class::DeliveryError,
+        "Resend delivery failed: RESEND_API_KEY is not configured"
+      )
+    end
+
     it "raises a delivery error when from is missing in settings" do
       incomplete_delivery_method = described_class.new(api_key: "re_test_123")
 

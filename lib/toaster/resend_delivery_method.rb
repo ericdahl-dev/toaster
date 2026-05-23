@@ -14,6 +14,8 @@ module Toaster
     end
 
     def deliver!(mail)
+      ensure_api_key!
+
       response = Net::HTTP.start(RESEND_EMAILS_URI.host, RESEND_EMAILS_URI.port, use_ssl: true) do |http|
         http.request(build_request(mail))
       end
@@ -30,6 +32,12 @@ module Toaster
     private
 
     attr_reader :settings
+
+    def ensure_api_key!
+      return if settings[:api_key].present?
+
+      raise DeliveryError, "Resend delivery failed: RESEND_API_KEY is not configured"
+    end
 
     def build_request(mail)
       request = Net::HTTP::Post.new(RESEND_EMAILS_URI)

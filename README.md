@@ -76,7 +76,7 @@ For reference, `.env.example` lists the variables the app expects:
 | `JOB_CONCURRENCY` | Optional | `1` | Number of GoodJob worker threads. |
 | `PGGSSENCMODE` | macOS | `disable` | Prevents libpq GSS segfault in forked workers (set automatically on macOS). |
 | `RAILS_MASTER_KEY` | Prod | — | Decrypts `config/credentials.yml.enc`. |
-| `RESEND_API_KEY` | Prod | — | API key used by Action Mailer to send transactional emails via Resend. |
+| `RESEND_API_KEY` | Prod (when sending mail) | — | API key for Resend transactional email. If unset in production, the app still boots but skips delivery and logs a warning (useful for preview deploys). |
 
 ---
 

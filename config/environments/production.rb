@@ -69,12 +69,9 @@ Rails.application.configure do
   # caching is enabled.
   config.action_mailer.perform_caching = false
 
-  # Deliver transactional email via Resend API
-  config.action_mailer.delivery_method = :resend_api
-  config.action_mailer.resend_api_settings = {
-    api_key: ENV.fetch("RESEND_API_KEY"),
-    from: "Toaster <toaster@ericdahl.dev>"
-  }
+  # Resend when RESEND_API_KEY is set; otherwise boot without sending mail (preview/staging).
+  require Rails.root.join("lib/toaster/resend_mailer_config")
+  Toaster::ResendMailerConfig.apply!(config)
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "toaster.app") }
 
