@@ -4,8 +4,9 @@
 
 Toaster is a **multi-tenant AI booking assistant for venue inquiries**. It connects to email
 inboxes (IMAP, AgentMailbox), ingests inbound booking requests, extracts structured data with
-LLM assistance, tracks request lifecycle, drafts follow-up replies, and routes them back via
-SMTP — with human approval whenever automation is not safe to proceed alone.
+LLM assistance, tracks request lifecycle, drafts follow-up replies, and routes transactional
+notifications through Resend — with human approval whenever automation is not safe to proceed
+alone.
 
 ---
 
@@ -75,6 +76,7 @@ For reference, `.env.example` lists the variables the app expects:
 | `JOB_CONCURRENCY` | Optional | `1` | Number of GoodJob worker threads. |
 | `PGGSSENCMODE` | macOS | `disable` | Prevents libpq GSS segfault in forked workers (set automatically on macOS). |
 | `RAILS_MASTER_KEY` | Prod | — | Decrypts `config/credentials.yml.enc`. |
+| `RESEND_API_KEY` | Prod (when sending mail) | — | API key for Resend transactional email. If unset in production, the app still boots but skips delivery and logs a warning (useful for preview deploys). |
 
 ---
 
@@ -114,6 +116,10 @@ The CI suite runs automatically on every push and pull request via GitHub Action
 
 6. **Audit trail** — `EventLog` records every significant state change and external interaction,
    rendered chronologically on the booking request detail page.
+
+7. **Transactional email templates** — Outbound transactional notifications are delivered via
+   Resend. Author new template content using Resend's React Email workflow:
+   https://resend.com/docs/knowledge-base/template-emails-with-react-email
 
 ---
 

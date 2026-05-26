@@ -35,6 +35,52 @@ RSpec.describe "Home", type: :request do
 
         expect(response.body).not_to include("sidebar")
       end
+
+      it "shows a split hero with a product preview" do
+        get "/"
+
+        expect(response.body).to include("lp-hero-grid")
+        expect(response.body).to include("lp-hero-preview")
+        expect(response.body).to include("thread-bubble--pending")
+      end
+
+      it "offers early access via waitlist without a second primary sign-in button" do
+        get "/"
+
+        expect(response.body).to include('href="#waitlist"')
+        expect(response.body).to include("Request early access")
+        expect(response.body).not_to include("Sign in to my account")
+      end
+
+      it "labels waitlist fields for accessibility" do
+        get "/"
+
+        expect(response.body).to include('for="waitlist_entry_full_name"')
+        expect(response.body).to include('for="waitlist_entry_email"')
+        expect(response.body).to include("lp-waitlist-label")
+      end
+
+      it "explains steps without numbered section labels" do
+        get "/"
+
+        expect(response.body).to include("How Toaster works")
+        expect(response.body).not_to include(">01<")
+        expect(response.body).not_to include(">02<")
+        expect(response.body).not_to include(">03<")
+        expect(response.body).to include("lp-steps-list")
+      end
+
+      it "avoids em-dash punctuation in landing copy" do
+        get "/"
+
+        doc = Nokogiri::HTML(response.body)
+        landing = doc.at_css(".lp")
+        expect(landing).to be_present
+
+        text = landing.text
+        expect(text).not_to include("—")
+        expect(text).not_to include("–")
+      end
     end
 
     context "when signed in" do

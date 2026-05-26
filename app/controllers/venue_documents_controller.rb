@@ -14,7 +14,8 @@ class VenueDocumentsController < ApplicationController
 
     dest_dir = Rails.root.join("tmp", "venue_documents")
     FileUtils.mkdir_p(dest_dir)
-    dest_path = dest_dir.join("#{SecureRandom.hex(8)}_#{file.original_filename}")
+    safe_name = sanitize_filename(file.original_filename)
+    dest_path = dest_dir.join("#{SecureRandom.hex(8)}_#{safe_name}")
     FileUtils.cp(file.tempfile.path, dest_path)
 
     doc = @venue.venue_documents.create!(
@@ -53,7 +54,8 @@ class VenueDocumentsController < ApplicationController
 
     dest_dir = Rails.root.join("tmp", "venue_documents")
     FileUtils.mkdir_p(dest_dir)
-    dest_path = dest_dir.join("#{SecureRandom.hex(8)}_#{file.original_filename}")
+    safe_name = sanitize_filename(file.original_filename)
+    dest_path = dest_dir.join("#{SecureRandom.hex(8)}_#{safe_name}")
     FileUtils.cp(file.tempfile.path, dest_path)
 
     doc.venue_chunks.delete_all
@@ -95,5 +97,9 @@ class VenueDocumentsController < ApplicationController
   def set_venue
     @venue = current_user.account.venues.find_by(id: params[:venue_id])
     render plain: "Not Found", status: :not_found unless @venue
+  end
+
+  def sanitize_filename(filename)
+    File.basename(filename).gsub(/[^a-zA-Z0-9._-]/, "_")
   end
 end
