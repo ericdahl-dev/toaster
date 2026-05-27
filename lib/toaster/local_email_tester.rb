@@ -74,11 +74,14 @@ module Toaster
     end
 
     def build_mail(connection)
+      current_subject = subject
+      current_body = body
+
       Mail.new do
         from "#{from_name} <#{from_email}>"
         to connection.username
-        subject subject
-        text_part { body body }
+        subject current_subject
+        text_part { body current_body }
       end
     end
 

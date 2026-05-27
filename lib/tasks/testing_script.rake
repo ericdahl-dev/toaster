@@ -18,8 +18,8 @@ namespace :testing do
     puts "From: #{result.from_email}"
     puts "Subject: #{result.subject}"
     puts "Matched IMAP UIDs: #{result.matched_uids.join(", ")}"
-  rescue KeyError
-    abort "TOASTER_TEST_CUSTOMER_EMAIL must be set."
+  rescue KeyError => e
+    abort "#{e.key} must be set."
   rescue Toaster::LocalEmailTester::Error => e
     abort e.message
   end
