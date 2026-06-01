@@ -34,6 +34,7 @@ RSpec.describe Toaster::LocalEmailTester do
       expect(result.subject).to eq("Test Subject")
       expect(result.from_email).to eq("customer@example.com")
       expect(result.matched_uids).to eq([ 42 ])
+      expect(result.response_uids).to eq([])
     end
 
     it "raises when no IMAP message is found before timeout" do
@@ -54,6 +55,37 @@ RSpec.describe Toaster::LocalEmailTester do
           poll_interval_seconds: 1
         )
       }.to raise_error(Toaster::LocalEmailTester::Error, /Timed out waiting for IMAP delivery/)
+    end
+
+    it "reads toaster response in customer inbox when customer imap is configured" do
+      mailer = instance_double(Toaster::ResendDeliveryMethod, deliver!: true)
+      allow(Toaster::ResendDeliveryMethod).to receive(:new).and_return(mailer)
+
+      toaster_imap = instance_double(Net::IMAP)
+      expect(Imap::Session).to receive(:call).with(imap_connection: imap_connection).and_yield(toaster_imap)
+      expect(toaster_imap).to receive(:select).with("INBOX")
+      expect(toaster_imap).to receive(:search).with([ "HEADER", "SUBJECT", "Roundtrip Subject", "HEADER", "FROM", "customer@example.com" ]).and_return([ 100 ])
+
+      customer_imap = instance_double(Net::IMAP)
+      expect(Net::IMAP).to receive(:new).with("imap.customer.test", port: 993, ssl: true).and_return(customer_imap)
+      expect(customer_imap).to receive(:login).with("customer@example.com", "secret")
+      expect(customer_imap).to receive(:select).with("INBOX")
+      expect(customer_imap).to receive(:search).with([ "HEADER", "SUBJECT", "Roundtrip Subject", "HEADER", "FROM", "bookings@venue.test" ]).and_return([ 200 ])
+      expect(customer_imap).to receive(:disconnect)
+
+      result = described_class.call(
+        account_id: account.id,
+        from_email: "customer@example.com",
+        subject: "Roundtrip Subject",
+        timeout_seconds: 10,
+        poll_interval_seconds: 1,
+        customer_imap_host: "imap.customer.test",
+        customer_imap_username: "customer@example.com",
+        customer_imap_password: "secret"
+      )
+
+      expect(result.matched_uids).to eq([ 100 ])
+      expect(result.response_uids).to eq([ 200 ])
     end
   end
 end
