@@ -29,10 +29,8 @@ namespace :testing do
     puts "Matched IMAP UIDs: #{result.matched_uids.join(", ")}"
     if result.response_uids.any?
       puts "Toaster response UIDs in customer inbox: #{result.response_uids.join(", ")}"
-    elsif wait_for_response
-      puts "Toaster response check enabled, but no matching response was found."
     else
-      puts "Toaster response check skipped (set TOASTER_TEST_WAIT_FOR_TOASTER_RESPONSE=true to enable)."
+      puts "Toaster response check skipped (set TOASTER_TEST_WAIT_FOR_TOASTER_RESPONSE=true and provide customer IMAP credentials to enable)."
     end
   rescue KeyError => e
     abort "#{e.key} must be set."

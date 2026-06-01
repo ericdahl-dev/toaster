@@ -128,9 +128,14 @@ module Toaster
 
     def wait_for_customer_response!(connection)
       deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout_seconds
-      imap = Net::IMAP.new(customer_imap_host, port: customer_imap_port, ssl: customer_imap_ssl)
-      imap.login(customer_imap_username, customer_imap_password)
-      imap.select(customer_imap_inbox_folder)
+      imap = begin
+        session = Net::IMAP.new(customer_imap_host, port: customer_imap_port, ssl: customer_imap_ssl)
+        session.login(customer_imap_username, customer_imap_password)
+        session.select(customer_imap_inbox_folder)
+        session
+      rescue Net::IMAP::Error, SocketError, IOError => e
+        raise Error, "Customer IMAP setup failed: #{e.message}"
+      end
 
       loop do
         matched_uids = imap.search([ "HEADER", "SUBJECT", subject, "HEADER", "FROM", connection.username ])
@@ -147,7 +152,7 @@ module Toaster
     ensure
       begin
         imap&.disconnect
-      rescue
+      rescue Net::IMAP::Error, IOError
         nil
       end
     end
