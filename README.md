@@ -90,6 +90,35 @@ bundle exec rspec spec/requests/         # request (integration) specs
 
 The CI suite runs automatically on every push and pull request via GitHub Actions.
 
+## Local Customer-Side Email Script
+
+Use this script to simulate a customer email being sent to the IMAP mailbox configured in Toaster, then verify delivery by checking that same mailbox via IMAP.
+
+To simulate the full back-and-forth, you can also enable a second IMAP check against the customer mailbox to confirm Toaster's reply is received.
+
+```bash
+TOASTER_TEST_CUSTOMER_EMAIL="customer@example.com" \
+RESEND_API_KEY="re_..." \
+bin/rails "testing:email_script[ACCOUNT_ID,IMAP_CONNECTION_ID]"
+```
+
+Optional env vars:
+
+- `TOASTER_TEST_CUSTOMER_NAME` (default: `Test Customer`)
+- `TOASTER_TEST_SUBJECT` (default: generated timestamped subject)
+- `TOASTER_TEST_BODY` (default: generated body)
+- `TOASTER_TEST_TIMEOUT` (default: `60`)
+- `TOASTER_TEST_POLL_INTERVAL` (default: `5`)
+- `TOASTER_TEST_WAIT_FOR_TOASTER_RESPONSE` (default: `false`)
+- `TOASTER_TEST_CUSTOMER_IMAP_HOST` (required for response check)
+- `TOASTER_TEST_CUSTOMER_IMAP_PORT` (default: `993`)
+- `TOASTER_TEST_CUSTOMER_IMAP_SSL` (default: `true`)
+- `TOASTER_TEST_CUSTOMER_IMAP_USERNAME` (required for response check)
+- `TOASTER_TEST_CUSTOMER_IMAP_PASSWORD` (required for response check)
+- `TOASTER_TEST_CUSTOMER_IMAP_INBOX` (default: `INBOX`)
+
+`ACCOUNT_ID` and `IMAP_CONNECTION_ID` are optional filters; omit either to let the task pick the first active IMAP connection.
+
 ---
 
 ## How It Works
