@@ -24,7 +24,7 @@ gem "multipart-post"
 # Background jobs with dashboard [https://github.com/bensheldon/good_job]
 gem "good_job"
 # Action Cable pub/sub in production (Postgres-backed; shared by web + Good Job worker)
-gem "solid_cable", "~> 3.0"
+gem "solid_cable", "~> 4.0"
 
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
