@@ -35,7 +35,7 @@ class VenuesController < ApplicationController
     if @venue.update(venue_params)
       redirect_to venues_path, notice: "Venue updated."
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

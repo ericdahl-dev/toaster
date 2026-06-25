@@ -45,7 +45,7 @@ class Admin::WaitlistController < Admin::BaseController
 
         redirect_to admin_waitlist_index_path, notice: "Invite sent to #{@entry.email}."
       else
-        render :invite, status: :unprocessable_entity
+        render :invite, status: :unprocessable_content
       end
     end
   end
