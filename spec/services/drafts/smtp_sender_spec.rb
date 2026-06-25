@@ -82,5 +82,72 @@ RSpec.describe Drafts::SmtpSender do
         expect(draft.reload.status).to eq("pending_review")
       end
     end
+
+    Drafts::SmtpSender::SMTP_ERRORS.each do |error_class|
+      it "wraps #{error_class} in SendError" do
+        allow(mail_double).to receive(:deliver!).and_raise(error_class, "failure")
+        expect { sender.call }.to raise_error(Drafts::SmtpSender::SendError)
+      end
+    end
+  end
+
+  describe ".call (class method)" do
+    let(:mail_double) { instance_double(Mail::Message, deliver!: true) }
+
+    before do
+      allow_any_instance_of(described_class).to receive(:build_mail).and_return(mail_double)
+    end
+
+    it "delegates to an instance and returns after marking draft sent" do
+      described_class.call(draft: draft, imap_connection: imap_connection)
+      expect(draft.reload.status).to eq("sent")
+    end
+  end
+
+  describe "#build_mail (private)" do
+    let(:contact) { create(:contact, email: "guest@venue.com", account: account) }
+    let(:booking_request_with_contact) { create(:booking_request, account: account, contact: contact) }
+    let(:draft_with_contact) do
+      create(:draft, account: account, booking_request: booking_request_with_contact,
+        body: "Hello guest!", status: "pending_review")
+    end
+    let(:sender_with_contact) { described_class.new(draft: draft_with_contact, imap_connection: imap_connection) }
+
+    it "sets from to the IMAP connection username" do
+      mail = sender_with_contact.send(:build_mail)
+      expect(mail.from.first).to eq("sender@example.com")
+    end
+
+    it "sets to to the contact email" do
+      mail = sender_with_contact.send(:build_mail)
+      expect(mail.to.first).to eq("guest@venue.com")
+    end
+
+    it "sets body to the draft body" do
+      mail = sender_with_contact.send(:build_mail)
+      expect(mail.body.decoded).to include("Hello guest!")
+    end
+
+    it "configures SMTP with the effective host and port" do
+      mail = sender_with_contact.send(:build_mail)
+      smtp_settings = mail.delivery_method.settings
+      expect(smtp_settings[:address]).to eq("smtp.example.com")
+      expect(smtp_settings[:port]).to eq(587)
+    end
+
+    it "does not enable SSL on port 587" do
+      mail = sender_with_contact.send(:build_mail)
+      smtp_settings = mail.delivery_method.settings
+      expect(smtp_settings[:ssl]).to be false
+      expect(smtp_settings[:enable_starttls_auto]).to be true
+    end
+
+    it "enables SSL on port 465" do
+      imap_connection.smtp_port = 465
+      mail = sender_with_contact.send(:build_mail)
+      smtp_settings = mail.delivery_method.settings
+      expect(smtp_settings[:ssl]).to be true
+      expect(smtp_settings[:enable_starttls_auto]).to be false
+    end
   end
 end
