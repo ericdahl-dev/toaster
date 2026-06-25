@@ -86,7 +86,7 @@ RSpec.describe "Admin::Waitlist invite", type: :request do
             user: { name: "", email: "" }
           }
         }.not_to change(Account, :count)
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

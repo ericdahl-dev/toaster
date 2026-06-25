@@ -51,7 +51,7 @@ RSpec.describe "Ops endpoints", type: :request do
 
       post "/ops/retry_draft/#{draft.id}", headers: { "X-Ops-Token" => "secret-token" }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "returns 404 for a missing draft" do

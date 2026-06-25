@@ -60,7 +60,7 @@ RSpec.describe "Admin::Users", type: :request do
       it "re-renders the form" do
         sign_in_as(admin)
         post admin_users_path, params: { user: { account_id: target_account.id, name: "", email: "", password: "" } }
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end
