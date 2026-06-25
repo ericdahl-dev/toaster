@@ -50,7 +50,7 @@ class OpsController < ApplicationController
   def retry_draft
     draft = Draft.find(params[:id])
     unless draft.approved?
-      return render json: { error: "Draft is not in approved state" }, status: :unprocessable_entity
+      return render json: { error: "Draft is not in approved state" }, status: :unprocessable_content
     end
     PushDraftJob.perform_later(draft.id)
     render json: { status: "enqueued", draft_id: draft.id }
