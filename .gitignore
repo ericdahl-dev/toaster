@@ -18,3 +18,4 @@ coverage/
 *.db
 .beads-credential-key
 REVISION
+.gstack/

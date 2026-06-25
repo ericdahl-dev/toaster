@@ -10,7 +10,7 @@ gem "puma", ">= 5.0"
 # IMAP support for polling-based inbox sync
 gem "net-imap"
 
-# Transactional email via Forward Email (SMTP)
+# Transactional email delivered through Action Mailer (Resend in production)
 
 # OpenAI API (embeddings + LLM)
 gem "ruby-openai"
@@ -83,8 +83,8 @@ gem "guard-rspec", "~> 4.7", groups: [ :development, :test ]
 
 gem "parallel_tests", "~> 5.7", groups: [ :development, :test ]
 
-gem "posthog-ruby", "~> 3.8"
-gem "posthog-rails", "~> 3.8"
+gem "posthog-ruby", "~> 3.9"
+gem "posthog-rails", "~> 3.9"
 
 group :test do
   gem "capybara"

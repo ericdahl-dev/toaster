@@ -34,6 +34,21 @@ RSpec.describe "VenueDocuments", type: :request do
         expect(response).to have_http_status(:not_found)
       end
 
+      it "sanitizes path-traversal filenames and lands file inside tmp/venue_documents/" do
+        traversal_file = fixture_file_upload("event_guide.txt", "text/plain")
+        traversal_file.instance_variable_set(:@original_filename, "../../../etc/passwd")
+
+        expect {
+          post venue_documents_path(venue), params: { document: { file: traversal_file } }
+        }.to change(VenueDocument, :count).by(1)
+
+        doc = VenueDocument.last
+        safe_root = Rails.root.join("tmp", "venue_documents").to_s
+        resolved = File.expand_path(doc.file_path)
+        expect(resolved).to start_with(safe_root)
+        expect(doc.file_path).not_to include("..")
+      end
+
       it "returns unprocessable when no file given" do
         post venue_documents_path(venue), params: { document: { file: nil } }
         expect(response).to have_http_status(:unprocessable_content)

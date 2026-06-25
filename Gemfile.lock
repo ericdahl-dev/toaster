@@ -81,7 +81,7 @@ GEM
     base64 (0.3.0)
     bcrypt (3.1.22)
     bigdecimal (4.1.2)
-    bootsnap (1.24.4)
+    bootsnap (1.24.5)
       msgpack (~> 1.2)
     brakeman (8.0.4)
       racc
@@ -275,10 +275,10 @@ GEM
     pg (1.6.3-x86_64-darwin)
     pg (1.6.3-x86_64-linux)
     pg (1.6.3-x86_64-linux-musl)
-    posthog-rails (3.8.1)
-      posthog-ruby (~> 3.8)
+    posthog-rails (3.9.1)
+      posthog-ruby (~> 3.9)
       railties (>= 5.2.0)
-    posthog-ruby (3.8.1)
+    posthog-ruby (3.9.1)
       concurrent-ruby (~> 1)
     pp (0.6.3)
       prettyprint
@@ -411,7 +411,7 @@ GEM
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     shellany (0.0.1)
-    simplecov (0.21.2)
+    simplecov (0.22.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
       simplecov_json_formatter (~> 0.1)
@@ -469,7 +469,7 @@ GEM
     websocket-extensions (0.1.5)
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.7.5)
+    zeitwerk (2.8.2)
 
 PLATFORMS
   aarch64-linux
@@ -502,8 +502,8 @@ DEPENDENCIES
   net-imap
   parallel_tests (~> 5.7)
   pg (~> 1.1)
-  posthog-rails (~> 3.8)
-  posthog-ruby (~> 3.8)
+  posthog-rails (~> 3.9)
+  posthog-ruby (~> 3.9)
   propshaft
   puma (>= 5.0)
   pundit

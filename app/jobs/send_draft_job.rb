@@ -29,7 +29,14 @@ class SendDraftJob < ApplicationJob
     return unless draft.approved?
 
     imap_connection = draft.account.imap_connections.active_connections.first
-    return unless imap_connection
+    unless imap_connection
+      EventLog.create!(
+        account: draft.account,
+        event_type: "draft.send_skipped_no_connection",
+        payload: { draft_id: draft.id, account_id: draft.account_id }
+      )
+      return
+    end
 
     begin
       Drafts::SmtpSender.call(draft: draft, imap_connection: imap_connection)

@@ -18,6 +18,9 @@ require "action_cable/engine"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+require_relative "../lib/toaster/resend_delivery_method"
+ActionMailer::Base.add_delivery_method :resend_api, Toaster::ResendDeliveryMethod
+
 module Toaster
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.

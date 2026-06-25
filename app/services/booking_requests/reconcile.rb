@@ -26,10 +26,22 @@ module BookingRequests
           booking_request = locked_booking_request
           extraction_locked = true
         else
-          extract_result = BookingRequests::Extract.call(inbox_message: inbox_message, venue: venue)
-          return nil if extract_result.nil?
+          account = inbox_message.account
+          stripped_body = InboundContext.prepare_text(inbox_message)
 
-          booking_request = extract_result.booking_request
+          is_booking = Classifier.new(account:).call(
+            subject: inbox_message.subject, body_text: stripped_body
+          )
+          return nil unless is_booking
+
+          venue_chunks = InboundContext.venue_chunks(
+            venue: venue, text: stripped_body, subject: inbox_message.subject
+          )
+          raw = LlmExtractor.new(account:, venue_chunks:).call(
+            subject: inbox_message.subject, body_text: stripped_body
+          )
+          persist_result = Persist.call(inbox_message:, raw:, account:)
+          booking_request = persist_result.booking_request
           extraction_locked = false
         end
 
@@ -44,7 +56,7 @@ module BookingRequests
         else
           log_reconciliation(booking_request, is_new: is_new)
           create_review_task(booking_request) if booking_request.reviewing?
-          draft_created = generate_draft(booking_request)
+          draft_created = generate_draft(booking_request, stripped_body: stripped_body, venue_chunks: venue_chunks)
         end
 
         Result.new(booking_request: booking_request, draft_created: draft_created)
@@ -113,11 +125,9 @@ module BookingRequests
       )
     end
 
-    def generate_draft(booking_request)
+    def generate_draft(booking_request, stripped_body:, venue_chunks:)
       return false if booking_request.drafts.pending_review.exists?
 
-      stripped_body = InboundContext.prepare_text(inbox_message)
-      venue_chunks = InboundContext.venue_chunks(venue: venue, text: stripped_body, subject: inbox_message.subject)
       thread_history = build_thread_history(booking_request)
 
       body = DraftWriter.new(account: booking_request.account, booking_request:, venue_chunks:).call(
@@ -126,8 +136,12 @@ module BookingRequests
         thread_history:
       )
 
-      Draft.create!(account: booking_request.account, booking_request:, body:, status: :pending_review)
+      ActiveRecord::Base.transaction(requires_new: true) do
+        Draft.create!(account: booking_request.account, booking_request:, body:, status: :pending_review)
+      end
       true
+    rescue ActiveRecord::RecordNotUnique
+      false
     end
 
     def build_thread_history(booking_request)

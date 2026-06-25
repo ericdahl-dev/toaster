@@ -5,6 +5,20 @@ module BookingRequests
     TRACKED_FIELDS = %i[event_date headcount budget].freeze
     CONFIDENCE_THRESHOLD = 0.8
 
+    Result = Struct.new(:attrs, :status, keyword_init: true)
+
+    def self.call(booking_request:, raw:)
+      validated = new(booking_request:).enrich(raw)
+      status = status_for(validated)
+      Result.new(
+        attrs: validated.slice(
+          :event_date, :headcount, :budget, :start_time, :celebration_type,
+          :fit_status, :staff_summary, :missing_fields, :recommended_venue_space_id
+        ),
+        status: status
+      )
+    end
+
     def self.status_for(validated_result)
       return "reviewing" if validated_result[:missing_fields]&.any?
       return "reviewing" if low_confidence?(validated_result)
@@ -12,6 +26,7 @@ module BookingRequests
 
       "pending"
     end
+    private_class_method :status_for
 
     def self.low_confidence?(result)
       confidence = result[:confidence]
@@ -28,7 +43,7 @@ module BookingRequests
       @booking_request = booking_request
     end
 
-    def call(extractor_result)
+    def enrich(extractor_result)
       missing = compute_missing_fields(extractor_result)
       recommended_space = recommend_venue_space(extractor_result)
       fit = compute_fit_status(extractor_result, missing, recommended_space)
