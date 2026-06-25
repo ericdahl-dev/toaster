@@ -52,20 +52,12 @@ module BookingRequests
           booking_request.contact = contact
           booking_request.conversation_thread = thread
 
-          validated = ValidateExtraction.new(booking_request:).call(raw)
-          status = ValidateExtraction.status_for(validated)
+          validation = ValidateExtraction.call(booking_request:, raw:)
 
-          booking_request.event_date = validated[:event_date]
-          booking_request.headcount = validated[:headcount]
-          booking_request.budget = validated[:budget]
-          booking_request.start_time = validated[:start_time]
-          booking_request.celebration_type = validated[:celebration_type]
-          booking_request.fit_status = validated[:fit_status]
-          booking_request.staff_summary = validated[:staff_summary]
-          booking_request.missing_fields = validated[:missing_fields]
+          booking_request.assign_attributes(validation.attrs)
           booking_request.review_reasons = []
           booking_request.extraction_snapshot = raw.transform_keys(&:to_s)
-          booking_request.status = status
+          booking_request.status = validation.status
           booking_request.save!
 
           message = find_or_build_canonical_message(booking_request, thread)
@@ -106,19 +98,23 @@ module BookingRequests
     attr_reader :inbox_message, :account
 
     def find_or_build_contact
+      normalized_name = inbox_message.from_name.presence || inbox_message.from_email.presence || "Unknown Contact"
+
       if inbox_message.from_email.present?
         normalized_email = inbox_message.from_email.downcase
-
-        account.with_lock do
-          contact = account.contacts.find_by(email: normalized_email)
-          contact ||= account.contacts.new(email: normalized_email)
-          contact.name = inbox_message.from_name.presence || inbox_message.from_email.presence || "Unknown Contact"
-          contact
+        contact = begin
+          ActiveRecord::Base.transaction(requires_new: true) do
+            account.contacts.find_or_create_by!(email: normalized_email) do |c|
+              c.name = normalized_name
+            end
+          end
+        rescue ActiveRecord::RecordNotUnique
+          account.contacts.find_by!(email: normalized_email)
         end
+        contact.name = normalized_name
+        contact
       else
-        account.contacts.new.tap do |contact|
-          contact.name = inbox_message.from_name.presence || inbox_message.from_email.presence || "Unknown Contact"
-        end
+        account.contacts.new(name: normalized_name)
       end
     end
 
