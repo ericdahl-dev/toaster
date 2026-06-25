@@ -34,9 +34,14 @@ Do **not** hardcode secrets or write them to files. Never commit `.env` files wi
 
 ## Build & Test
 
+Always run commands through Doppler so `RAILS_MASTER_KEY` and other secrets are injected — without it, tests that use encrypted model attributes (e.g. `imap_connection`) will fail with `ActiveRecord::Encryption::Errors::Configuration`.
+
 ```bash
-mise exec -- bundle exec rspec
+doppler run -- bundle exec rspec
+doppler run -- bundle exec rails ...
 ```
+
+`DATABASE_URL` from Doppler points at the development DB; `config/database.yml` explicitly overrides the test environment URL so tests always hit `toaster_test`, not `toaster_development`.
 
 ## Learned User Preferences
 
