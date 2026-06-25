@@ -76,5 +76,42 @@ RSpec.describe SendDraftJob do
       described_class.new.perform(draft.id)
       expect(booking_request.reload.status).to eq("pending")
     end
+
+    it "captures draft_sent telemetry on success" do
+      expect(Telemetry).to receive(:capture).with(
+        distinct_id: "account_#{account.id}",
+        event: "draft_sent",
+        properties: hash_including(draft_id: draft.id, booking_request_id: booking_request.id)
+      )
+      described_class.new.perform(draft.id)
+    end
+
+    context "when SmtpSender raises SendError" do
+      before do
+        allow(Drafts::SmtpSender).to receive(:call)
+          .and_raise(Drafts::SmtpSender::SendError, "connection refused")
+      end
+
+      it "captures draft_send_failed telemetry" do
+        expect(Telemetry).to receive(:capture).with(
+          distinct_id: "account_#{account.id}",
+          event: "draft_send_failed",
+          properties: hash_including(
+            draft_id: draft.id,
+            error_class: "Drafts::SmtpSender::SendError",
+            error_message: "connection refused"
+          )
+        )
+        expect { described_class.new.perform(draft.id) }.to raise_error(Drafts::SmtpSender::SendError)
+      end
+
+      it "captures the exception via Telemetry.capture_exception" do
+        expect(Telemetry).to receive(:capture_exception).with(
+          an_instance_of(Drafts::SmtpSender::SendError),
+          "account_#{account.id}"
+        )
+        expect { described_class.new.perform(draft.id) }.to raise_error(Drafts::SmtpSender::SendError)
+      end
+    end
   end
 end
