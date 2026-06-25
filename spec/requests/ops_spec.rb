@@ -14,8 +14,13 @@ RSpec.describe "Ops endpoints", type: :request do
   end
 
   describe "GET /ops" do
-    it "redirects to login when not authenticated" do
+    it "returns 401 when no token is provided" do
       get "/ops"
+      expect(response).to have_http_status(:unauthorized)
+    end
+
+    it "redirects to login when token is valid but no session" do
+      get "/ops", headers: { "X-Ops-Token" => "secret-token" }
       expect(response).to redirect_to(new_user_session_path)
     end
   end

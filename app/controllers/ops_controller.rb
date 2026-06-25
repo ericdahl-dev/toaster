@@ -5,7 +5,6 @@ class OpsController < ApplicationController
   include Ops::RequireToken
   include Ops::RequireAdmin
 
-  skip_before_action :require_ops_auth!, only: [ :index ]
   skip_before_action :require_ops_admin!, only: [ :failed_jobs, :retry_failed_job, :retry_draft ]
 
   def index
