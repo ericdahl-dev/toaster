@@ -34,18 +34,22 @@ Do **not** hardcode secrets or write them to files. Never commit `.env` files wi
 
 ## Build & Test
 
-Always run commands through Doppler so `RAILS_MASTER_KEY` and other secrets are injected — without it, tests that use encrypted model attributes (e.g. `imap_connection`) will fail with `ActiveRecord::Encryption::Errors::Configuration`.
+The correct test invocation depends on the environment:
 
-```bash
-doppler run -- bundle exec rspec
-doppler run -- bundle exec rails ...
-```
+| Environment | Command |
+|-------------|---------|
+| **Local dev** | `doppler run -- bundle exec rspec` |
+| **Cursor Cloud** | `mise exec -- bundle exec rspec` (see Cloud section below) |
+
+**Local dev:** Doppler injects `RAILS_MASTER_KEY` and other secrets. Without it, tests that use encrypted model attributes (e.g. `imap_connection`) fail with `ActiveRecord::Encryption::Errors::Configuration`. `mise` is assumed active in the shell; prefix with `mise exec --` if running in a non-interactive context.
 
 `DATABASE_URL` from Doppler points at the development DB; `config/database.yml` explicitly overrides the test environment URL so tests always hit `toaster_test`, not `toaster_development`.
 
+**Cursor Cloud:** Doppler is not available — use `mise exec -- bundle exec rspec`. Encryption keys come from `~/.bashrc` (see Cloud section).
+
 ## Learned User Preferences
 
-- Use `mise exec --` (from repo root) before `bundle`, `rspec`, or other gem commands so native extensions match the pinned Ruby interpreter (`mise.toml` pins the version).
+- In Cursor Cloud (non-interactive shell), prefix gem commands with `mise exec --` so native extensions match the pinned Ruby interpreter (`mise.toml` pins the version). On local dev, `mise` is active in the shell and `doppler run --` is the required prefix instead — see Build & Test.
 - Issue tracking is **GitHub Issues only** — use `gh issue` commands. Do not use `bd`, beads, or any other issue tracker.
 - Prefer local test coverage only (SimpleCov); do not add Codecov or other remote coverage upload unless asked.
 - Keep `parallel_rspec` usage local-only unless explicitly asked; CI should continue to run serial `bundle exec rspec`.
@@ -69,7 +73,7 @@ doppler run -- bundle exec rails ...
 **When ending a work session**, complete ALL steps below. Work is NOT complete until `git push` succeeds.
 
 1. **File issues for remaining work** — `gh issue create --title "..." --body "..."` for anything needing follow-up
-2. **Run quality gates** (if code changed) — `bundle exec rspec`, linters
+2. **Run quality gates** (if code changed) — `doppler run -- bundle exec rspec` (local) or `mise exec -- bundle exec rspec` (Cloud), linters
 3. **Push to remote** — `git pull --rebase && git push`; verify `git status` shows "up to date with origin"
 4. **Hand off** — Provide context for next session
 
