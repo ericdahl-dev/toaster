@@ -5,8 +5,7 @@ class OpsController < ApplicationController
   include Ops::RequireToken
   include Ops::RequireAdmin
 
-  skip_before_action :require_ops_auth!, only: [ :index ]
-  skip_before_action :require_ops_admin!, only: [ :failed_jobs, :retry_failed_job, :retry_draft ]
+  skip_before_action :require_ops_admin!, only: [ :index, :failed_jobs, :retry_failed_job, :retry_draft ]
 
   def index
     @queued_jobs = GoodJob::Job.where(finished_at: nil).count
@@ -51,7 +50,7 @@ class OpsController < ApplicationController
   def retry_draft
     draft = Draft.find(params[:id])
     unless draft.approved?
-      return render json: { error: "Draft is not in approved state" }, status: :unprocessable_entity
+      return render json: { error: "Draft is not in approved state" }, status: :unprocessable_content
     end
     PushDraftJob.perform_later(draft.id)
     render json: { status: "enqueued", draft_id: draft.id }

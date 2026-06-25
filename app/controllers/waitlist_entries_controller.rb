@@ -16,7 +16,7 @@ class WaitlistEntriesController < ApplicationController
       render :success, status: :ok
     else
       @entry.valid?
-      render :form, status: :unprocessable_entity
+      render :form, status: :unprocessable_content
     end
   end
 

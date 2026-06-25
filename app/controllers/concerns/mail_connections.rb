@@ -37,7 +37,7 @@ module MailConnections
       InboxSyncScheduler.schedule(connection)
       render json: { connection: connection_json(connection) }, status: :created
     else
-      render json: { errors: connection.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: connection.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -45,7 +45,7 @@ module MailConnections
     if @connection.update(connection_params)
       render json: { connection: connection_json(@connection) }
     else
-      render json: { errors: @connection.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @connection.errors.full_messages }, status: :unprocessable_content
     end
   end
 

@@ -64,11 +64,7 @@ development:
 # Test always uses local Postgres — DATABASE_URL (Neon) is for production only.
 test:
   <<: *default
-  host: <%= ENV.fetch("PGHOST", "127.0.0.1") %>
-  port: <%= ENV.fetch("PGPORT", "5432") %>
-  username: <%= ENV.fetch("PGUSER", "postgres") %>
-  password: <%= ENV.fetch("PGPASSWORD", "postgres") %>
-  database: toaster_test<%= ENV.fetch("TEST_ENV_NUMBER", "") %>
+  url: postgresql://<%= ENV.fetch("PGUSER", "postgres") %>:<%= ENV.fetch("PGPASSWORD", "postgres") %>@<%= ENV.fetch("PGHOST", "127.0.0.1") %>:<%= ENV.fetch("PGPORT", "5432") %>/toaster_test<%= ENV.fetch("TEST_ENV_NUMBER", "") %>
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
