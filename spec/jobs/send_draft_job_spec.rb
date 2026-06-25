@@ -78,12 +78,13 @@ RSpec.describe SendDraftJob do
     end
 
     it "captures draft_sent telemetry on success" do
-      expect(Telemetry).to receive(:capture).with(
+      allow(Telemetry).to receive(:capture)
+      described_class.new.perform(draft.id)
+      expect(Telemetry).to have_received(:capture).with(
         distinct_id: "account_#{account.id}",
         event: "draft_sent",
         properties: hash_including(draft_id: draft.id, booking_request_id: booking_request.id)
       )
-      described_class.new.perform(draft.id)
     end
 
     context "when SmtpSender raises SendError" do
