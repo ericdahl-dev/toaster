@@ -3,54 +3,45 @@
 require "rails_helper"
 
 RSpec.describe "Ops HTML dashboard", type: :request do
-  include Devise::Test::IntegrationHelpers
-
-  let(:admin) { create(:user, :admin) }
-  let(:non_admin) { create(:user) }
+  around do |example|
+    prev = ENV["OPS_AUTH_TOKEN"]
+    ENV["OPS_AUTH_TOKEN"] = "secret"
+    example.run
+  ensure
+    ENV["OPS_AUTH_TOKEN"] = prev.nil? ? nil.tap { ENV.delete("OPS_AUTH_TOKEN") } : prev
+  end
 
   describe "GET /ops" do
-    context "as admin" do
-      before { sign_in admin }
-
+    context "with valid ops token" do
       it "renders HTML dashboard" do
-        get "/ops"
+        get "/ops", headers: { "X-Ops-Token" => "secret" }
         expect(response).to have_http_status(:ok)
         expect(response.content_type).to include("text/html")
         expect(response.body).to include("Ops")
       end
 
       it "shows queue health metrics" do
-        get "/ops"
+        get "/ops", headers: { "X-Ops-Token" => "secret" }
         expect(response.body).to match(/queued|pending|failed/i)
       end
     end
 
-    context "as non-admin user" do
-      before { sign_in non_admin }
-
-      it "redirects away" do
+    context "without a token" do
+      it "returns 401" do
         get "/ops"
-        expect(response).to have_http_status(:redirect).or have_http_status(:not_found)
+        expect(response).to have_http_status(:unauthorized)
       end
     end
 
-    context "unauthenticated" do
-      it "redirects to login" do
-        get "/ops"
-        expect(response).to redirect_to(new_user_session_path)
+    context "with an invalid token" do
+      it "returns 401" do
+        get "/ops", headers: { "X-Ops-Token" => "wrong" }
+        expect(response).to have_http_status(:unauthorized)
       end
     end
   end
 
-  describe "API endpoints still work with X-Ops-Token" do
-    around do |example|
-      prev = ENV["OPS_AUTH_TOKEN"]
-      ENV["OPS_AUTH_TOKEN"] = "secret"
-      example.run
-    ensure
-      ENV["OPS_AUTH_TOKEN"] = prev.nil? ? nil.tap { ENV.delete("OPS_AUTH_TOKEN") } : prev
-    end
-
+  describe "API endpoints also work with X-Ops-Token" do
     it "GET /ops/ai_runs returns JSON with token" do
       account = create(:account)
       get "/ops/ai_runs",

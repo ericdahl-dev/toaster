@@ -19,9 +19,9 @@ RSpec.describe "Ops endpoints", type: :request do
       expect(response).to have_http_status(:unauthorized)
     end
 
-    it "redirects to login when token is valid but no session" do
+    it "returns 200 with valid token" do
       get "/ops", headers: { "X-Ops-Token" => "secret-token" }
-      expect(response).to redirect_to(new_user_session_path)
+      expect(response).to have_http_status(:ok)
     end
   end
 
