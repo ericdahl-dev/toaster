@@ -38,11 +38,39 @@ class SendDraftJob < ApplicationJob
       return
     end
 
-    Drafts::SmtpSender.call(draft: draft, imap_connection: imap_connection)
+    begin
+      Drafts::SmtpSender.call(draft: draft, imap_connection: imap_connection)
+    rescue Drafts::SmtpSender::SendError => e
+      Telemetry.capture_exception(e, "account_#{draft.account_id}")
+      Telemetry.capture(
+        distinct_id: "account_#{draft.account_id}",
+        event: "draft_send_failed",
+        properties: {
+          draft_id: draft.id,
+          booking_request_id: draft.booking_request_id,
+          imap_connection_id: imap_connection.id,
+          error_class: e.class.name,
+          error_message: e.message,
+          attempt: executions
+        }
+      )
+      raise
+    end
+
     Drafts::CompleteSend.call(
       draft: draft.reload,
       sent_body: draft.body,
       actor: "send_draft_job"
+    )
+
+    Telemetry.capture(
+      distinct_id: "account_#{draft.account_id}",
+      event: "draft_sent",
+      properties: {
+        draft_id: draft.id,
+        booking_request_id: draft.booking_request_id,
+        imap_connection_id: imap_connection.id
+      }
     )
   end
 end

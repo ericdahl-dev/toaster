@@ -75,5 +75,34 @@ RSpec.describe Drafts::Approve do
 
       expect(result).to eq(:not_pending)
     end
+
+    it "captures draft_queued telemetry when approval succeeds" do
+      draft = make_draft
+      allow(SendDraftJob).to receive(:perform_later)
+
+      expect(Telemetry).to receive(:capture).with(
+        distinct_id: "account_#{account.id}",
+        event: "draft_queued",
+        properties: { draft_id: draft.id, booking_request_id: booking_request.id }
+      )
+
+      described_class.call(draft: draft)
+    end
+
+    it "does not capture draft_queued telemetry when draft is already sent" do
+      draft = make_draft(status: "sent")
+
+      expect(Telemetry).not_to receive(:capture)
+
+      described_class.call(draft: draft)
+    end
+
+    it "does not capture draft_queued telemetry when draft is not pending" do
+      draft = make_draft(status: "rejected")
+
+      expect(Telemetry).not_to receive(:capture)
+
+      described_class.call(draft: draft)
+    end
   end
 end

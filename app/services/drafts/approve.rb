@@ -37,7 +37,14 @@ module Drafts
         result = :ok
       end
 
-      SendDraftJob.perform_later(draft.id) if result == :ok
+      if result == :ok
+        SendDraftJob.perform_later(draft.id)
+        Telemetry.capture(
+          distinct_id: "account_#{draft.account_id}",
+          event: "draft_queued",
+          properties: { draft_id: draft.id, booking_request_id: draft.booking_request_id }
+        )
+      end
 
       result
     end
