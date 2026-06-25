@@ -114,6 +114,24 @@ RSpec.describe BookingRequests::Persist do
       end
     end
 
+    context "when find_or_create_by! races a concurrent insert (RecordNotUnique rescue)" do
+      before do
+        create(:contact, account:, email: "guest@example.com", name: "Concurrent Winner")
+      end
+
+      it "falls back to the existing contact via find_by!" do
+        # Stub find_or_create_by! to raise — simulates the moment another transaction
+        # commits the same contact between our SELECT and our INSERT
+        contacts_proxy = account.contacts
+        allow(account).to receive(:contacts).and_return(contacts_proxy)
+        allow(contacts_proxy).to receive(:find_or_create_by!).and_raise(ActiveRecord::RecordNotUnique)
+
+        expect {
+          described_class.call(inbox_message:, raw:, account:)
+        }.not_to change(Contact, :count)
+      end
+    end
+
     context "when called twice with the same inbox_message" do
       it "does not create a duplicate BookingRequest" do
         described_class.call(inbox_message:, raw:, account:)
