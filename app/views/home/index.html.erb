@@ -1,15 +1,14 @@
-<% content_for :title, "Toaster — Stop chasing booking inquiries" %>
+<% content_for :title, "Toaster - Stop chasing booking inquiries" %>
 <% content_for :head do %>
-  <meta name="description" content="Venue operators use Toaster to turn a flood of booking emails into organized requests — with AI-drafted replies ready to approve. Invite-only beta.">
-  <meta property="og:title" content="Toaster — Stop chasing booking inquiries">
-  <meta property="og:description" content="Your inbox is full of booking requests. Toaster reads them, extracts the details, and drafts the reply. You just say yes.">
+  <meta name="description" content="Venue operators use Toaster to turn booking emails into organized requests with AI-drafted replies ready to approve. Invite-only beta.">
+  <meta property="og:title" content="Toaster - Stop chasing booking inquiries">
+  <meta property="og:description" content="Your inbox is full of booking requests. Toaster reads them, extracts the details, and drafts the reply. You approve and send.">
   <meta property="og:type" content="website">
 <% end %>
 
 <% content_for :fullpage do %>
 <div class="lp">
 
-  <%# ── Nav ── %>
   <header class="lp-nav">
     <a href="/" class="lp-nav-logo">
       <div class="lp-nav-icon"><%= render "shared/toast_icon" %></div>
@@ -21,126 +20,170 @@
     </div>
   </header>
 
-  <%# ── Hero ── %>
   <section class="lp-hero">
     <div class="lp-hero-glow" aria-hidden="true"></div>
-    <div class="lp-hero-inner">
-      <p class="lp-eyebrow">Invite-only beta</p>
-      <h1 class="lp-headline">
-        Booking inquiries.<br>
-        <span class="lp-headline-accent">Answered before<br>you open them.</span>
-      </h1>
-      <p class="lp-sub">
-        Every inquiry that lands in your venue's inbox gets read, parsed, and
-        replied to — automatically. You review the draft and hit send.
-        No chasing, no copy-pasting, no missed leads.
-      </p>
-      <div class="lp-cta-row">
-        <%= link_to "Sign in to my account", login_path, class: "btn btn-ghost lp-cta-btn" %>
+    <div class="lp-hero-grid">
+      <div class="lp-hero-copy">
+        <h1 class="lp-headline">
+          Booking inquiries,<br>
+          <span class="lp-headline-accent">answered before you open them.</span>
+        </h1>
+        <p class="lp-sub">
+          Toaster reads venue inbox mail, extracts event details, and drafts replies for your approval.
+        </p>
+        <div class="lp-hero-actions">
+          <a href="#waitlist" class="btn btn-amber lp-hero-cta">Request early access</a>
+          <p class="lp-hero-signin">
+            Already invited?
+            <%= link_to "Sign in", login_path, class: "lp-hero-signin-link" %>
+          </p>
+        </div>
       </div>
-      <div class="lp-hero-waitlist">
-        <a href="#waitlist" class="lp-waitlist-btn lp-waitlist-btn--hero">Request early access &darr;</a>
-        <p class="lp-cta-note">Invite-only beta &mdash; no spam, ever.</p>
-      </div>
+
+      <aside class="lp-hero-preview" aria-label="Example booking thread in Toaster">
+        <div class="lp-preview-card">
+          <p class="thread-subject">Private event inquiry - 120 guests, March 14</p>
+          <div class="thread-row thread-row--inbound">
+            <div class="thread-avatar thread-avatar--customer">MK</div>
+            <div class="thread-bubble thread-bubble--inbound">
+              <div class="thread-bubble-meta">
+                <span class="thread-sender">Morgan Kline</span>
+                <span class="thread-timestamp dim">Tue 9:14</span>
+              </div>
+              <div class="thread-bubble-body">Hi, we're planning a corporate dinner for about 120 on March 14. Do you have availability and a rough minimum spend?</div>
+            </div>
+          </div>
+          <div class="thread-row thread-row--pending">
+            <div class="thread-bubble thread-bubble--pending">
+              <div class="thread-bubble-meta">
+                <span class="thread-sender thread-sender--pending">AI draft</span>
+                <span class="badge badge-pending" style="font-size:10px;padding:1px 6px">Pending review</span>
+              </div>
+              <div class="thread-bubble-body">Thanks for reaching out. March 14 works for our main room at 120 seated. I'll send package options and a hold link shortly.</div>
+              <div class="draft-card-actions">
+                <span class="btn btn-success" role="presentation">Approve</span>
+                <span class="btn btn-danger" role="presentation">Reject</span>
+              </div>
+            </div>
+            <div class="thread-avatar thread-avatar--venue">AI</div>
+          </div>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <%# ── Pain ── %>
   <section class="lp-pain">
     <div class="lp-pain-inner">
-      <p class="lp-section-label">Sound familiar?</p>
-      <div class="lp-pain-grid">
-        <div class="lp-pain-item">
-          <span class="lp-pain-mark">—</span>
-          <p>Booking emails pile up while you're running the venue</p>
-        </div>
-        <div class="lp-pain-item">
-          <span class="lp-pain-mark">—</span>
-          <p>You copy event dates and headcounts into a spreadsheet by hand</p>
-        </div>
-        <div class="lp-pain-item">
-          <span class="lp-pain-mark">—</span>
-          <p>A lead goes cold because a reply slipped through the cracks</p>
-        </div>
-      </div>
+      <h2 class="lp-pain-title">Sound familiar?</h2>
+      <ul class="lp-pain-grid">
+        <li class="lp-pain-item">Booking emails pile up while you're running the venue</li>
+        <li class="lp-pain-item">You copy event dates and headcounts into a spreadsheet by hand</li>
+        <li class="lp-pain-item">A lead goes cold because a reply slipped through the cracks</li>
+      </ul>
     </div>
   </section>
 
-  <%# ── How it works ── %>
-  <section class="lp-steps">
-    <p class="lp-section-label">How Toaster works</p>
-    <div class="lp-steps-grid">
-      <div class="lp-step">
-        <div class="lp-step-num">01</div>
-        <h3 class="lp-step-title">Connect your inbox</h3>
-        <p class="lp-step-body">Link your venue's email in one step. Toaster watches for new inquiries around the clock — nothing slips past.</p>
-      </div>
-      <div class="lp-step">
-        <div class="lp-step-num">02</div>
-        <h3 class="lp-step-title">AI reads every inquiry</h3>
-        <p class="lp-step-body">Date, headcount, budget, venue — extracted and filed automatically. Every request organized the moment it arrives.</p>
-      </div>
-      <div class="lp-step">
-        <div class="lp-step-num">03</div>
-        <h3 class="lp-step-title">You approve, it sends</h3>
-        <p class="lp-step-body">Toaster drafts the reply in your voice. Edit if you want, or send as-is. You stay in control of every response.</p>
-      </div>
-    </div>
+  <section class="lp-steps" aria-labelledby="lp-steps-heading">
+    <h2 id="lp-steps-heading" class="lp-steps-heading">How Toaster works</h2>
+    <ol class="lp-steps-list">
+      <li class="lp-step-row">
+        <div class="lp-step-copy">
+          <h3 class="lp-step-title">Connect your inbox</h3>
+          <p class="lp-step-body">Link your venue email in one step. Toaster watches for new inquiries around the clock so nothing slips past.</p>
+        </div>
+        <div class="lp-step-aside" aria-hidden="true">
+          <div class="lp-step-panel">
+            <span class="lp-step-panel-label">Mail connection</span>
+            <span class="lp-step-panel-value">events@yourvenue.com</span>
+            <span class="lp-step-panel-status">Syncing</span>
+          </div>
+        </div>
+      </li>
+      <li class="lp-step-row lp-step-row--flip">
+        <div class="lp-step-copy">
+          <h3 class="lp-step-title">AI reads every inquiry</h3>
+          <p class="lp-step-body">Date, headcount, budget, and venue are extracted and filed automatically the moment mail arrives.</p>
+        </div>
+        <div class="lp-step-aside" aria-hidden="true">
+          <div class="lp-step-panel">
+            <span class="lp-step-panel-label">Extracted</span>
+            <span class="lp-step-panel-value">14 Mar · 120 guests · $18k budget</span>
+            <span class="lp-step-panel-status">Pending review</span>
+          </div>
+        </div>
+      </li>
+      <li class="lp-step-row">
+        <div class="lp-step-copy">
+          <h3 class="lp-step-title">You approve, it sends</h3>
+          <p class="lp-step-body">Toaster drafts the reply in your voice. Edit if you want, or send as-is. You stay in control of every response.</p>
+        </div>
+        <div class="lp-step-aside" aria-hidden="true">
+          <div class="lp-step-panel lp-step-panel--accent">
+            <span class="lp-step-panel-label">Your draft</span>
+            <span class="lp-step-panel-value">Ready to approve</span>
+            <span class="lp-step-panel-status">One click to send</span>
+          </div>
+        </div>
+      </li>
+    </ol>
   </section>
 
-  <%# ── Waitlist section ── %>
   <section class="lp-waitlist-section" id="waitlist">
     <div class="lp-waitlist-section-inner">
       <div class="lp-waitlist-section-glow" aria-hidden="true"></div>
-      <p class="lp-section-label">Early access</p>
       <h2 class="lp-waitlist-section-heading">
         Be first in the door.<br>
         <span class="lp-headline-accent">Your inbox can't wait.</span>
       </h2>
       <p class="lp-waitlist-section-sub">
         Toaster is invite-only while we work closely with early operators.
-        Tell us a little about yourself and we'll be in touch when your spot opens up.
+        Tell us about your venue and we will reach out when your spot opens.
       </p>
       <%= turbo_frame_tag "waitlist" do %>
         <%= form_with url: waitlist_path, html: {class: "lp-waitlist-form lp-waitlist-form--lg"} do |f| %>
           <div class="lp-waitlist-fields">
             <div class="lp-waitlist-row">
-              <%= f.text_field :full_name,
-                    name: "waitlist_entry[full_name]",
-                    placeholder: "Your name",
-                    class: "lp-waitlist-input lp-waitlist-input--lg",
-                    autocomplete: "name",
-                    aria: {label: "Your name"} %>
-              <%= f.text_field :company_name,
-                    name: "waitlist_entry[company_name]",
-                    placeholder: "Venue or company name",
-                    class: "lp-waitlist-input lp-waitlist-input--lg",
-                    autocomplete: "organization",
-                    aria: {label: "Venue or company name"} %>
+              <div class="lp-waitlist-field-block">
+                <%= f.label :full_name, "Your name", class: "lp-waitlist-label", for: "waitlist_entry_full_name" %>
+                <%= f.text_field :full_name,
+                      name: "waitlist_entry[full_name]",
+                      id: "waitlist_entry_full_name",
+                      class: "lp-waitlist-input lp-waitlist-input--lg",
+                      autocomplete: "name" %>
+              </div>
+              <div class="lp-waitlist-field-block">
+                <%= f.label :company_name, "Venue or company", class: "lp-waitlist-label", for: "waitlist_entry_company_name" %>
+                <%= f.text_field :company_name,
+                      name: "waitlist_entry[company_name]",
+                      id: "waitlist_entry_company_name",
+                      class: "lp-waitlist-input lp-waitlist-input--lg",
+                      autocomplete: "organization" %>
+              </div>
             </div>
-            <div class="lp-waitlist-field">
-              <%= f.email_field :email,
-                    name: "waitlist_entry[email]",
-                    placeholder: "your@email.com",
-                    class: "lp-waitlist-input lp-waitlist-input--lg",
-                    autocomplete: "email",
-                    aria: {label: "Email address"} %>
-              <%= f.submit "Request access", class: "lp-waitlist-btn lp-waitlist-btn--lg" %>
+            <div class="lp-waitlist-field-block lp-waitlist-field-block--submit">
+              <%= f.label :email, "Email", class: "lp-waitlist-label", for: "waitlist_entry_email" %>
+              <div class="lp-waitlist-field">
+                <%= f.email_field :email,
+                      name: "waitlist_entry[email]",
+                      id: "waitlist_entry_email",
+                      class: "lp-waitlist-input lp-waitlist-input--lg",
+                      autocomplete: "email" %>
+                <%= f.submit "Request access", class: "lp-waitlist-btn lp-waitlist-btn--lg" %>
+              </div>
             </div>
           </div>
         <% end %>
       <% end %>
-      <p class="lp-waitlist-section-note">No spam. No credit card. Just a heads-up when you're in.</p>
+      <p class="lp-waitlist-section-note">No spam. No credit card. We only email when your invite is ready.</p>
     </div>
   </section>
 
-  <%# ── Footer ── %>
   <footer class="lp-footer">
     <div class="lp-footer-logo">
       <div class="lp-nav-icon lp-footer-icon"><%= render "shared/toast_icon" %></div>
       <span>Toaster</span>
     </div>
-    <p class="lp-footer-copy">AI booking assistant for venue operators &mdash; invite-only beta</p>
+    <p class="lp-footer-copy">AI booking assistant for venue operators. Invite-only beta.</p>
   </footer>
 
 </div>

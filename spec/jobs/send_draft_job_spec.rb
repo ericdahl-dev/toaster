@@ -26,6 +26,16 @@ RSpec.describe SendDraftJob do
         expect(Drafts::SmtpSender).not_to receive(:call)
         described_class.new.perform(draft.id)
       end
+
+      it "writes a draft.send_skipped_no_connection EventLog entry" do
+        expect {
+          described_class.new.perform(draft.id)
+        }.to change(EventLog, :count).by(1)
+        log = EventLog.last
+        expect(log.event_type).to eq("draft.send_skipped_no_connection")
+        expect(log.payload["draft_id"]).to eq(draft.id)
+        expect(log.payload["account_id"]).to eq(account.id)
+      end
     end
 
     context "when draft is not pending_review" do
