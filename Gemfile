@@ -83,8 +83,8 @@ gem "guard-rspec", "~> 4.7", groups: [ :development, :test ]
 
 gem "parallel_tests", "~> 5.7", groups: [ :development, :test ]
 
-gem "posthog-ruby", "~> 3.9"
-gem "posthog-rails", "~> 3.9"
+gem "posthog-ruby", "~> 3.14"
+gem "posthog-rails", "~> 3.14"
 
 group :test do
   gem "capybara"
